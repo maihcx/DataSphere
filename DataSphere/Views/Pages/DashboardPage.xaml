@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DataSphere.Views.Pages"
+    xmlns:controls="clr-namespace:DataSphere.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="DashboardPage"
@@ -16,21 +17,17 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
-    <Grid VerticalAlignment="Top">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+    <StackPanel Margin="0 0 0 30">
+        <controls:ReferralCard
+            Title="{Binding ViewModel.SortAuthor, Mode=OneWay}"
+            Subtitle="{Binding ViewModel.Author, Mode=OneWay}"
+            Description="{Binding ViewModel.AppDescription, Mode=OneWay}"
+            FooterText="{Binding ViewModel.AuthorCreated, Mode=OneWay}" />
 
-        <ui:Button
-            Grid.Column="0"
-            Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}"
-            Content="Click me!"
-            Icon="Fluent24" />
-        <TextBlock
-            Grid.Column="1"
-            Margin="12,0,0,0"
-            VerticalAlignment="Center"
-            Text="{Binding ViewModel.Counter, Mode=OneWay}" />
-    </Grid>
+        <controls:GalleryNavigationPresenter
+            Margin="0"
+            Padding="0"
+            IsVertical="True"
+            ItemsSource="{Binding ViewModel.NavigationCards, Mode=OneWay}" />
+    </StackPanel>
 </Page>

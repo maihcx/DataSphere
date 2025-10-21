@@ -8,7 +8,7 @@ namespace DataSphere.Helpers
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (parameter is not String enumString)
+            if (parameter is not string enumString)
             {
                 throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
             }
@@ -25,7 +25,7 @@ namespace DataSphere.Helpers
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (parameter is not String enumString)
+            if (parameter is not string enumString)
             {
                 throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
             }
