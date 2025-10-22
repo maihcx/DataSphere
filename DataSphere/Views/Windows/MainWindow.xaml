@@ -21,12 +21,12 @@
     WindowCornerPreference="Round"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
-    <ui:FluentWindow.InputBindings>
+    <!--<ui:FluentWindow.InputBindings>
         <KeyBinding
             Key="F"
             Command="{Binding ElementName=AutoSuggestBox, Path=FocusCommand}"
             Modifiers="Control" />
-    </ui:FluentWindow.InputBindings>
+    </ui:FluentWindow.InputBindings>-->
 
     <Grid>
         <Grid.RenderTransform>
@@ -62,7 +62,7 @@
                     <ui:BreadcrumbBar x:Name="BreadcrumbBarHolder" Margin="15" Visibility="Collapsed"/>
                 </StackPanel>
             </ui:NavigationView.Header>
-            <ui:NavigationView.AutoSuggestBox>
+            <!--<ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox x:Name="AutoSuggestBox" PlaceholderText="Search">
                     <ui:AutoSuggestBox.Icon>
                         <ui:IconSourceElement>
@@ -70,7 +70,7 @@
                         </ui:IconSourceElement>
                     </ui:AutoSuggestBox.Icon>
                 </ui:AutoSuggestBox>
-            </ui:NavigationView.AutoSuggestBox>
+            </ui:NavigationView.AutoSuggestBox>-->
             <ui:NavigationView.ContentOverlay>
                 <Grid>
                     <ui:SnackbarPresenter x:Name="SnackbarPresenter" />

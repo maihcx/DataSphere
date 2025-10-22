@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="DataSphere.Views.Pages.DatabaseGroup.ConnectViewControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DataSphere.Views.Pages.DatabaseGroup"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:DataSphere.Controls"
+             mc:Ignorable="d" 
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch">
+    <StackPanel Background="Transparent">
+        <StackPanel.ContextMenu>
+            <controls:ContextMenus ItemsSource="{Binding ViewModel.ViewContextItem, Mode=OneWay}" />
+        </StackPanel.ContextMenu>
+    </StackPanel>
+</UserControl>

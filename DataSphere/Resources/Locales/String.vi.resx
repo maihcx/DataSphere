@@ -117,6 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ctx_mysql_title" xml:space="preserve">
+    <value>MySQL</value>
+  </data>
+  <data name="ctx_add_title" xml:space="preserve">
+    <value>Thêm</value>
+  </data>
+  <data name="page_db_summary" xml:space="preserve">
+    <value>Quản lý cơ sở dữ liệu</value>
+  </data>
+  <data name="page_db_title" xml:space="preserve">
+    <value>Cơ sở dữ liệu</value>
+  </data>
   <data name="page_home_summary" xml:space="preserve">
     <value>Đi đến Trang Chủ</value>
   </data>
@@ -173,5 +185,8 @@
   </data>
   <data name="sys_need_restart_app_summary" xml:space="preserve">
     <value>Cần khởi động lại ứng dụng khi thực hiện thay đổi này.</value>
+  </data>
+  <data name="connection_title" xml:space="preserve">
+    <value>Kết nối</value>
   </data>
 </root>

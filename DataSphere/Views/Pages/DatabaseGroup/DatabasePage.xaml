@@ -1,0 +1,61 @@
+﻿<Page 
+    x:Class="DataSphere.Views.Pages.DatabasePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:local="clr-namespace:DataSphere.Views.Pages"
+    xmlns:controls="clr-namespace:DataSphere.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="DatabasePage"
+    d:DataContext="{d:DesignInstance local:DatabasePage,
+                                    IsDesignTimeCreatable=False}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    mc:Ignorable="d">
+
+    <!--<Page.ContextMenu>
+        <controls:ContextMenus ItemsSource="{Binding ViewModel.ViewContextItem, Mode=OneWay}" />
+    </Page.ContextMenu>-->
+
+    <controls:TabsControl 
+        ItemsSourceBinding="{Binding ViewModel.TabsViewer}" 
+        HorizontalAlignment="Stretch" 
+        VerticalAlignment="Stretch"
+        Margin="0 0 0 30" />
+    <!--<StackPanel Margin="0 0 0 30" Background="Transparent">-->
+
+        
+        <!--<TreeView x:Name="myTreeView" AllowDrop="True">
+            <TreeView.Resources>
+                <ContextMenu x:Key="NodeContextMenu">
+                    <MenuItem Header="Add Child" />
+                    <MenuItem Header="Delete Node" />
+                </ContextMenu>
+            </TreeView.Resources>
+            <TreeViewItem Header="Servers" ContextMenu="{StaticResource NodeContextMenu}">
+                <TreeViewItem Header="Server1">
+                    <TreeViewItem Header="Instance1" />
+                    <TreeViewItem Header="Instance2" />
+                </TreeViewItem>
+                <TreeViewItem Header="Server2">
+                    <TreeViewItem Header="InstanceA" />
+                    <TreeViewItem Header="InstanceB" />
+                </TreeViewItem>
+            </TreeViewItem>
+            <TreeViewItem Header="Databases">
+                <TreeViewItem Header="Database1">
+                    <TreeViewItem Header="Table1" />
+                    <TreeViewItem Header="Table2" />
+                </TreeViewItem>
+                <TreeViewItem Header="Database2">
+                    <TreeViewItem Header="TableA" />
+                    <TreeViewItem Header="TableB" />
+                </TreeViewItem>
+            </TreeViewItem>
+        </TreeView>-->
+    <!--</StackPanel>-->
+</Page>

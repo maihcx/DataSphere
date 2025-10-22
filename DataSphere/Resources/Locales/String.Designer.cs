@@ -61,6 +61,51 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to connection_title.
+        /// </summary>
+        internal static string connection_title {
+            get {
+                return ResourceManager.GetString("connection_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ctx_add_title.
+        /// </summary>
+        internal static string ctx_add_title {
+            get {
+                return ResourceManager.GetString("ctx_add_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ctx_mysql_title.
+        /// </summary>
+        internal static string ctx_mysql_title {
+            get {
+                return ResourceManager.GetString("ctx_mysql_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to page_db_summary.
+        /// </summary>
+        internal static string page_db_summary {
+            get {
+                return ResourceManager.GetString("page_db_summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to page_db_title.
+        /// </summary>
+        internal static string page_db_title {
+            get {
+                return ResourceManager.GetString("page_db_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to page_home_summary.
         /// </summary>
         internal static string page_home_summary {

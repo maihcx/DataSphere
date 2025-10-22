@@ -56,7 +56,6 @@
 
                 NavigationHandle.SetupPageViewModelPairs(services, "DataSphere.Views.Pages", "DataSphere.ViewModels.Pages");
                 NavigationHandle.SetupPageViewModelPairs(services, "DataSphere.Views.PagesBottom", "DataSphere.ViewModels.PagesBottom");
-                NavigationHandle.SetupPageViewModelPairs(services, "DataSphere.Views.Pages.SystemConfigPages", "DataSphere.ViewModels.Pages.SystemConfigViewModels");
             }).Build();
 
         /// <summary>
