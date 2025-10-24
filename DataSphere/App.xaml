@@ -26,6 +26,23 @@
             <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <helpers:SubtractDoubleConverter x:Key="SubtractDoubleConverter" />
             <helpers:ThemeToIndexConverter x:Key="ThemeToIndexConverter" />
+
+            <ControlTemplate x:Key="StarErrorTemplate">
+                <Grid>
+                    <AdornedElementPlaceholder x:Name="adornerPlaceholder" />
+                    <TextBlock 
+                        Text="*"
+                        Foreground="Red"
+                        FontWeight="Bold"
+                        VerticalAlignment="Center"
+                        Margin="0,2,10,0"
+                        HorizontalAlignment="Right" />
+                </Grid>
+            </ControlTemplate>
+
+            <Style TargetType="ui:TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="Validation.ErrorTemplate" Value="{StaticResource StarErrorTemplate}" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

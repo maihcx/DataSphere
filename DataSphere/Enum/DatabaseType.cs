@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace DataSphere.Models
 {
-    enum DatabaseType
+    public enum DatabaseType
     {
+        Folder,
         MySql
     }
 }

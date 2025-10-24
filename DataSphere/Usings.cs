@@ -60,3 +60,4 @@ global using DataSphere.ViewModels.Windows;
 global using DataSphere.Views;
 global using DataSphere.Views.Pages;
 global using DataSphere.Views.Windows;
+global using DataSphere.Controls;

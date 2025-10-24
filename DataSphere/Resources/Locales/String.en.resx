@@ -189,4 +189,55 @@
   <data name="connection_title" xml:space="preserve">
     <value>Connection</value>
   </data>
+  <data name="ucrt_empty_summary" xml:space="preserve">
+    <value>No data, please right click and select add</value>
+  </data>
+  <data name="close_title" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="dialog_connectset_title" xml:space="preserve">
+    <value>Establish connection</value>
+  </data>
+  <data name="save_title" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="dalog_conn_name_title" xml:space="preserve">
+    <value>Connection name</value>
+  </data>
+  <data name="dalog_conn_host_title" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="dalog_conn_port_title" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="dalog_conn_password_title" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="dalog_conn_usname_title" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="dalog_conn_save_pw_title" xml:space="preserve">
+    <value>Save password</value>
+  </data>
+  <data name="ctx_folder_title" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="ctx_rename_title" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="ctx_delete_title" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="msgbox_delete_ques_title" xml:space="preserve">
+    <value>Confirm delete</value>
+  </data>
+  <data name="msgbox_delete_ques_summary" xml:space="preserve">
+    <value>The action you are taking will permanently delete this object, and this process cannot be reversed. Do you want to continue?</value>
+  </data>
+  <data name="msgbox_cancel_title" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="msgbox_ok_title" xml:space="preserve">
+    <value>OK</value>
+  </data>
 </root>

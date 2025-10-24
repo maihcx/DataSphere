@@ -14,6 +14,10 @@
 
         public static string CopyRight = "© 2025 Song Mai Software";
 
+        public static readonly string DataDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "DataSphere");
+
         public static string GetAppPath()
         {
             string? appPath = Environment.ProcessPath;

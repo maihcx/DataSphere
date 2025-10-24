@@ -61,6 +61,15 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to close_title.
+        /// </summary>
+        internal static string close_title {
+            get {
+                return ResourceManager.GetString("close_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to connection_title.
         /// </summary>
         internal static string connection_title {
@@ -79,11 +88,137 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ctx_delete_title.
+        /// </summary>
+        internal static string ctx_delete_title {
+            get {
+                return ResourceManager.GetString("ctx_delete_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ctx_folder_title.
+        /// </summary>
+        internal static string ctx_folder_title {
+            get {
+                return ResourceManager.GetString("ctx_folder_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ctx_mysql_title.
         /// </summary>
         internal static string ctx_mysql_title {
             get {
                 return ResourceManager.GetString("ctx_mysql_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ctx_rename_title.
+        /// </summary>
+        internal static string ctx_rename_title {
+            get {
+                return ResourceManager.GetString("ctx_rename_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dalog_conn_host_title.
+        /// </summary>
+        internal static string dalog_conn_host_title {
+            get {
+                return ResourceManager.GetString("dalog_conn_host_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dalog_conn_name_title.
+        /// </summary>
+        internal static string dalog_conn_name_title {
+            get {
+                return ResourceManager.GetString("dalog_conn_name_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dalog_conn_password_title.
+        /// </summary>
+        internal static string dalog_conn_password_title {
+            get {
+                return ResourceManager.GetString("dalog_conn_password_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dalog_conn_port_title.
+        /// </summary>
+        internal static string dalog_conn_port_title {
+            get {
+                return ResourceManager.GetString("dalog_conn_port_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dalog_conn_save_pw_title.
+        /// </summary>
+        internal static string dalog_conn_save_pw_title {
+            get {
+                return ResourceManager.GetString("dalog_conn_save_pw_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dalog_conn_usname_title.
+        /// </summary>
+        internal static string dalog_conn_usname_title {
+            get {
+                return ResourceManager.GetString("dalog_conn_usname_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dialog_connectset_title.
+        /// </summary>
+        internal static string dialog_connectset_title {
+            get {
+                return ResourceManager.GetString("dialog_connectset_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to msgbox_cancel_title.
+        /// </summary>
+        internal static string msgbox_cancel_title {
+            get {
+                return ResourceManager.GetString("msgbox_cancel_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to msgbox_delete_ques_summary.
+        /// </summary>
+        internal static string msgbox_delete_ques_summary {
+            get {
+                return ResourceManager.GetString("msgbox_delete_ques_summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to msgbox_delete_ques_title.
+        /// </summary>
+        internal static string msgbox_delete_ques_title {
+            get {
+                return ResourceManager.GetString("msgbox_delete_ques_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to msgbox_ok_title.
+        /// </summary>
+        internal static string msgbox_ok_title {
+            get {
+                return ResourceManager.GetString("msgbox_ok_title", resourceCulture);
             }
         }
         
@@ -268,11 +403,29 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to save_title.
+        /// </summary>
+        internal static string save_title {
+            get {
+                return ResourceManager.GetString("save_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to sys_need_restart_app_summary.
         /// </summary>
         internal static string sys_need_restart_app_summary {
             get {
                 return ResourceManager.GetString("sys_need_restart_app_summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ucrt_empty_summary.
+        /// </summary>
+        internal static string ucrt_empty_summary {
+            get {
+                return ResourceManager.GetString("ucrt_empty_summary", resourceCulture);
             }
         }
     }

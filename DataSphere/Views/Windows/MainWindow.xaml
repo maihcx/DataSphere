@@ -80,6 +80,6 @@
 
         <ContentPresenter x:Name="RootContentDialog" Grid.Row="0" />
 
-        <ui:SnackbarPresenter x:Name="GlobalSnackbar" />
+        <ui:SnackbarPresenter x:Name="GlobalSnackbar" Grid.Row="0" />
     </Grid>
 </ui:FluentWindow>

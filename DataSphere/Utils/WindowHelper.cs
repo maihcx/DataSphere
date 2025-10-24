@@ -8,7 +8,9 @@ namespace DataSphere.Utils
 
         public static Window? MainWindow;
 
-        public static SnackbarService? GlobalSnackbar;
+        public static ISnackbarService? GlobalSnackbar;
+
+        public static IContentDialogService? ContentDialogService;
 
         public delegate void AutoHideNavPanelChanged(bool state);
         public static event AutoHideNavPanelChanged? OnAutoHideNavChanged;

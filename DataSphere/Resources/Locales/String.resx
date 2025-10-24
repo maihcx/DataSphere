@@ -189,4 +189,55 @@
   <data name="connection_title" xml:space="preserve">
     <value>connection_title</value>
   </data>
+  <data name="ucrt_empty_summary" xml:space="preserve">
+    <value>ucrt_empty_summary</value>
+  </data>
+  <data name="close_title" xml:space="preserve">
+    <value>close_title</value>
+  </data>
+  <data name="dialog_connectset_title" xml:space="preserve">
+    <value>dialog_connectset_title</value>
+  </data>
+  <data name="save_title" xml:space="preserve">
+    <value>save_title</value>
+  </data>
+  <data name="dalog_conn_name_title" xml:space="preserve">
+    <value>dalog_conn_name_title</value>
+  </data>
+  <data name="dalog_conn_host_title" xml:space="preserve">
+    <value>dalog_conn_host_title</value>
+  </data>
+  <data name="dalog_conn_port_title" xml:space="preserve">
+    <value>dalog_conn_port_title</value>
+  </data>
+  <data name="dalog_conn_password_title" xml:space="preserve">
+    <value>dalog_conn_password_title</value>
+  </data>
+  <data name="dalog_conn_usname_title" xml:space="preserve">
+    <value>dalog_conn_usname_title</value>
+  </data>
+  <data name="dalog_conn_save_pw_title" xml:space="preserve">
+    <value>dalog_conn_save_pw_title</value>
+  </data>
+  <data name="ctx_folder_title" xml:space="preserve">
+    <value>ctx_folder_title</value>
+  </data>
+  <data name="ctx_rename_title" xml:space="preserve">
+    <value>ctx_rename_title</value>
+  </data>
+  <data name="ctx_delete_title" xml:space="preserve">
+    <value>ctx_delete_title</value>
+  </data>
+  <data name="msgbox_delete_ques_title" xml:space="preserve">
+    <value>msgbox_delete_ques_title</value>
+  </data>
+  <data name="msgbox_delete_ques_summary" xml:space="preserve">
+    <value>msgbox_delete_ques_summary</value>
+  </data>
+  <data name="msgbox_cancel_title" xml:space="preserve">
+    <value>msgbox_cancel_title</value>
+  </data>
+  <data name="msgbox_ok_title" xml:space="preserve">
+    <value>msgbox_ok_title</value>
+  </data>
 </root>

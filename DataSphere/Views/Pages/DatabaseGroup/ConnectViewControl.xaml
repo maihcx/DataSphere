@@ -6,12 +6,71 @@
              xmlns:local="clr-namespace:DataSphere.Views.Pages.DatabaseGroup"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:DataSphere.Controls"
+             xmlns:utils="clr-namespace:DataSphere.Utils"
+             xmlns:helpers="clr-namespace:DataSphere.Helpers"
+             xmlns:models="clr-namespace:DataSphere.Models"
              mc:Ignorable="d" 
              HorizontalAlignment="Stretch"
              VerticalAlignment="Stretch">
-    <StackPanel Background="Transparent">
-        <StackPanel.ContextMenu>
+
+    <UserControl.Resources>
+        <helpers:BooleanToVisibilityConverter  x:Key="BooleanToVisibilityConverter" />
+        <helpers:InverseBooleanToVisibilityConverter  x:Key="InverseBooleanToVisibilityConverter" />
+    </UserControl.Resources>
+    
+    <Grid Background="Transparent" HorizontalAlignment="Stretch"
+VerticalAlignment="Stretch">
+        <Grid.ContextMenu>
             <controls:ContextMenus ItemsSource="{Binding ViewModel.ViewContextItem, Mode=OneWay}" />
-        </StackPanel.ContextMenu>
-    </StackPanel>
+        </Grid.ContextMenu>
+
+        <TreeView x:Name="ConnectTreeView"
+            ItemsSource="{Binding ViewModel.ConnectItems}"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            AllowDrop="True">
+
+            <TreeView.Resources>
+                <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <controls:ContextMenus ItemsSource="{Binding ContextMenuItems, Mode=OneWay}" />
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+                <!--<Style TargetType="ui:TextBox" BasedOn="{StaticResource {x:Type ui:TextBox}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                            <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={RelativeSource Self}}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>-->
+
+                <HierarchicalDataTemplate DataType="{x:Type models:ConnectionModel}" ItemsSource="{Binding Children}">
+                    <StackPanel Orientation="Horizontal">
+                        <ContentControl Content="{Binding Icon}" Margin="0,0,8,0"/>
+
+                        <ui:TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}"
+                             LostFocus="TextBox_LostFocus"
+                             KeyDown="TextBox_KeyDown"
+                             MinWidth="100"/>
+
+                        <ui:TextBlock Text="{Binding Name}"
+                           Visibility="{Binding IsEditing, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                           MouseDown="TextBlock_MouseDown"/>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.Resources>
+        </TreeView>
+
+        <TextBlock Text="{utils:Localization ucrt_empty_summary}" 
+            FontSize="20" 
+            FontWeight="Bold" 
+            Margin="10" 
+            HorizontalAlignment="Center" TextAlignment="Center"
+            VerticalAlignment="Center" TextWrapping="WrapWithOverflow"
+                   Visibility="{Binding ViewModel.IsEmptyView, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+    </Grid>
 </UserControl>

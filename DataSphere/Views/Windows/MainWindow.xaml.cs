@@ -1,4 +1,6 @@
-﻿using DataSphere.ViewModels.Windows;
+﻿using DataSphere.Services.Contracts;
+using DataSphere.ViewModels.Windows;
+using System.Windows;
 using Wpf.Ui;
 using Wpf.Ui.Abstractions;
 using Wpf.Ui.Appearance;
@@ -6,7 +8,7 @@ using Wpf.Ui.Controls;
 
 namespace DataSphere.Views.Windows
 {
-    public partial class MainWindow : INavigationWindow
+    public partial class MainWindow : IWindow
     {
         public MainWindowViewModel ViewModel { get; }
 
@@ -14,8 +16,10 @@ namespace DataSphere.Views.Windows
 
         public MainWindow(
             MainWindowViewModel viewModel,
-            INavigationViewPageProvider navigationViewPageProvider,
-            INavigationService navigationService
+            INavigationService navigationService,
+            IServiceProvider serviceProvider,
+            ISnackbarService snackbarService,
+            IContentDialogService contentDialogService
         )
         {
             ViewModel = viewModel;
@@ -27,19 +31,16 @@ namespace DataSphere.Views.Windows
             ThemeManagerService.Watch();
 
             InitializeComponent();
-            SetPageService(navigationViewPageProvider);
 
             navigationService.SetNavigationControl(RootNavigation);
+            contentDialogService.SetDialogHost(RootContentDialog);
+            snackbarService.SetSnackbarPresenter(GlobalSnackbar);
+
             RootNavigation.Navigated += RootNavigation_Navigated;
 
-            this.SourceInitialized += OnSourceInitialized;
-            this.Closing += MainWindow_Closing;
-
             WindowHelper.OnAutoHideNavChanged += SharedVariable_OnAutoHideNavChanged;
-
-            SnackbarService snackbarService = new SnackbarService();
-            snackbarService.SetSnackbarPresenter(GlobalSnackbar);
             WindowHelper.GlobalSnackbar = snackbarService;
+            WindowHelper.ContentDialogService = contentDialogService;
 
             RestoreWindow();
         }
@@ -49,8 +50,6 @@ namespace DataSphere.Views.Windows
         public INavigationView GetNavigation() => RootNavigation;
 
         public bool Navigate(Type pageType) => RootNavigation.Navigate(pageType);
-
-        public void SetPageService(INavigationViewPageProvider navigationViewPageProvider) => RootNavigation.SetPageProviderService(navigationViewPageProvider);
 
         public void ShowWindow() => Show();
 
@@ -69,9 +68,10 @@ namespace DataSphere.Views.Windows
             Application.Current.Shutdown();
         }
 
-        INavigationView INavigationWindow.GetNavigation()
+        protected override void OnClosing(CancelEventArgs e)
         {
-            throw new NotImplementedException();
+            SaveWindow();
+            base.OnClosing(e);
         }
 
         public void SetServiceProvider(IServiceProvider serviceProvider)
@@ -103,8 +103,10 @@ namespace DataSphere.Views.Windows
             GC.WaitForPendingFinalizers();
         }
 
-        private void OnSourceInitialized(object? sender, EventArgs e)
+        protected override void OnSourceInitialized(EventArgs e)
         {
+            base.OnSourceInitialized(e);
+
             ApplicationThemeManager.Apply(ThemeManagerService.GetSysApplicationTheme(), ThemeManagerService.GetBackdropType(), true);
             ViewModel.OnNavigatedTo();
 
@@ -115,11 +117,6 @@ namespace DataSphere.Views.Windows
                 this.SizeChanged += MainWindow_SizeChanged;
                 MainWindow_SizeChanged(null, null);
             }
-        }
-
-        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
-        {
-            SaveWindow();
         }
 
         private void SaveWindow()

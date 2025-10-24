@@ -189,4 +189,55 @@
   <data name="connection_title" xml:space="preserve">
     <value>Kết nối</value>
   </data>
+  <data name="ucrt_empty_summary" xml:space="preserve">
+    <value>Không có dữ liệu, vui lòng click phải chuột và chọn thêm</value>
+  </data>
+  <data name="close_title" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+  <data name="dialog_connectset_title" xml:space="preserve">
+    <value>Thiết lập kết nối</value>
+  </data>
+  <data name="save_title" xml:space="preserve">
+    <value>Lưu</value>
+  </data>
+  <data name="dalog_conn_name_title" xml:space="preserve">
+    <value>Tên kết nối</value>
+  </data>
+  <data name="dalog_conn_host_title" xml:space="preserve">
+    <value>Địa chỉ</value>
+  </data>
+  <data name="dalog_conn_port_title" xml:space="preserve">
+    <value>Cổng</value>
+  </data>
+  <data name="dalog_conn_password_title" xml:space="preserve">
+    <value>Mật khẩu</value>
+  </data>
+  <data name="dalog_conn_usname_title" xml:space="preserve">
+    <value>Tên người dùng</value>
+  </data>
+  <data name="dalog_conn_save_pw_title" xml:space="preserve">
+    <value>Lưu mật khẩu</value>
+  </data>
+  <data name="ctx_folder_title" xml:space="preserve">
+    <value>Thư mục</value>
+  </data>
+  <data name="ctx_rename_title" xml:space="preserve">
+    <value>Đổi tên</value>
+  </data>
+  <data name="ctx_delete_title" xml:space="preserve">
+    <value>Xóa</value>
+  </data>
+  <data name="msgbox_delete_ques_title" xml:space="preserve">
+    <value>Xác nhận xóa</value>
+  </data>
+  <data name="msgbox_delete_ques_summary" xml:space="preserve">
+    <value>Thao tác bạn đang thực hiện sẽ xóa vĩnh viễn đối tượng này và quá trình này không thể đảo ngược. Bạn có muốn tiếp tục không?</value>
+  </data>
+  <data name="msgbox_cancel_title" xml:space="preserve">
+    <value>Hủy bỏ</value>
+  </data>
+  <data name="msgbox_ok_title" xml:space="preserve">
+    <value>Xác nhận</value>
+  </data>
 </root>
