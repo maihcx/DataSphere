@@ -17,7 +17,7 @@
             obj.SetValue(AutoScrollProperty, value);
 
         private static readonly TextChangedEventHandler AutoScrollHandler =
-            (s, e) => { 
+            (s, e) => {
                 if (s is Wpf.Ui.Controls.TextBox textBox)
                 {
                     textBox.ScrollToEnd();
@@ -103,6 +103,43 @@
 
             if (!allowed)
                 e.Handled = true;
+        }
+
+        // --- AutoFocusAndSelect ---
+        public static readonly DependencyProperty AutoFocusAndSelectProperty =
+            DependencyProperty.RegisterAttached(
+                "AutoFocusAndSelect",
+                typeof(bool),
+                typeof(TextBoxExtensions),
+                new PropertyMetadata(false, OnAutoFocusAndSelectChanged));
+
+        public static bool GetAutoFocusAndSelect(DependencyObject obj) =>
+            (bool)obj.GetValue(AutoFocusAndSelectProperty);
+
+        public static void SetAutoFocusAndSelect(DependencyObject obj, bool value) =>
+            obj.SetValue(AutoFocusAndSelectProperty, value);
+
+        private static void OnAutoFocusAndSelectChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue)
+            {
+                if (d is Wpf.Ui.Controls.TextBox textBox)
+                {
+                    textBox.Dispatcher.BeginInvoke(() =>
+                    {
+                        textBox.Focus();
+                        textBox.SelectAll();
+                    }, System.Windows.Threading.DispatcherPriority.Input);
+                }
+                else if (d is System.Windows.Controls.TextBox textBoxW)
+                {
+                    textBoxW.Dispatcher.BeginInvoke(() =>
+                    {
+                        textBoxW.Focus();
+                        textBoxW.SelectAll();
+                    }, System.Windows.Threading.DispatcherPriority.Input);
+                }
+            }
         }
     }
 }

@@ -34,16 +34,25 @@ namespace DataSphere.Dialogs.ViewModels
         private string _connectionName = string.Empty;
 
         [ObservableProperty]
-        private string _connectionHost = string.Empty;
+        private string _connectionHost = "127.0.0.1";
 
         [ObservableProperty]
         private int _connectionPort = 3306;
 
         [ObservableProperty]
-        private string _connectionUser = string.Empty;
+        private string _connectionUser = "root";
 
         [ObservableProperty]
         private string _connectionPassword = string.Empty;
+
+        [ObservableProperty]
+        private ObservableCollection<DatabaseTypes> _databaseTypes = new()
+        {
+            new DatabaseTypes() { Value = DatabaseType.MySql },
+        };
+
+        [ObservableProperty]
+        private DatabaseTypes _databaseSelectedType = new DatabaseTypes() { Value = DatabaseType.MySql };
 
         public string Error => string.Empty;
 
@@ -56,15 +65,36 @@ namespace DataSphere.Dialogs.ViewModels
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(ConnectionName) ||
-                    string.IsNullOrWhiteSpace(ConnectionHost) ||
-                    string.IsNullOrWhiteSpace(ConnectionUser) ||
-                    string.IsNullOrWhiteSpace(ConnectionPassword)
-                ) {
-                    return "error";
+                switch (columnName)
+                {
+                    case nameof(ConnectionName):
+                        if (string.IsNullOrWhiteSpace(ConnectionName))
+                            return "Connection name is required";
+                        break;
+                    case nameof(ConnectionHost):
+                        if (string.IsNullOrWhiteSpace(ConnectionHost))
+                            return "Connection Host name is required";
+                        break;
+                    case nameof(ConnectionUser):
+                        if (string.IsNullOrWhiteSpace(ConnectionUser))
+                            return "Connection User name is required";
+                        break;
                 }
                 return string.Empty;
             }
+        }
+
+        public ConnectionModel ToConnectionModel()
+        {
+            return new ConnectionModel()
+            {
+                Name = ConnectionName,
+                Type = DatabaseSelectedType,
+                Host = ConnectionHost,
+                Port = ConnectionPort,
+                User = ConnectionUser,
+                Password = ConnectionPassword,
+            };
         }
 
         public void SetModel(ConnectionModel? model)

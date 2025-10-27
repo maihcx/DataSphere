@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DataSphere.Models
@@ -69,13 +70,17 @@ namespace DataSphere.Models
             }
         }
 
-        public SymbolIcon? Icon
+        public string? SymbolKey { get; set; }
+
+        [JsonIgnore]
+        public SymbolIcon Icon
         {
-            get => field;
-            set
+            get
             {
-                field = value;
-                OnPropertyChanged(nameof(Icon));
+                if (Enum.TryParse(SymbolKey, out SymbolRegular symbol))
+                    return new SymbolIcon() { Symbol = symbol };
+
+                return new SymbolIcon() { Symbol = SymbolRegular.QuestionCircle16 };
             }
         }
 

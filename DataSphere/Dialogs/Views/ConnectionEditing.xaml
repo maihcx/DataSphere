@@ -56,6 +56,26 @@
 
             <TextBlock 
                 Grid.Column="0"
+                Text="{utils:Localization dalog_conn_type_title}" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Center" 
+                Margin="0,0,10,0" />
+
+            <ComboBox
+                Grid.Column="1"
+                ItemsSource="{Binding ViewModel.DatabaseTypes}"
+                SelectedItem="{Binding ViewModel.DatabaseSelectedType, Mode=TwoWay}"
+                DisplayMemberPath="Name"
+                Width="200" />
+        </Grid>
+        <Grid Margin="0 6 0 0" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition SharedSizeGroup="Col1" Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock 
+                Grid.Column="0"
                 Text="{utils:Localization dalog_conn_host_title}" 
                 HorizontalAlignment="Left" 
                 VerticalAlignment="Center" 
@@ -124,14 +144,11 @@
                 VerticalAlignment="Center" 
                 Margin="0,0,10,0" />
 
-            <ui:TextBox
+            <ui:PasswordBox
                 Grid.Column="1"
                 HorizontalAlignment="Left"
                 Width="200"
-                Text="{Binding ViewModel.ConnectionPassword, 
-                        Mode=TwoWay, 
-                        UpdateSourceTrigger=PropertyChanged,
-                        ValidatesOnDataErrors=True}" />
+                Password="{Binding ViewModel.ConnectionPassword, Mode=TwoWay}" />
         </Grid>
     </StackPanel>
 </ui:ContentDialog>

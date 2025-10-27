@@ -19,30 +19,12 @@ namespace DataSphere.Views.Pages.DatabaseGroup
 
         private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 2) // double-click để rename
+            if (e.ClickCount == 2)
             {
                 if (sender is Wpf.Ui.Controls.TextBlock tb && tb.DataContext is ConnectionModel item)
                 {
                     item.IsEditing = true;
-
-                    // Delay nhỏ để đảm bảo TextBox render xong
-                    Dispatcher.BeginInvoke(() =>
-                    {
-                        var container = (System.Windows.Controls.TreeViewItem)ConnectTreeView.ItemContainerGenerator.ContainerFromItem(item);
-                        var textBox = FindVisualChild<Wpf.Ui.Controls.TextBox>(container);
-                        textBox?.Focus();
-                        textBox?.SelectAll();
-                    });
                 }
-            }
-        }
-
-        private void TextBox_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (sender is Wpf.Ui.Controls.TextBox tb && tb.DataContext is ConnectionModel model && model.IsEditing)
-            {
-                tb.Focus();
-                tb.SelectAll();
             }
         }
 

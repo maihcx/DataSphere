@@ -240,4 +240,10 @@
   <data name="msgbox_ok_title" xml:space="preserve">
     <value>Xác nhận</value>
   </data>
+  <data name="dalog_conn_type_title" xml:space="preserve">
+    <value>Kiểu kết nối</value>
+  </data>
+  <data name="ctx_edit_title" xml:space="preserve">
+    <value>Chỉnh sửa</value>
+  </data>
 </root>

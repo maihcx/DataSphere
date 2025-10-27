@@ -240,4 +240,10 @@
   <data name="msgbox_ok_title" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="dalog_conn_type_title" xml:space="preserve">
+    <value>Connection type</value>
+  </data>
+  <data name="ctx_edit_title" xml:space="preserve">
+    <value>Edit</value>
+  </data>
 </root>

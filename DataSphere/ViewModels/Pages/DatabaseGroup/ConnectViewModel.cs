@@ -1,4 +1,6 @@
-﻿namespace DataSphere.ViewModels.Pages.DatabaseGroup
+﻿using System.Collections.Specialized;
+
+namespace DataSphere.ViewModels.Pages.DatabaseGroup
 {
     public partial class ConnectViewModel : ObservableObject
     {
@@ -24,93 +26,138 @@
 
         private void addFolderToTree()
         {
-            int index = ConnectItems.Count(c => c.Type == DatabaseType.Folder) + 1;
+            int index = ConnectItems.Count(c => c.Type?.Value == DatabaseType.Folder) + 1;
             var newFolder = new ConnectionModel()
             {
                 Name = $"New Folder {index}",
-                Type = DatabaseType.Folder
-
+                Type = new DatabaseTypes() { Value = DatabaseType.Folder },
+                IsEditing = true
             };
 
-            newFolder.ContextMenuItems = new ObservableCollection<ContextAction>() 
-            {
-                new ContextAction()
-                {
-                    NameKey = "ctx_rename_title",
-                    Icon = new SymbolIcon() { Symbol = SymbolRegular.Edit16 },
-                    Command = new RelayCommand<ConnectionModel>((param) =>
-                    {
-                        newFolder.IsEditing = true;
-                    }),
-                },
-                new ContextAction()
-                {
-                    NameKey = "ctx_delete_title",
-                    Icon = new SymbolIcon() { Symbol = SymbolRegular.Delete16 },
-                    Command = new RelayCommand<ConnectionModel>(async (param) =>
-                    {
-                        var msgbox = new Wpf.Ui.Controls.MessageBox()
-                        {
-                            Title = LanguageBase.GetLangValue("msgbox_delete_ques_title"),
-                            Content = LanguageBase.GetLangValue("msgbox_delete_ques_summary"),
-                            CloseButtonText = LanguageBase.GetLangValue("msgbox_cancel_title"),
-                            PrimaryButtonText = LanguageBase.GetLangValue("msgbox_ok_title"),
-                        };
-                        msgbox.Owner = Application.Current.MainWindow;
-                        msgbox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                        var result = await msgbox.ShowDialogAsync();
-                        if (result == Wpf.Ui.Controls.MessageBoxResult.Primary)
-                        {
-                            ConnectItems.Remove(newFolder);
-                        }
-                    })
-                }
-            };
+            ModelInitialize(newFolder, null);
 
             ConnectItems.Add(newFolder);
             IsEmptyView = false;
             IsNotEmptyView = true;
         }
 
-        private void InitializeViewModel()
+        private void setModelValues(ConnectionModel from, ConnectionModel to)
+        {
+            to.Name = from.Name;
+            to.Type = from.Type;
+            to.Host = from.Host;
+            to.Port = from.Port;
+            to.User = from.User;
+            to.Password = from.Password;
+        }
+
+        private async void SaveConnectionsAsync(object? sender, PropertyChangedEventArgs e)
+        {
+            await ConnectionStorageService.SaveAsync(ConnectItems);
+
+            int lenght = ConnectItems.Count();
+            IsNotEmptyView = lenght > 0;
+            IsEmptyView = lenght == 0;
+        }
+
+        private async void SaveConnectionsAsync(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            await ConnectionStorageService.SaveAsync(ConnectItems);
+
+            int lenght = ConnectItems.Count();
+            IsNotEmptyView = lenght > 0;
+            IsEmptyView = lenght == 0;
+        }
+
+        private void ModelInitialize(ConnectionModel connectionModel, ConnectionModel? parent = null)
+        {
+            connectionModel.InitializeRuntimeProperties(
+                addConnectionCallback: model =>
+                {
+                    ModelInitialize(model, connectionModel);
+                    connectionModel.Children.CollectionChanged -= SaveConnectionsAsync;
+                    connectionModel.Children.CollectionChanged += SaveConnectionsAsync;
+                    connectionModel.Children.Add(model);
+                },
+                removeConnectionCallback: model =>
+                {
+                    if (parent != null)
+                    {
+                        parent.Children.Remove(model);
+                    }
+                    else
+                    {
+                        ConnectItems.Remove(model);
+                    }
+                },
+                editConnectionCallback: async model =>
+                {
+                    var result = await MessengerService.ShowDialogAsync<Dialogs.Views.ConnectionEditing, Dialogs.ViewModels.ConnectionEditing>(model);
+                    if (result != null)
+                    {
+                        setModelValues(result.ToConnectionModel(), model);
+                    }
+                }
+            );
+
+            connectionModel.PropertyChanged -= SaveConnectionsAsync;
+            connectionModel.PropertyChanged += SaveConnectionsAsync;
+
+            foreach (var child in connectionModel.Children)
+            {
+                ModelInitialize(child, connectionModel);
+            }
+        }
+
+        private async void InitializeViewModel()
         {
             _isInitialized = true;
 
-            ConnectionHandle.OnConnectLenghtChanged += (lenght) =>
-            {
-                IsNotEmptyView = lenght == 0;
-                IsEmptyView = lenght > 0;
-            };
+            ConnectItems = await ConnectionStorageService.LoadAsync();
 
+            ConnectItems.CollectionChanged -= SaveConnectionsAsync;
+            ConnectItems.CollectionChanged += SaveConnectionsAsync;
+
+            foreach (var conn in ConnectItems)
+            {
+                ModelInitialize(conn, null);
+            }
+
+            int lenght = ConnectItems.Count();
+            IsNotEmptyView = lenght > 0;
+            IsEmptyView = lenght == 0;
 
             ViewContextItem.Add(new ContextAction()
             {
                 NameKey = "ctx_add_title",
-                Icon = new SymbolIcon() { Symbol = SymbolRegular.Add20 },
+                SymbolKey = SymbolRegular.Add20.ToString(),
                 Children = new ObservableCollection<ContextAction>()
+                {
+                    new ContextAction()
                     {
-                        new ContextAction()
+                        NameKey = "ctx_folder_title",
+                        SymbolKey = SymbolRegular.Folder16.ToString(),
+                        Command = new RelayCommand(() =>
                         {
-                            NameKey = "ctx_folder_title",
-                            Icon = new SymbolIcon() { Symbol = SymbolRegular.Folder16 },
-                            Command = new RelayCommand(() =>
-                            {
-                                addFolderToTree();
-                            })
-                        },
-                        new ContextAction()
+                            addFolderToTree();
+                        })
+                    },
+                    new ContextAction()
+                    {
+                        NameKey = "ctx_mysql_title",
+                        SymbolKey = SymbolRegular.Database16.ToString(),
+                        Command = new RelayCommand(async () =>
                         {
-                            NameKey = "ctx_mysql_title",
-                            Icon = new SymbolIcon() { Symbol = SymbolRegular.Database16 },
-                            Command = new RelayCommand(async () =>
+                            var result = await MessengerService.ShowDialogAsync<Dialogs.Views.ConnectionEditing, Dialogs.ViewModels.ConnectionEditing>();
+                            if (result != null)
                             {
-                                var result = await MessengerService.ShowDialogAsync<Dialogs.Views.ConnectionEditing, Dialogs.ViewModels.ConnectionEditing>();
-                                if (result != null)
-                                {
-                                }
-                            })
-                        }
+                                var model = result.ToConnectionModel();
+                                ModelInitialize(model, null);
+                                ConnectItems.Add(model);
+                            }
+                        })
                     }
+                }
             });
         }
     }

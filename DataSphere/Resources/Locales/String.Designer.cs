@@ -97,6 +97,15 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ctx_edit_title.
+        /// </summary>
+        internal static string ctx_edit_title {
+            get {
+                return ResourceManager.GetString("ctx_edit_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ctx_folder_title.
         /// </summary>
         internal static string ctx_folder_title {
@@ -165,6 +174,15 @@ namespace DataSphere.Resources.Locales {
         internal static string dalog_conn_save_pw_title {
             get {
                 return ResourceManager.GetString("dalog_conn_save_pw_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dalog_conn_type_title.
+        /// </summary>
+        internal static string dalog_conn_type_title {
+            get {
+                return ResourceManager.GetString("dalog_conn_type_title", resourceCulture);
             }
         }
         
