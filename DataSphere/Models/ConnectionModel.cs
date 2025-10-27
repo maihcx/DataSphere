@@ -94,7 +94,13 @@ namespace DataSphere.Models
 
         public ObservableCollection<ConnectionModel> Children
         {
-            get => field ?? new();
+            get {
+                if (field == null)
+                {
+                    field = new ObservableCollection<ConnectionModel>();
+                }
+                return field;
+            }
             set 
             { 
                 field = value; 
