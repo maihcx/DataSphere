@@ -1,14 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
-using DataSphere.Services;
 using System.Collections.Specialized;
 
 namespace DataSphere.ViewModels.Pages.DatabaseGroup
 {
-    public partial class ConnectViewModel : ObservableObject
+    public partial class CCViewModel : ObservableObject
     {
         private bool _isInitialized = false;
 
-        public ConnectViewModel()
+        public CCViewModel()
         {
             if (!_isInitialized)
                 InitializeViewModel();
@@ -51,16 +50,10 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
             to.Port = from.Port;
             to.User = from.User;
             to.Password = from.Password;
-
-            WeakReferenceMessenger.Default.Send(new GenericMessage<(ConnectionModel, string)>((to, "edit")));
         }
 
         private async void SaveConnectionsAsync(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is ConnectionModel to)
-            {
-                WeakReferenceMessenger.Default.Send(new GenericMessage<(ConnectionModel, string)>((to, "edit")));
-            }
             await ConnectionStorageService.SaveAsync(ConnectItems);
 
             int lenght = ConnectItems.Count();
@@ -133,6 +126,7 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
             foreach (var conn in ConnectItems)
             {
                 ModelInitialize(conn, null);
+                InitializeParentRecursive(conn, null);
             }
 
             int lenght = ConnectItems.Count();
@@ -171,6 +165,15 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
                     }
                 }
             });
+        }
+
+        private static void InitializeParentRecursive(ConnectionModel model, ConnectionModel? parent)
+        {
+            model.Parent = parent;
+            foreach (var child in model.Children)
+            {
+                InitializeParentRecursive(child, model);
+            }
         }
     }
 }

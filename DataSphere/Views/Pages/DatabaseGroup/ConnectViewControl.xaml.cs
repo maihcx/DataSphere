@@ -9,11 +9,11 @@ namespace DataSphere.Views.Pages.DatabaseGroup
     /// </summary>
     public partial class ConnectViewControl : UserControl
     {
-        public ConnectViewModel ViewModel { get; }
+        public CCViewModel ViewModel { get; }
 
         public ConnectViewControl()
         {
-            ViewModel = new ConnectViewModel();
+            ViewModel = new CCViewModel();
             DataContext = this;
 
             InitializeComponent();

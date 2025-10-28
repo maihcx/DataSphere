@@ -40,11 +40,23 @@ namespace DataSphere.ViewModels.Pages
                 {
                     var newTab = new TabItemView()
                     {
-                        Header = conn.Name,
+                        Header = (conn.Parent == null) ? conn.Name : $"{conn.Parent.Name}/{conn.Name}",
                         Icon = conn.Icon,
-                        Content = new Views.Pages.DatabaseGroup.DatabaseViewControl(),
+                        Content = new Views.Pages.DatabaseGroup.DatabaseViewControl(conn),
                         CanClose = true,
                         Key = conn.Key,
+                    };
+
+                    conn.PropertyChanged += (s, e) =>
+                    {
+                        if (conn.Parent == null)
+                        {
+                            newTab.Header = conn.Name;
+                        }
+                        else
+                        {
+                            newTab.Header = $"{conn.Parent.Name}/{conn.Name}";
+                        }
                     };
 
                     TabsViewer.Add(newTab);

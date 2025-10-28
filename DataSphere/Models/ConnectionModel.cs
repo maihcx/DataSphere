@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Specialized;
+using System.Text.Json.Serialization;
 
 namespace DataSphere.Models
 {
@@ -118,12 +119,19 @@ namespace DataSphere.Models
                 if (field == null)
                 {
                     field = new ObservableCollection<ConnectionModel>();
+                    HookChildrenEvents(field);
                 }
                 return field;
             }
             set 
-            { 
-                field = value; 
+            {
+                if (field != null)
+                {
+                    field.CollectionChanged -= OnChildrenCollectionChanged;
+                }
+
+                field = value;
+                HookChildrenEvents(field);
                 OnPropertyChanged(); 
             }
         }
@@ -134,6 +142,27 @@ namespace DataSphere.Models
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+            if (Children != null && Children.Count > 0)
+            {
+                foreach (var child in Children)
+                {
+                    child.OnParentPropertyChanged(propertyName);
+                }
+            }
+        }
+
+        internal void OnParentPropertyChanged(string? propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs($"Parent.{propertyName}"));
+
+            if (Children != null && Children.Count > 0)
+            {
+                foreach (var child in Children)
+                {
+                    child.OnParentPropertyChanged(propertyName);
+                }
+            }
         }
 
         public void InitializeRuntimeProperties(
@@ -269,6 +298,33 @@ namespace DataSphere.Models
                         }
                     };
                     break;
+            }
+        }
+
+        private void HookChildrenEvents(ObservableCollection<ConnectionModel> collection)
+        {
+            collection.CollectionChanged += OnChildrenCollectionChanged;
+        }
+
+        private void OnChildrenCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (ConnectionModel child in e.NewItems)
+                {
+                    child.Parent = this;
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (ConnectionModel child in e.OldItems)
+                {
+                    if (child.Parent == this)
+                    {
+                        child.Parent = null;
+                    }
+                }
             }
         }
     }

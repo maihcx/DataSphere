@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataSphere.ViewModels.Pages.DatabaseGroup;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,8 +21,14 @@ namespace DataSphere.Views.Pages.DatabaseGroup
     /// </summary>
     public partial class DatabaseViewControl : UserControl
     {
-        public DatabaseViewControl()
+        public ConnectionModel ConnectionModel { get; set; }
+
+        public DCViewModel ViewModel { get; set; }
+
+        public DatabaseViewControl(ConnectionModel connectionModel)
         {
+            ConnectionModel = connectionModel;
+            ViewModel = new DCViewModel(ConnectionModel);
             InitializeComponent();
         }
     }
