@@ -17,45 +17,10 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
-    <!--<Page.ContextMenu>
-        <controls:ContextMenus ItemsSource="{Binding ViewModel.ViewContextItem, Mode=OneWay}" />
-    </Page.ContextMenu>-->
-
     <controls:TabsControl 
         ItemsSourceBinding="{Binding ViewModel.TabsViewer}" 
+        SelectedItem="{Binding ViewModel.SelectedTab, Mode=TwoWay}"
         HorizontalAlignment="Stretch" 
         VerticalAlignment="Stretch"
-        Margin="0 0 0 30" />
-    <!--<StackPanel Margin="0 0 0 30" Background="Transparent">-->
-
-        
-        <!--<TreeView x:Name="myTreeView" AllowDrop="True">
-            <TreeView.Resources>
-                <ContextMenu x:Key="NodeContextMenu">
-                    <MenuItem Header="Add Child" />
-                    <MenuItem Header="Delete Node" />
-                </ContextMenu>
-            </TreeView.Resources>
-            <TreeViewItem Header="Servers" ContextMenu="{StaticResource NodeContextMenu}">
-                <TreeViewItem Header="Server1">
-                    <TreeViewItem Header="Instance1" />
-                    <TreeViewItem Header="Instance2" />
-                </TreeViewItem>
-                <TreeViewItem Header="Server2">
-                    <TreeViewItem Header="InstanceA" />
-                    <TreeViewItem Header="InstanceB" />
-                </TreeViewItem>
-            </TreeViewItem>
-            <TreeViewItem Header="Databases">
-                <TreeViewItem Header="Database1">
-                    <TreeViewItem Header="Table1" />
-                    <TreeViewItem Header="Table2" />
-                </TreeViewItem>
-                <TreeViewItem Header="Database2">
-                    <TreeViewItem Header="TableA" />
-                    <TreeViewItem Header="TableB" />
-                </TreeViewItem>
-            </TreeViewItem>
-        </TreeView>-->
-    <!--</StackPanel>-->
+        Margin="0 0 0 20" />
 </Page>

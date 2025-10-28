@@ -72,5 +72,20 @@ namespace DataSphere.Models
                 OnPropertyChanged(nameof(CanClose));
             }
         } = true;
+
+        public string Key { 
+            get 
+            { 
+                if (field == null)
+                {
+                    field = PasswordEncryptor.RandomHash();
+                }
+                return field;
+            } 
+            set
+            {
+                field = value;
+            }
+        }
     }
 }

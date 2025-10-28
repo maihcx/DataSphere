@@ -1,4 +1,5 @@
-﻿using DataSphere.Controls;
+﻿using CommunityToolkit.Mvvm.Messaging.Messages;
+using DataSphere.Controls;
 using DataSphere.Dialogs;
 
 namespace DataSphere.Services
@@ -60,5 +61,10 @@ namespace DataSphere.Services
             await dialog.ShowAsync();
             return dialog.Result;
         }
+    }
+
+    public class GenericMessage<T> : ValueChangedMessage<T>
+    {
+        public GenericMessage(T value) : base(value) { }
     }
 }

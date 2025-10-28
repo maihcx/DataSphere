@@ -246,4 +246,7 @@
   <data name="ctx_edit_title" xml:space="preserve">
     <value>ctx_edit_title</value>
   </data>
+  <data name="ctx_opencnn_title" xml:space="preserve">
+    <value>ctx_opencnn_title</value>
+  </data>
 </root>

@@ -16,13 +16,30 @@ namespace DataSphere.Models
             }
         }
 
+        public string Key
+        {
+            get 
+            { 
+                if (string.IsNullOrWhiteSpace(field))
+                {
+                    field = PasswordEncryptor.RandomHash();
+                }
+                return field;
+            }
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(Key));
+            }
+        }
+
         public bool IsEditing
         {
             get => field;
             set 
             { 
                 field = value; 
-                OnPropertyChanged(); 
+                OnPropertyChanged(nameof(IsEditing)); 
             }
         }
 
@@ -92,6 +109,9 @@ namespace DataSphere.Models
             }
         }
 
+        [JsonIgnore]
+        public ConnectionModel? Parent {  get; set; }
+
         public ObservableCollection<ConnectionModel> Children
         {
             get {
@@ -119,7 +139,8 @@ namespace DataSphere.Models
         public void InitializeRuntimeProperties(
             Action<ConnectionModel>? addConnectionCallback,
             Action<ConnectionModel>? removeConnectionCallback,
-            Action<ConnectionModel>? editConnectionCallback) {
+            Action<ConnectionModel>? editConnectionCallback,
+            Action<ConnectionModel>? startConnectionCallback) {
             switch (Type?.Value)
             {
                 case DatabaseType.Folder:
@@ -189,6 +210,18 @@ namespace DataSphere.Models
                 case DatabaseType.MySql:
                     ContextMenuItems = new ObservableCollection<ContextAction>()
                     {
+                        new ContextAction()
+                        {
+                            NameKey = "ctx_opencnn_title",
+                            SymbolKey = SymbolRegular.PlugConnectedCheckmark20.ToString(),
+                            Command = new RelayCommand<ConnectionModel>((param) =>
+                            {
+                                if (param != null) {
+                                    startConnectionCallback?.Invoke(param);
+                                }
+                            }),
+                            CommandParameter = this
+                        },
                         new ContextAction()
                         {
                             NameKey = "ctx_edit_title",

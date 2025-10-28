@@ -1,4 +1,6 @@
-﻿using System.Collections.Specialized;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using DataSphere.Services;
+using System.Collections.Specialized;
 
 namespace DataSphere.ViewModels.Pages.DatabaseGroup
 {
@@ -49,10 +51,16 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
             to.Port = from.Port;
             to.User = from.User;
             to.Password = from.Password;
+
+            WeakReferenceMessenger.Default.Send(new GenericMessage<(ConnectionModel, string)>((to, "edit")));
         }
 
         private async void SaveConnectionsAsync(object? sender, PropertyChangedEventArgs e)
         {
+            if (sender is ConnectionModel to)
+            {
+                WeakReferenceMessenger.Default.Send(new GenericMessage<(ConnectionModel, string)>((to, "edit")));
+            }
             await ConnectionStorageService.SaveAsync(ConnectItems);
 
             int lenght = ConnectItems.Count();
@@ -97,6 +105,10 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
                     {
                         setModelValues(result.ToConnectionModel(), model);
                     }
+                },
+                startConnectionCallback: model =>
+                {
+                    WeakReferenceMessenger.Default.Send(new GenericMessage<(ConnectionModel, string)>((model, "add")));
                 }
             );
 

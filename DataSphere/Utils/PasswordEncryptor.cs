@@ -56,6 +56,11 @@ namespace DataSphere.Utils
                 .Select(s => s[random.Next(s.Length)]).ToArray()));
         }
 
+        public static string RandomHash()
+        {
+            return Guid.NewGuid().ToString();
+        }
+
         public static string Md5Hash(string input)
         {
             StringBuilder hash = new StringBuilder();

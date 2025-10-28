@@ -4,6 +4,8 @@ namespace DataSphere.Services
 {
     public static class ConnectionStorageService
     {
+        private static CancellationTokenSource? _saveCts;
+
         private static readonly string ConfigFilePath =
             Path.Combine(AppInfoHelper.DataDir, "connections.json");
 
@@ -13,10 +15,24 @@ namespace DataSphere.Services
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        public static async Task SaveAsync(ObservableCollection<ConnectionModel> connections)
+        public static async Task SaveAsync(ObservableCollection<ConnectionModel> connections, int delayMs = 200)
         {
-            var json = JsonSerializer.Serialize(connections, Options);
-            await File.WriteAllTextAsync(ConfigFilePath, json);
+            _saveCts?.Cancel();
+            _saveCts = new CancellationTokenSource();
+            var token = _saveCts.Token;
+
+            try
+            {
+                await Task.Delay(delayMs, token);
+                if (token.IsCancellationRequested) return;
+
+                var json = JsonSerializer.Serialize(connections, Options);
+                await File.WriteAllTextAsync(ConfigFilePath, json, token);
+            }
+            catch (TaskCanceledException)
+            {
+                
+            }
         }
 
         public static async Task<ObservableCollection<ConnectionModel>> LoadAsync()

@@ -124,6 +124,15 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ctx_opencnn_title.
+        /// </summary>
+        internal static string ctx_opencnn_title {
+            get {
+                return ResourceManager.GetString("ctx_opencnn_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ctx_rename_title.
         /// </summary>
         internal static string ctx_rename_title {

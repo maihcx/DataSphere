@@ -1,4 +1,6 @@
-﻿using DataSphere.ViewModels.Pages.DatabaseGroup;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
+using DataSphere.ViewModels.Pages.DatabaseGroup;
 
 namespace DataSphere.Views.Pages.DatabaseGroup
 {
@@ -15,17 +17,6 @@ namespace DataSphere.Views.Pages.DatabaseGroup
             DataContext = this;
 
             InitializeComponent();
-        }
-
-        private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ClickCount == 2)
-            {
-                if (sender is Wpf.Ui.Controls.TextBlock tb && tb.DataContext is ConnectionModel item)
-                {
-                    item.IsEditing = true;
-                }
-            }
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
@@ -64,6 +55,29 @@ namespace DataSphere.Views.Pages.DatabaseGroup
                     return descendent;
             }
             return null;
+        }
+
+        private void ConnectTreeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (ConnectTreeView.SelectedItem is ConnectionModel selected)
+            {
+                if (selected.Type?.Value != DatabaseType.Folder)
+                {
+                    WeakReferenceMessenger.Default.Send(new GenericMessage<(ConnectionModel, string)>((selected, "add")));
+                }
+            }
+        }
+
+        private void ConnectTreeView_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F2)
+            {
+                if (ConnectTreeView.SelectedItem is ConnectionModel selected)
+                {
+                    selected.IsEditing = true;
+                }
+                e.Handled = false;
+            }
         }
     }
 }

@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="DataSphere.Views.Pages.DatabaseGroup.DatabaseViewControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DataSphere.Views.Pages.DatabaseGroup"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:DataSphere.Controls"
+             xmlns:utils="clr-namespace:DataSphere.Utils"
+             xmlns:helpers="clr-namespace:DataSphere.Helpers"
+             xmlns:models="clr-namespace:DataSphere.Models"
+             mc:Ignorable="d" 
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="5" />
+            <!-- vị trí splitter -->
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Khung bên trái -->
+        <Border Grid.Column="0">
+            <TextBlock Text="Panel trái" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        </Border>
+
+        <!-- Splitter -->
+        <GridSplitter
+            Grid.Column="1"
+            Width="5"
+            Background="{ui:ThemeResource TextFillColorDisabledBrush}"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            ResizeBehavior="PreviousAndNext"
+            ResizeDirection="Columns"/>
+
+        <!-- Khung bên phải -->
+        <Border Grid.Column="2">
+            <TextBlock Text="Panel phải" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        </Border>
+    </Grid>
+</UserControl>

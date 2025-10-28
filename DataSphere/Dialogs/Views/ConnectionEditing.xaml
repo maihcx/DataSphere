@@ -28,7 +28,7 @@
         <Grid HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition SharedSizeGroup="Col1" Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition SharedSizeGroup="Col2" Width="*"/>
             </Grid.ColumnDefinitions>
             
             <TextBlock 
@@ -51,7 +51,7 @@
         <Grid Margin="0 6 0 0" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition SharedSizeGroup="Col1" Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition SharedSizeGroup="Col2" Width="*"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock 
@@ -63,15 +63,15 @@
 
             <ComboBox
                 Grid.Column="1"
+                HorizontalAlignment="Left"
                 ItemsSource="{Binding ViewModel.DatabaseTypes}"
                 SelectedItem="{Binding ViewModel.DatabaseSelectedType, Mode=TwoWay}"
-                DisplayMemberPath="Name"
-                Width="200" />
+                DisplayMemberPath="Name" />
         </Grid>
         <Grid Margin="0 6 0 0" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition SharedSizeGroup="Col1" Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition SharedSizeGroup="Col2" Width="*"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock 
@@ -93,7 +93,7 @@
         <Grid Margin="0 6 0 0" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition SharedSizeGroup="Col1" Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition SharedSizeGroup="Col2" Width="*"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock 
@@ -106,13 +106,13 @@
             <ui:NumberBox
                 Grid.Column="1"
                 HorizontalAlignment="Left"
-                Width="200"
+                Width="160"
                 Value="{Binding ViewModel.ConnectionPort, Mode=TwoWay}" />
         </Grid>
         <Grid Margin="0 6 0 0" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition SharedSizeGroup="Col1" Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition SharedSizeGroup="Col2" Width="*"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock 
@@ -134,7 +134,7 @@
         <Grid Margin="0 6 0 0" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition SharedSizeGroup="Col1" Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition SharedSizeGroup="Col2" Width="*"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock 

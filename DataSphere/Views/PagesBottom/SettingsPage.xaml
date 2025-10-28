@@ -22,7 +22,7 @@
         <helpers:BooleanToString x:Key="BooleanToString" />
     </Page.Resources>
 
-    <StackPanel>
+    <StackPanel Margin="0 0 0 20">
         <ui:TextBlock
             Margin="0,24,0,8"
             FontTypography="BodyStrong"
@@ -105,8 +105,7 @@
 
         <ui:CardExpander 
             ContentPadding="0" 
-            Icon="{ui:ImageIcon 'pack://application:,,,/Assets/wpfui-icon-256.png', Width=38, Height=35}"
-            Margin="0 0 0 30">
+            Icon="{ui:ImageIcon 'pack://application:,,,/Assets/wpfui-icon-256.png', Width=38, Height=35}">
             <ui:CardExpander.Header>
                 <Grid>
                     <Grid.RowDefinitions>

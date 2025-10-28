@@ -28,7 +28,7 @@ namespace DataSphere.Views.Windows
             ThemeManagerService = new ApplicationThemeManagerService(this);
             WindowHelper.ThemeManagerService = ThemeManagerService;
             ThemeManagerService.InitCornerRadius();
-            ThemeManagerService.Watch();
+            ThemeManagerService.SetApplicationTheme(ThemeManagerService.GetApplicationTheme());
 
             InitializeComponent();
 

@@ -92,7 +92,7 @@
             OnThemeChanged?.Invoke(applicationTheme);
         }
 
-        public void Watch(ThemeType applicationTheme = ThemeType.Unknown, WindowBackdropType windowBackdrop = WindowBackdropType.Mica, bool updateAccents = true)
+        public void Watch(ThemeType applicationTheme = ThemeType.Unknown, WindowBackdropType windowBackdrop = WindowBackdropType.Tabbed, bool updateAccents = true)
         {
             if (!IsWatcher)
             {

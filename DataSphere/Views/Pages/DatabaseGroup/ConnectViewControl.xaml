@@ -26,6 +26,8 @@ VerticalAlignment="Stretch">
 
         <TreeView x:Name="ConnectTreeView"
             ItemsSource="{Binding ViewModel.ConnectItems}"
+            MouseDoubleClick="ConnectTreeView_MouseDoubleClick"
+            KeyDown="ConnectTreeView_KeyDown"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             AllowDrop="True">
@@ -41,18 +43,17 @@ VerticalAlignment="Stretch">
 
                 <HierarchicalDataTemplate DataType="{x:Type models:ConnectionModel}" ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
-                        <ContentControl Content="{Binding Icon}" Margin="0,0,8,0"/>
+                        <ContentControl Content="{Binding Icon}" Margin="0,0,8,0" FontSize="17" />
 
                         <ui:TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                             Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}"
                             LostFocus="TextBox_LostFocus"
                             KeyDown="TextBox_KeyDown"
                             helpers:TextBoxExtensions.AutoFocusAndSelect="{Binding IsEditing}"
-                            MinWidth="100"/>
+                            MinWidth="100" Padding="2"/>
 
                         <ui:TextBlock Text="{Binding Name}"
-                            Visibility="{Binding IsEditing, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                            MouseDown="TextBlock_MouseDown"/>
+                            Visibility="{Binding IsEditing, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Padding="0 2" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
@@ -64,6 +65,6 @@ VerticalAlignment="Stretch">
             Margin="10" 
             HorizontalAlignment="Center" TextAlignment="Center"
             VerticalAlignment="Center" TextWrapping="WrapWithOverflow"
-                   Visibility="{Binding ViewModel.IsEmptyView, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            Visibility="{Binding ViewModel.IsEmptyView, Converter={StaticResource BooleanToVisibilityConverter}}"/>
     </Grid>
 </UserControl>
