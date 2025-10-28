@@ -1,4 +1,5 @@
-﻿using DataSphere.ViewModels.Pages.DatabaseGroup;
+﻿using DataSphere.Models.Database;
+using DataSphere.ViewModels.Pages.DatabaseGroup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,13 +24,24 @@ namespace DataSphere.Views.Pages.DatabaseGroup
     {
         public ConnectionModel ConnectionModel { get; set; }
 
-        public DCViewModel ViewModel { get; set; }
+        public DCViewModel ViewModel { get; }
 
         public DatabaseViewControl(ConnectionModel connectionModel)
         {
             ConnectionModel = connectionModel;
             ViewModel = new DCViewModel(ConnectionModel);
+            DataContext = this;
+
             InitializeComponent();
+        }
+
+        private async void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
+        {
+            if (e.OriginalSource is System.Windows.Controls.TreeViewItem item &&
+                item.DataContext is DatabaseInfo db)
+            {
+                await ViewModel.LoadTablesAsync(db);
+            }
         }
     }
 }

@@ -10,54 +10,113 @@ namespace DataSphere.Models.Database
     /// Represents a database (schema) in the MySQL server, 
     /// including metadata such as name, size, collation, and contained tables.
     /// </summary>
-    public class DatabaseInfo
+    public class DatabaseInfo : INotifyPropertyChanged
     {
-        /// <summary>
-        /// Gets or sets the database name.
-        /// </summary>
-        public required string Name { get; set; }
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        /// <summary>
-        /// Gets or sets the default character set used by this database.
-        /// </summary>
-        public string? Charset { get; set; }
+        public DatabaseInfo()
+        {
+            Tables = new ObservableCollection<Table>()
+            {
+                new()
+                {
+                    Name = "Loading...",
+                    Schema = "LoadingHolder"
+                }
+            };
 
-        /// <summary>
-        /// Gets or sets the default collation for this database.
-        /// </summary>
-        public string? Collation { get; set; }
+            Tables.CollectionChanged += (s, e) =>
+            {
+                OnPropertyChanged(nameof(Tables));
+            };
+        }
 
-        /// <summary>
-        /// Gets or sets the total size of the database in bytes (approximate).
-        /// </summary>
-        public long? SizeInBytes { get; set; }
+        public string Name
+        {
+            get => field ?? string.Empty;
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(Name));
+            }
+        }
 
-        /// <summary>
-        /// Gets or sets the number of tables contained in this database.
-        /// </summary>
-        public int? TableCount { get; set; }
+        public string Charset
+        {
+            get => field ?? string.Empty;
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(Charset));
+            }
+        }
 
-        /// <summary>
-        /// Gets or sets an optional comment or description of the database.
-        /// </summary>
-        public string? Comment { get; set; }
+        public string Collation
+        {
+            get => field ?? string.Empty;
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(Collation));
+            }
+        }
 
-        /// <summary>
-        /// Gets or sets a collection of tables that belong to this database.
-        /// May be populated lazily when needed.
-        /// </summary>
+        public long? SizeInBytes
+        {
+            get => field;
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(SizeInBytes));
+            }
+        }
+
+        public int TableCount
+        {
+            get => field;
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(TableCount));
+            }
+        } = 0;
+
+        public string? Comment
+        {
+            get => field;
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(Comment));
+            }
+        }
+
+        public bool IsTablesLoaded
+        {
+            get => field;
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(IsTablesLoaded));
+            }
+        } = false;
+
+        public bool HasDummyChild => true;
+
         public ObservableCollection<Table>? Tables { get; set; }
 
-        /// <summary>
-        /// Returns a human-readable representation of the database.
-        /// </summary>
         public override string ToString()
         {
             string sizeInfo = SizeInBytes.HasValue
                 ? $" ~{(SizeInBytes.Value / 1024.0 / 1024.0):0.##} MB"
                 : string.Empty;
 
-            return $"{Name} ({TableCount ?? 0} tables){sizeInfo}";
+            return $"{Name} ({TableCount} tables){sizeInfo}";
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
