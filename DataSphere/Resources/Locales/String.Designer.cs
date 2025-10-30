@@ -124,6 +124,15 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ctx_open_title.
+        /// </summary>
+        internal static string ctx_open_title {
+            get {
+                return ResourceManager.GetString("ctx_open_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ctx_opencnn_title.
         /// </summary>
         internal static string ctx_opencnn_title {
@@ -201,6 +210,60 @@ namespace DataSphere.Resources.Locales {
         internal static string dalog_conn_usname_title {
             get {
                 return ResourceManager.GetString("dalog_conn_usname_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dbinf_events_title.
+        /// </summary>
+        internal static string dbinf_events_title {
+            get {
+                return ResourceManager.GetString("dbinf_events_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dbinf_fncs_title.
+        /// </summary>
+        internal static string dbinf_fncs_title {
+            get {
+                return ResourceManager.GetString("dbinf_fncs_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dbinf_sps_title.
+        /// </summary>
+        internal static string dbinf_sps_title {
+            get {
+                return ResourceManager.GetString("dbinf_sps_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dbinf_tables_title.
+        /// </summary>
+        internal static string dbinf_tables_title {
+            get {
+                return ResourceManager.GetString("dbinf_tables_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dbinf_triggers_title.
+        /// </summary>
+        internal static string dbinf_triggers_title {
+            get {
+                return ResourceManager.GetString("dbinf_triggers_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dbinf_views_title.
+        /// </summary>
+        internal static string dbinf_views_title {
+            get {
+                return ResourceManager.GetString("dbinf_views_title", resourceCulture);
             }
         }
         

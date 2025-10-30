@@ -239,8 +239,8 @@ namespace DataSphere.Services.Database
                 databases.Add(new DatabaseInfo
                 {
                     Name = reader.GetString("DatabaseName"),
-                    Charset = reader["Charset"]?.ToString(),
-                    Collation = reader["Collation"]?.ToString()
+                    Charset = reader["Charset"].ToString() ?? string.Empty,
+                    Collation = reader["Collation"]?.ToString() ?? string.Empty
                 });
             }
 

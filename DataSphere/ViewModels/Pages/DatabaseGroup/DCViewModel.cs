@@ -57,5 +57,15 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
 
         [ObservableProperty]
         private ObservableCollection<DatabaseInfo>? _allDatabases;
+
+        [ObservableProperty]
+        private ObservableCollection<ContextAction> _databaseContextMenuItems = new()
+        {
+            new ContextAction()
+            {
+                SymbolKey = SymbolRegular.Open16.ToString(),
+                NameKey = "ctx_open_title"
+            }
+        };
     }
 }

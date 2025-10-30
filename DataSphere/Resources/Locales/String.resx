@@ -249,4 +249,25 @@
   <data name="ctx_opencnn_title" xml:space="preserve">
     <value>ctx_opencnn_title</value>
   </data>
+  <data name="dbinf_tables_title" xml:space="preserve">
+    <value>dbinf_tables_title</value>
+  </data>
+  <data name="dbinf_views_title" xml:space="preserve">
+    <value>dbinf_views_title</value>
+  </data>
+  <data name="dbinf_sps_title" xml:space="preserve">
+    <value>dbinf_sps_title</value>
+  </data>
+  <data name="dbinf_fncs_title" xml:space="preserve">
+    <value>dbinf_fncs_title</value>
+  </data>
+  <data name="dbinf_triggers_title" xml:space="preserve">
+    <value>dbinf_triggers_title</value>
+  </data>
+  <data name="dbinf_events_title" xml:space="preserve">
+    <value>dbinf_events_title</value>
+  </data>
+  <data name="ctx_open_title" xml:space="preserve">
+    <value>ctx_open_title</value>
+  </data>
 </root>

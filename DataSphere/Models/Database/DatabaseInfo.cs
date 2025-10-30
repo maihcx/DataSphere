@@ -118,5 +118,54 @@ namespace DataSphere.Models.Database
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public IEnumerable<DatabaseCategory> Categories
+        {
+            get
+            {
+                yield return new DatabaseCategory
+                {
+                    NameKey = "dbinf_tables_title",
+                    Icon = new SymbolIcon() { Symbol = SymbolRegular.BookDatabase20 },
+                    Items = Tables ?? new ObservableCollection<Table>()
+                };
+
+                // Các nhóm khác bạn có thể thêm sau khi có dữ liệu thực:
+                yield return new DatabaseCategory
+                {
+                    NameKey = "dbinf_views_title",
+                    Icon = new SymbolIcon() { Symbol = SymbolRegular.ContentView20 },
+                    Items = new ObservableCollection<object>()
+                };
+
+                yield return new DatabaseCategory
+                {
+                    NameKey = "dbinf_sps_title",
+                    Icon = new SymbolIcon() { Symbol = SymbolRegular.Code20 },
+                    Items = new ObservableCollection<object>()
+                };
+
+                yield return new DatabaseCategory
+                {
+                    NameKey = "dbinf_fncs_title",
+                    Icon = new SymbolIcon() { Symbol = SymbolRegular.AppFolder20 },
+                    Items = new ObservableCollection<object>()
+                };
+
+                yield return new DatabaseCategory
+                {
+                    NameKey = "dbinf_triggers_title",
+                    Icon = new SymbolIcon() { Symbol = SymbolRegular.Settings20 },
+                    Items = new ObservableCollection<object>()
+                };
+
+                yield return new DatabaseCategory
+                {
+                    NameKey = "dbinf_events_title",
+                    Icon = new SymbolIcon() { Symbol = SymbolRegular.CalendarLtr20 },
+                    Items = new ObservableCollection<object>()
+                };
+            }
+        }
     }
 }

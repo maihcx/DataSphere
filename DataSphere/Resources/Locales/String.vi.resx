@@ -249,4 +249,25 @@
   <data name="ctx_opencnn_title" xml:space="preserve">
     <value>Mở kết nối</value>
   </data>
+  <data name="dbinf_tables_title" xml:space="preserve">
+    <value>Bảng</value>
+  </data>
+  <data name="dbinf_views_title" xml:space="preserve">
+    <value>Xem</value>
+  </data>
+  <data name="dbinf_sps_title" xml:space="preserve">
+    <value>Thủ tục lưu trữ</value>
+  </data>
+  <data name="dbinf_fncs_title" xml:space="preserve">
+    <value>Hàm</value>
+  </data>
+  <data name="dbinf_triggers_title" xml:space="preserve">
+    <value>Trình kích hoạt</value>
+  </data>
+  <data name="dbinf_events_title" xml:space="preserve">
+    <value>Sự kiện</value>
+  </data>
+  <data name="ctx_open_title" xml:space="preserve">
+    <value>Mở</value>
+  </data>
 </root>
