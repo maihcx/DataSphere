@@ -270,4 +270,22 @@
   <data name="ctx_open_title" xml:space="preserve">
     <value>ctx_open_title</value>
   </data>
+  <data name="dbinf_fnc_title" xml:space="preserve">
+    <value>dbinf_fnc_title</value>
+  </data>
+  <data name="dbinf_sp_title" xml:space="preserve">
+    <value>dbinf_sp_title</value>
+  </data>
+  <data name="dbinf_table_title" xml:space="preserve">
+    <value>dbinf_table_title</value>
+  </data>
+  <data name="dbinf_trigger_title" xml:space="preserve">
+    <value>dbinf_trigger_title</value>
+  </data>
+  <data name="dbinf_view_title" xml:space="preserve">
+    <value>dbinf_view_title</value>
+  </data>
+  <data name="dbinf_event_title" xml:space="preserve">
+    <value>dbinf_event_title</value>
+  </data>
 </root>

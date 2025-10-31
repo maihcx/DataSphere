@@ -3,12 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="clr-namespace:Wpf.Ui.Controls;assembly=Wpf.Ui"
              xmlns:models="clr-namespace:DataSphere.Models"
-             xmlns:helpers="clr-namespace:DataSphere.Helpers">
+             xmlns:helpers="clr-namespace:DataSphere.Helpers"
+             xmlns:controls="clr-namespace:DataSphere.Controls">
     <ContextMenu.Style>
         <Style TargetType="ContextMenu" BasedOn="{StaticResource {x:Type ContextMenu}}"/>
     </ContextMenu.Style>
 
     <ContextMenu.Resources>
+        <helpers:PreferNotNullConverter x:Key="PreferNotNullConverter" />
         <!-- Template cho MenuItem -->
         <HierarchicalDataTemplate DataType="{x:Type models:ContextAction}" 
                                   ItemsSource="{Binding Children}">
@@ -37,7 +39,16 @@
     <ContextMenu.ItemContainerStyle>
         <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
             <Setter Property="Command" Value="{Binding Command}" />
-            <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
+            <Setter Property="CommandParameter">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource PreferNotNullConverter}">
+                        <!-- Ưu tiên parameter từ chính ContextAction -->
+                        <Binding Path="CommandParameter" />
+                        <!-- Fallback: lấy từ ContextMenus.Parameter -->
+                        <Binding RelativeSource="{RelativeSource AncestorType={x:Type controls:ContextMenus}}" Path="Parameter" />
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
             <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
         </Style>
     </ContextMenu.ItemContainerStyle>

@@ -1,6 +1,7 @@
 ﻿using DataSphere.Models.Database;
+using System.Data;
 
-namespace DataSphere.Services.Database
+namespace DataSphere.Services.Database.Interface
 {
     public interface IDatabaseConnection
     {
@@ -16,6 +17,10 @@ namespace DataSphere.Services.Database
 
         Task<Table?> GetTableInfoAsync(string tableName);
 
-        Task<ObservableCollection<Models.Database.DatabaseInfo>?> GetAllDatabasesAsync();
+        Task<ObservableCollection<DatabaseInfo>?> GetAllDatabasesAsync();
+
+        Task<DataTable?> ExecuteQueryAsync(string sql);
+
+        Task<DataTable?> ExecuteQueryAsync(ISqlBuilder builder);
     }
 }

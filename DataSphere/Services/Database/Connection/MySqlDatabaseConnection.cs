@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using DataSphere.Models;
-using DataSphere.Models.Database;
+﻿using DataSphere.Models.Database;
+using DataSphere.Services.Database.Interface;
 using MySqlConnector;
+using System.Data;
 
-namespace DataSphere.Services.Database
+namespace DataSphere.Services.Database.Connection
 {
     /// <summary>
     /// Provides MySQL database connection and metadata retrieval logic.
@@ -35,7 +32,7 @@ namespace DataSphere.Services.Database
             try
             {
                 string connStr =
-                    $"Server={Model.Host};Port={Model.Port};User ID={Model.User};Password={Model.Password};";
+                    $"Server={Model.Host};Port={Model.Port};User ID={Model.User};Password={Model.Password};AllowZeroDateTime=True;";
                 _connection = new MySqlConnection(connStr);
                 await _connection.OpenAsync().ConfigureAwait(false);
                 return IsConnected;
@@ -245,6 +242,55 @@ namespace DataSphere.Services.Database
             }
 
             return databases;
+        }
+
+        /// <summary>
+        /// Executes a raw SQL query and returns the result as a DataTable.
+        /// </summary>
+        public async Task<DataTable?> ExecuteQueryAsync(string sql)
+        {
+            if (_connection == null || !IsConnected)
+                throw new InvalidOperationException("Database is not connected.");
+
+            if (string.IsNullOrWhiteSpace(sql))
+                throw new ArgumentException("SQL query cannot be null or empty.", nameof(sql));
+
+            try
+            {
+                var table = new DataTable();
+
+                using (var cmd = new MySqlCommand(sql, _connection))
+                {
+                    using (var adapter = new MySqlDataAdapter(cmd))
+                    {
+                        await Task.Run(() =>
+                        {
+                            adapter.FillSchema(table, SchemaType.Source);
+
+                            adapter.Fill(table);
+                        }).ConfigureAwait(false);
+                    }
+                }
+
+                return table;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MySQL] Query failed: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Executes an SQL query built from a fluent SQL builder.
+        /// </summary>
+        public async Task<DataTable?> ExecuteQueryAsync(ISqlBuilder builder)
+        {
+            if (builder == null)
+                throw new ArgumentNullException(nameof(builder));
+
+            string sql = builder.ToSqlString();
+            return await ExecuteQueryAsync(sql).ConfigureAwait(false);
         }
     }
 }

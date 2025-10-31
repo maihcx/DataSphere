@@ -214,11 +214,29 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to dbinf_event_title.
+        /// </summary>
+        internal static string dbinf_event_title {
+            get {
+                return ResourceManager.GetString("dbinf_event_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to dbinf_events_title.
         /// </summary>
         internal static string dbinf_events_title {
             get {
                 return ResourceManager.GetString("dbinf_events_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dbinf_fnc_title.
+        /// </summary>
+        internal static string dbinf_fnc_title {
+            get {
+                return ResourceManager.GetString("dbinf_fnc_title", resourceCulture);
             }
         }
         
@@ -232,11 +250,29 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to dbinf_sp_title.
+        /// </summary>
+        internal static string dbinf_sp_title {
+            get {
+                return ResourceManager.GetString("dbinf_sp_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to dbinf_sps_title.
         /// </summary>
         internal static string dbinf_sps_title {
             get {
                 return ResourceManager.GetString("dbinf_sps_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dbinf_table_title.
+        /// </summary>
+        internal static string dbinf_table_title {
+            get {
+                return ResourceManager.GetString("dbinf_table_title", resourceCulture);
             }
         }
         
@@ -250,11 +286,29 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to dbinf_trigger_title.
+        /// </summary>
+        internal static string dbinf_trigger_title {
+            get {
+                return ResourceManager.GetString("dbinf_trigger_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to dbinf_triggers_title.
         /// </summary>
         internal static string dbinf_triggers_title {
             get {
                 return ResourceManager.GetString("dbinf_triggers_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dbinf_view_title.
+        /// </summary>
+        internal static string dbinf_view_title {
+            get {
+                return ResourceManager.GetString("dbinf_view_title", resourceCulture);
             }
         }
         

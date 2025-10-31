@@ -3,11 +3,11 @@ using System.Collections.Specialized;
 
 namespace DataSphere.ViewModels.Pages.DatabaseGroup
 {
-    public partial class CCViewModel : ObservableObject
+    public partial class ConnectControlViewModel : ObservableObject
     {
         private bool _isInitialized = false;
 
-        public CCViewModel()
+        public ConnectControlViewModel()
         {
             if (!_isInitialized)
                 InitializeViewModel();

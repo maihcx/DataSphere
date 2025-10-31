@@ -19,6 +19,10 @@ namespace DataSphere
 
         private static SplashScreen? SplashScreen;
 
+        private static Task? _gcTask;
+
+        private static CancellationTokenSource _cts = new();
+
         public static void OnBeforeStartup()
         {
             #region Mutex checker
@@ -111,7 +115,20 @@ namespace DataSphere
 
         public static void OnStartup()
         {
-            
+            _gcTask = Task.Run(async () =>
+            {
+                while (!_cts.IsCancellationRequested)
+                {
+                    try
+                    {
+                        GC.Collect(0, GCCollectionMode.Default, blocking: false);
+                    }
+                    catch { /* ignore */ }
+
+                    await Task.Delay(TimeSpan.FromSeconds(3), _cts.Token)
+                              .ConfigureAwait(false);
+                }
+            });
         }
 
         public static void OnExit()
@@ -125,6 +142,9 @@ namespace DataSphere
                 catch { }
                 _mutex.Dispose();
             }
+
+            _cts?.Cancel();
+            _gcTask?.Dispose();
         }
 
         /// <summary>

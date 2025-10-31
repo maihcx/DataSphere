@@ -52,9 +52,17 @@ namespace DataSphere.Controls
             {
                 if (ItemsSourceBinding != null && ItemsSourceBinding.Contains(tab))
                 {
-                    ItemsSourceBinding.Remove(tab);
+                    CloseTab(tab);
                 }
             }
+        }
+
+        private void CloseTab(TabItemView tab)
+        {
+            if (tab.Content is IDisposable page) {
+                page.Dispose();
+            }
+            ItemsSourceBinding.Remove(tab);
         }
     }
 }

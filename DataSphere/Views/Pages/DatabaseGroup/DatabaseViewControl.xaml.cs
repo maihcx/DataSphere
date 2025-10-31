@@ -1,35 +1,24 @@
 ﻿using DataSphere.Models.Database;
 using DataSphere.ViewModels.Pages.DatabaseGroup;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace DataSphere.Views.Pages.DatabaseGroup
 {
     /// <summary>
     /// Interaction logic for DatabaseViewControl.xaml
     /// </summary>
-    public partial class DatabaseViewControl : UserControl
+    public partial class DatabaseViewControl : UserControl, IDisposable
     {
+        private bool _disposed = false;
+
         public ConnectionModel ConnectionModel { get; set; }
 
-        public DCViewModel ViewModel { get; }
+        public DatabaseControlViewModel ViewModel { get; }
 
         public DatabaseViewControl(ConnectionModel connectionModel)
         {
             ConnectionModel = connectionModel;
-            ViewModel = new DCViewModel(ConnectionModel);
+            ViewModel = new DatabaseControlViewModel(ConnectionModel);
             DataContext = this;
 
             InitializeComponent();
@@ -37,11 +26,50 @@ namespace DataSphere.Views.Pages.DatabaseGroup
 
         private async void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
         {
-            if (e.OriginalSource is System.Windows.Controls.TreeViewItem item &&
-                item.DataContext is DatabaseInfo db)
+            if (_disposed) return;
+
+            if (sender is System.Windows.Controls.TreeViewItem item &&
+                item.DataContext is DatabaseCategory category)
             {
-                await ViewModel.LoadTablesAsync(db);
+                if (category.Parent is DatabaseInfo parent)
+                {
+                    e.Handled = true;
+                    await ViewModel.LoadTablesAsync(parent);
+                }
             }
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+
+            _disposed = true;
+
+            treeView.ItemsSource = null;
+
+            // Unsubscribe event handlers
+            // (nếu có subscribe events nào khác)
+
+            // Dispose ViewModel
+            ViewModel?.Dispose();
+
+            // Clear DataContext
+            DataContext = null;
+
+            // Clear connection model reference
+            ConnectionModel = null!;
+
+            // Force garbage collection (optional, chỉ dùng khi thực sự cần)
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            GC.SuppressFinalize(this);
+        }
+
+        ~DatabaseViewControl()
+        {
+            Dispose();
         }
     }
 }

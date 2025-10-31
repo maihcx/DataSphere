@@ -270,4 +270,22 @@
   <data name="ctx_open_title" xml:space="preserve">
     <value>Open</value>
   </data>
+  <data name="dbinf_fnc_title" xml:space="preserve">
+    <value>Function</value>
+  </data>
+  <data name="dbinf_sp_title" xml:space="preserve">
+    <value>Stored Procedure</value>
+  </data>
+  <data name="dbinf_table_title" xml:space="preserve">
+    <value>Table</value>
+  </data>
+  <data name="dbinf_trigger_title" xml:space="preserve">
+    <value>Trigger</value>
+  </data>
+  <data name="dbinf_view_title" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="dbinf_event_title" xml:space="preserve">
+    <value>Event</value>
+  </data>
 </root>

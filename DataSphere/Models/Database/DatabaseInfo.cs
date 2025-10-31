@@ -101,6 +101,16 @@ namespace DataSphere.Models.Database
             }
         } = false;
 
+        public bool IsExpanded
+        {
+            get => field;
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(IsExpanded));
+            }
+        } = false;
+
         public bool HasDummyChild => true;
 
         public ObservableCollection<Table>? Tables { get; set; }
@@ -127,7 +137,8 @@ namespace DataSphere.Models.Database
                 {
                     NameKey = "dbinf_tables_title",
                     Icon = new SymbolIcon() { Symbol = SymbolRegular.BookDatabase20 },
-                    Items = Tables ?? new ObservableCollection<Table>()
+                    Items = Tables ?? new ObservableCollection<Table>(),
+                    Parent = this
                 };
 
                 // Các nhóm khác bạn có thể thêm sau khi có dữ liệu thực:
@@ -135,35 +146,40 @@ namespace DataSphere.Models.Database
                 {
                     NameKey = "dbinf_views_title",
                     Icon = new SymbolIcon() { Symbol = SymbolRegular.ContentView20 },
-                    Items = new ObservableCollection<object>()
+                    Items = new ObservableCollection<object>(),
+                    Parent = this
                 };
 
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_sps_title",
                     Icon = new SymbolIcon() { Symbol = SymbolRegular.Code20 },
-                    Items = new ObservableCollection<object>()
+                    Items = new ObservableCollection<object>(),
+                    Parent = this
                 };
 
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_fncs_title",
                     Icon = new SymbolIcon() { Symbol = SymbolRegular.AppFolder20 },
-                    Items = new ObservableCollection<object>()
+                    Items = new ObservableCollection<object>(),
+                    Parent = this
                 };
 
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_triggers_title",
                     Icon = new SymbolIcon() { Symbol = SymbolRegular.Settings20 },
-                    Items = new ObservableCollection<object>()
+                    Items = new ObservableCollection<object>(),
+                    Parent = this
                 };
 
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_events_title",
                     Icon = new SymbolIcon() { Symbol = SymbolRegular.CalendarLtr20 },
-                    Items = new ObservableCollection<object>()
+                    Items = new ObservableCollection<object>(),
+                    Parent = this
                 };
             }
         }

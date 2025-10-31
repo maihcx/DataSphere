@@ -28,9 +28,11 @@
         </Grid.ColumnDefinitions>
 
         <TreeView
+            Name="treeView"
             Tag="{Binding ViewModel}"
             Grid.Column="0"
-            ItemsSource="{Binding ViewModel.AllDatabases, Mode=OneWay}"
+            ItemsSource="{Binding ViewModel.RootConnections, Mode=OneWay}"
+            helpers:TreeViewHelper.SelectedItem="{Binding ViewModel.SelectedRootConnection, Mode=TwoWay}"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch">
 
@@ -39,13 +41,23 @@
                     <Setter Property="Tag" Value="{Binding DataContext.ViewModel, RelativeSource={RelativeSource AncestorType=TreeView}}" />
                     <EventSetter Event="Expanded" Handler="TreeViewItem_Expanded" />
                     <Style.Triggers>
+                        <!--  ConnectionRoot -->
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource TypeOfConverter}, ConverterParameter={x:Type dbmodels:ConnectionRoot}}" Value="True">
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <controls:ContextMenus ItemsSource="{Binding PlacementTarget.Tag.RootConnectionsContextMenuItems, RelativeSource={RelativeSource Self}}" Parameter="{Binding DataContext, RelativeSource={RelativeSource Self}}" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        </DataTrigger>
                         <!--  DatabaseInfo -->
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource TypeOfConverter}, ConverterParameter={x:Type dbmodels:DatabaseInfo}}" Value="True">
                             <Setter Property="ContextMenu">
                                 <Setter.Value>
-                                    <controls:ContextMenus ItemsSource="{Binding PlacementTarget.Tag.DatabaseContextMenuItems, RelativeSource={RelativeSource Self}}" />
+                                    <controls:ContextMenus ItemsSource="{Binding PlacementTarget.Tag.DatabaseContextMenuItems, RelativeSource={RelativeSource Self}}" Parameter="{Binding DataContext, RelativeSource={RelativeSource Self}}" />
                                 </Setter.Value>
                             </Setter>
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                         </DataTrigger>
                         <!-- DatabaseCategory -->
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource TypeOfConverter}, ConverterParameter={x:Type dbmodels:DatabaseCategory}}" Value="True">
@@ -68,6 +80,14 @@
             </TreeView.ItemContainerStyle>
 
             <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type dbmodels:ConnectionRoot}"
+                              ItemsSource="{Binding Databases}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <ui:SymbolIcon Symbol="PlugConnected20" FontSize="20" Margin="0,0,6,0" />
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+                
                 <HierarchicalDataTemplate DataType="{x:Type dbmodels:DatabaseInfo}" ItemsSource="{Binding Categories}">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <ui:SymbolIcon Symbol="BookDatabase20" FontSize="20" Margin="0,0,6,0" />
@@ -106,10 +126,10 @@
             ResizeDirection="Columns"/>
 
         <Border Grid.Column="2">
-            <!--<ContentControl 
+            <ContentControl 
                 Content="{Binding ViewModel.RightPanelContent}" 
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"/>-->
+                VerticalAlignment="Stretch"/>
         </Border>
     </Grid>
 </UserControl>

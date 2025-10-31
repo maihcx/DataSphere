@@ -69,6 +69,18 @@ namespace DataSphere.Models.Database
             }
         } = new ObservableCollection<object>();
 
+        public object? Parent {
+            get
+            {
+                return field;
+            }
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(Parent));
+            }
+        }
+
         public DatabaseCategory()
         {
             TranslationSource.Instance.PropertyChanged += (s, e) =>

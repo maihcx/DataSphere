@@ -250,16 +250,16 @@
     <value>Mở kết nối</value>
   </data>
   <data name="dbinf_tables_title" xml:space="preserve">
-    <value>Bảng</value>
+    <value>Các bảng</value>
   </data>
   <data name="dbinf_views_title" xml:space="preserve">
-    <value>Xem</value>
+    <value>Trình bày</value>
   </data>
   <data name="dbinf_sps_title" xml:space="preserve">
-    <value>Thủ tục lưu trữ</value>
+    <value>Các thủ tục</value>
   </data>
   <data name="dbinf_fncs_title" xml:space="preserve">
-    <value>Hàm</value>
+    <value>Các hàm</value>
   </data>
   <data name="dbinf_triggers_title" xml:space="preserve">
     <value>Trình kích hoạt</value>
@@ -269,5 +269,23 @@
   </data>
   <data name="ctx_open_title" xml:space="preserve">
     <value>Mở</value>
+  </data>
+  <data name="dbinf_fnc_title" xml:space="preserve">
+    <value>Hàm</value>
+  </data>
+  <data name="dbinf_sp_title" xml:space="preserve">
+    <value>Thủ tục</value>
+  </data>
+  <data name="dbinf_table_title" xml:space="preserve">
+    <value>Bảng</value>
+  </data>
+  <data name="dbinf_trigger_title" xml:space="preserve">
+    <value>Trình kích hoạt</value>
+  </data>
+  <data name="dbinf_view_title" xml:space="preserve">
+    <value>Trình bày</value>
+  </data>
+  <data name="dbinf_event_title" xml:space="preserve">
+    <value>Sự kiện</value>
   </data>
 </root>
