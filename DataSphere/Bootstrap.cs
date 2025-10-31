@@ -121,11 +121,11 @@ namespace DataSphere
                 {
                     try
                     {
-                        GC.Collect(0, GCCollectionMode.Default, blocking: false);
+                        GC.Collect(2, GCCollectionMode.Default, blocking: false);
                     }
                     catch { /* ignore */ }
 
-                    await Task.Delay(TimeSpan.FromSeconds(3), _cts.Token)
+                    await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token)
                               .ConfigureAwait(false);
                 }
             });
