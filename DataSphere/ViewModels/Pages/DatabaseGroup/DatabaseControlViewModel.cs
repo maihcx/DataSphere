@@ -33,6 +33,49 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
                         param.IsExpanded = true;
                     }
                 })
+            },
+            new ContextAction()
+            {
+                SymbolKey = SymbolRegular.Add20.ToString(),
+                NameKey = "ctx_add_title",
+                Children = new ObservableCollection<ContextAction>()
+                {
+                    new ContextAction()
+                    {
+                        SymbolKey = SymbolRegular.BookDatabase20.ToString(),
+                        NameKey = "dbinf_table_title"
+                    },
+                    new ContextAction()
+                    {
+                        SymbolKey = SymbolRegular.ContentView20.ToString(),
+                        NameKey = "dbinf_view_title"
+                    },
+                    new ContextAction()
+                    {
+                        SymbolKey = SymbolRegular.Code20.ToString(),
+                        NameKey = "dbinf_sp_title"
+                    },
+                    new ContextAction()
+                    {
+                        SymbolKey = SymbolRegular.AppFolder20.ToString(),
+                        NameKey = "dbinf_fnc_title"
+                    },
+                    new ContextAction()
+                    {
+                        SymbolKey = SymbolRegular.Settings20.ToString(),
+                        NameKey = "dbinf_trigger_title"
+                    },
+                    new ContextAction()
+                    {
+                        SymbolKey = SymbolRegular.CalendarLtr20.ToString(),
+                        NameKey = "dbinf_event_title"
+                    }
+                }
+            },
+            new ContextAction()
+            {
+                SymbolKey = SymbolRegular.Delete20.ToString(),
+                NameKey = "ctx_delete_title"
             }
         };
 
@@ -114,8 +157,8 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
                 IsExpanded = true,
             };
 
-            RootConnections.Clear();
-            RootConnections.Add(root);
+            RootConnections?.Clear();
+            RootConnections?.Add(root);
 
             _isInitialized = true;
         }

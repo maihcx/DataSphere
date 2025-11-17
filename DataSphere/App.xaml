@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:helpers="clr-namespace:DataSphere.Helpers"
+    xmlns:utils="clr-namespace:DataSphere.Utils"
     DispatcherUnhandledException="OnDispatcherUnhandledException"
     Exit="OnExit"
     Startup="OnStartup">
@@ -26,6 +27,24 @@
             <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <helpers:SubtractDoubleConverter x:Key="SubtractDoubleConverter" />
             <helpers:ThemeToIndexConverter x:Key="ThemeToIndexConverter" />
+
+            <ContextMenu x:Key="DefaultControlContextMenu">
+                <MenuItem Header="{utils:Localization ctx_copy_title}" Command="ApplicationCommands.Copy">
+                    <MenuItem.Icon>
+                        <ui:SymbolIcon Symbol="Copy24" Margin="0 2 0 0" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="{utils:Localization ctx_cut_title}" Command="ApplicationCommands.Cut">
+                    <MenuItem.Icon>
+                        <ui:SymbolIcon Symbol="Cut24" Margin="0 2 0 0" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="{utils:Localization ctx_paste_title}" Command="ApplicationCommands.Paste">
+                    <MenuItem.Icon>
+                        <ui:SymbolIcon Symbol="ClipboardPaste24" Margin="0 2 0 0" />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </ContextMenu>
 
             <ControlTemplate x:Key="StarErrorTemplate">
                 <Grid>

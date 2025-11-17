@@ -26,43 +26,39 @@
             })).Start();
         }
 
-        protected override bool OnPrimaryButtonClick()
+        protected override void OnButtonClick(ContentDialogButton button)
         {
-            Control? _firstInvalidControl = null;
-            bool isValid = true;
-
-            foreach (var child in FindVisualChildren<Wpf.Ui.Controls.TextBox>(this))
+            if (button == ContentDialogButton.Primary)
             {
-                var binding = child.GetBindingExpression(Wpf.Ui.Controls.TextBox.TextProperty);
-                binding?.UpdateSource();
+                Control? _firstInvalidControl = null;
+                bool isValid = true;
 
-                if (binding?.ResolvedSourcePropertyName is string prop)
+                foreach (var child in FindVisualChildren<Wpf.Ui.Controls.TextBox>(this))
                 {
-                    var error = ((IDataErrorInfo)ViewModel)[prop];
-                    if (!string.IsNullOrEmpty(error))
+                    var binding = child.GetBindingExpression(Wpf.Ui.Controls.TextBox.TextProperty);
+                    binding?.UpdateSource();
+
+                    if (binding?.ResolvedSourcePropertyName is string prop)
                     {
-                        _firstInvalidControl ??= child;
-                        isValid = false;
+                        var error = ((IDataErrorInfo)ViewModel)[prop];
+                        if (!string.IsNullOrEmpty(error))
+                        {
+                            _firstInvalidControl ??= child;
+                            isValid = false;
+                        }
                     }
                 }
+
+                if (!isValid && _firstInvalidControl != null)
+                {
+                    _firstInvalidControl.Focus();
+                    return;
+                }
+
+                Result = ViewModel;
             }
 
-            if (!isValid && _firstInvalidControl != null)
-            {
-                _firstInvalidControl.Focus();
-                return false;
-            }
-
-            Result = ViewModel;
-
-            return base.OnPrimaryButtonClick();
-        }
-
-        protected override bool OnCloseButtonClick()
-        {
-            Result = null;
-
-            return base.OnCloseButtonClick();
+            base.OnButtonClick(button);
         }
 
         private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject

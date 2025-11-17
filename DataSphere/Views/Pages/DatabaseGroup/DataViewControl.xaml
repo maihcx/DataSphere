@@ -26,7 +26,6 @@
             VirtualizingPanel.IsVirtualizing="True"
             VirtualizingPanel.VirtualizationMode="Recycling"
             ScrollViewer.CanContentScroll="True"
-            SelectionUnit="CellOrRowHeader"
-            AutoGenerateColumns="True"/>
+            AutoGenerateColumns="True" />
     </Grid>
 </UserControl>

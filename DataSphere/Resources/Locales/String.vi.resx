@@ -288,4 +288,13 @@
   <data name="dbinf_event_title" xml:space="preserve">
     <value>Sự kiện</value>
   </data>
+  <data name="ctx_copy_title" xml:space="preserve">
+    <value>Sao chép</value>
+  </data>
+  <data name="ctx_cut_title" xml:space="preserve">
+    <value>Cắt</value>
+  </data>
+  <data name="ctx_paste_title" xml:space="preserve">
+    <value>Dán</value>
+  </data>
 </root>

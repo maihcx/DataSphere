@@ -88,6 +88,24 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ctx_copy_title.
+        /// </summary>
+        internal static string ctx_copy_title {
+            get {
+                return ResourceManager.GetString("ctx_copy_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ctx_cut_title.
+        /// </summary>
+        internal static string ctx_cut_title {
+            get {
+                return ResourceManager.GetString("ctx_cut_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ctx_delete_title.
         /// </summary>
         internal static string ctx_delete_title {
@@ -138,6 +156,15 @@ namespace DataSphere.Resources.Locales {
         internal static string ctx_opencnn_title {
             get {
                 return ResourceManager.GetString("ctx_opencnn_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ctx_paste_title.
+        /// </summary>
+        internal static string ctx_paste_title {
+            get {
+                return ResourceManager.GetString("ctx_paste_title", resourceCulture);
             }
         }
         

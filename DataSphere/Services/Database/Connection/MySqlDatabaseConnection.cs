@@ -268,6 +268,46 @@ namespace DataSphere.Services.Database.Connection
                             adapter.FillSchema(table, SchemaType.Source);
 
                             adapter.Fill(table);
+
+                            var dateColumns = table.Columns.Cast<DataColumn>()
+                        .Where(c => c.DataType == typeof(MySqlConnector.MySqlDateTime))
+                        .Select(c => new { Column = c, Index = c.Ordinal })
+                        .ToList();
+
+                            if (dateColumns.Any())
+                            {
+                                // Tạo DataTable mới với cấu trúc giống hệt
+                                var newTable = table.Clone();
+
+                                // Đổi kiểu các cột datetime
+                                foreach (var col in dateColumns)
+                                {
+                                    newTable.Columns[col.Index].DataType = typeof(string);
+                                }
+
+                                // Copy dữ liệu và convert
+                                foreach (DataRow oldRow in table.Rows)
+                                {
+                                    var newRow = newTable.NewRow();
+                                    for (int i = 0; i < table.Columns.Count; i++)
+                                    {
+                                        if (oldRow[i] is MySqlConnector.MySqlDateTime mySqlDt)
+                                        {
+                                            newRow[i] = mySqlDt.IsValidDateTime
+                                                ? mySqlDt.GetDateTime().ToString("dd/MM/yyyy hh:mm:ss tt")
+                                                : "0000-00-00 00:00:00";
+                                        }
+                                        else
+                                        {
+                                            newRow[i] = oldRow[i];
+                                        }
+                                    }
+                                    newTable.Rows.Add(newRow);
+                                }
+
+                                table = newTable;
+                            }
+
                         }).ConfigureAwait(false);
                     }
                 }
