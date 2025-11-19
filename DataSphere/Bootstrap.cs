@@ -144,6 +144,7 @@ namespace DataSphere
             }
 
             _cts?.Cancel();
+            Thread.Sleep(200);
             _gcTask?.Dispose();
         }
 
