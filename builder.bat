@@ -31,11 +31,7 @@ echo.
 for %%P in (%PROJECTS%) do (
     echo [%%P] Building...
     
-    dotnet publish .\%%P\%%P.csproj -c Release -r win-x64 --self-contained false ^
-        /p:PublishSingleFile=true ^
-        /p:IncludeAllContentForSelfExtract=true ^
-        /p:DebugType=None ^
-        /p:DebugSymbols=false ^
+    dotnet publish .\%%P\%%P.csproj -c Release -r win-x64 ^
         -o "%OUTPUT_DIR%"
     
     if !errorlevel! neq 0 (
