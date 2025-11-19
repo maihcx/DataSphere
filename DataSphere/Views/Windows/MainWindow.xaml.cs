@@ -117,6 +117,11 @@ namespace DataSphere.Views.Windows
                 this.SizeChanged += MainWindow_SizeChanged;
                 MainWindow_SizeChanged(null, null);
             }
+
+            TranslationSource.Instance.PropertyChanged += (s, e) =>
+            {
+                RootNavigation.UpdateBreadcrumbContents();
+            };
         }
 
         private void SaveWindow()
