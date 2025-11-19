@@ -39,7 +39,7 @@ namespace DataSphere.Services
             WindowHelper.GlobalSnackbar?.Show(ResourceManager.GetString(title, CurrentCulture) ?? string.Empty, ResourceManager.GetString(content ?? string.Empty, CurrentCulture) ?? string.Empty, controlAppearance, icon, timeSpan);
         }
 
-        public static async Task<TResult?> ShowDialogAsync<TDialog, TResult>(object? model = null, ContentPresenter? dialogHost = null) where TDialog : ContentDialog, IDialogWithResult<TResult>
+        public static async Task<TResult?> ShowDialogAsync<TDialog, TResult>(object? model = null, ContentPresenter? dialogHost = null, Func<TDialog, Task>? onShowing = null) where TDialog : ContentDialog, IDialogWithResult<TResult>
         {
             var service = WindowHelper.ContentDialogService
                 ?? throw new InvalidOperationException("ContentDialogService is not initialized.");
@@ -51,10 +51,19 @@ namespace DataSphere.Services
 
             // Nếu dialog có interface IDialogWithModel → truyền model vào
             if (dialog is IDialogWithModel modelDialog)
+            {
+                if (onShowing != null)
+                {
+                    await onShowing(dialog);
+                }
                 modelDialog.SetModel(model);
+            }
             else if (model != null)
             {
-                // Nếu dialog không implement, ta fallback gán thẳng DataContext
+                if (onShowing != null)
+                {
+                    await onShowing(dialog);
+                }
                 dialog.DataContext = model;
             }
 
