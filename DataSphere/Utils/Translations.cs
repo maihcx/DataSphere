@@ -91,9 +91,24 @@
             };
         }
 
-        public static string GetLangValue(string key)
+        public static string GetLangValue(string key, params object[] args)
         {
-            return Resources.Locales.String.ResourceManager.GetString(key, TranslationSource.Instance.CurrentCulture) ?? key;
+            string? raw = Resources.Locales.String.ResourceManager.GetString(
+                key,
+                TranslationSource.Instance.CurrentCulture
+            );
+
+            if (raw == null)
+            {
+                return key;
+            }
+
+            if (args == null || args.Length == 0)
+            {
+                return raw;
+            }
+
+            return string.Format(raw, args);
         }
     }
 }

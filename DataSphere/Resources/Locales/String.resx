@@ -297,4 +297,25 @@
   <data name="ctx_paste_title" xml:space="preserve">
     <value>ctx_paste_title</value>
   </data>
+  <data name="dbinf_database_title" xml:space="preserve">
+    <value>dbinf_database_title</value>
+  </data>
+  <data name="dialog_databaseset_title" xml:space="preserve">
+    <value>dialog_databaseset_title</value>
+  </data>
+  <data name="dalog_db_name_title" xml:space="preserve">
+    <value>dalog_db_name_title</value>
+  </data>
+  <data name="dalog_db_collation_title" xml:space="preserve">
+    <value>dalog_db_collation_title</value>
+  </data>
+  <data name="err_table_exist_params" xml:space="preserve">
+    <value>err_table_exist_params</value>
+  </data>
+  <data name="msgbox_drop_table_params" xml:space="preserve">
+    <value>msgbox_drop_table_params</value>
+  </data>
+  <data name="msgbox_drop_database_params" xml:space="preserve">
+    <value>msgbox_drop_database_params</value>
+  </data>
 </root>

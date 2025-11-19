@@ -297,4 +297,25 @@
   <data name="ctx_paste_title" xml:space="preserve">
     <value>Paste</value>
   </data>
+  <data name="dbinf_database_title" xml:space="preserve">
+    <value>Database</value>
+  </data>
+  <data name="dialog_databaseset_title" xml:space="preserve">
+    <value>Set up the database</value>
+  </data>
+  <data name="dalog_db_name_title" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="dalog_db_collation_title" xml:space="preserve">
+    <value>Collation</value>
+  </data>
+  <data name="err_table_exist_params" xml:space="preserve">
+    <value>Table "{0}" already exists!</value>
+  </data>
+  <data name="msgbox_drop_table_params" xml:space="preserve">
+    <value>Do you want to delete the table "{0}"?</value>
+  </data>
+  <data name="msgbox_drop_database_params" xml:space="preserve">
+    <value>Do you want to delete the database "{0}"?</value>
+  </data>
 </root>

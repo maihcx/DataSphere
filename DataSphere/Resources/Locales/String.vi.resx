@@ -256,7 +256,7 @@
     <value>Trình bày</value>
   </data>
   <data name="dbinf_sps_title" xml:space="preserve">
-    <value>Các thủ tục</value>
+    <value>Thủ tục</value>
   </data>
   <data name="dbinf_fncs_title" xml:space="preserve">
     <value>Các hàm</value>
@@ -296,5 +296,26 @@
   </data>
   <data name="ctx_paste_title" xml:space="preserve">
     <value>Dán</value>
+  </data>
+  <data name="dbinf_database_title" xml:space="preserve">
+    <value>Cơ sở dữ liệu</value>
+  </data>
+  <data name="dialog_databaseset_title" xml:space="preserve">
+    <value>Thiết lập cơ sở dữ liệu</value>
+  </data>
+  <data name="dalog_db_name_title" xml:space="preserve">
+    <value>Tên</value>
+  </data>
+  <data name="dalog_db_collation_title" xml:space="preserve">
+    <value>Đối chiếu</value>
+  </data>
+  <data name="err_table_exist_params" xml:space="preserve">
+    <value>Bảng "{0}" đã tồn tại!</value>
+  </data>
+  <data name="msgbox_drop_table_params" xml:space="preserve">
+    <value>Bạn có muốn xóa bảng "{0}" không?</value>
+  </data>
+  <data name="msgbox_drop_database_params" xml:space="preserve">
+    <value>Bạn có muốn xóa cơ sở dữ liệu "{0}" không?</value>
   </data>
 </root>
