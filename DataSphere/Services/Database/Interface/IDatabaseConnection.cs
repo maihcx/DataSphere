@@ -17,10 +17,22 @@ namespace DataSphere.Services.Database.Interface
 
         Task<Table?> GetTableInfoAsync(string tableName);
 
+        Task<ObservableCollection<CollationModel>?> GetAllCollation();
+
+        Task<CollationModel> GetDefCollation();
+
+        Task<CollationModel> GetCollationInfo(string strCollation, CollationModel? collation = null);
+
         Task<ObservableCollection<DatabaseInfo>?> GetAllDatabasesAsync();
 
         Task<DataTable?> ExecuteQueryAsync(string sql);
 
         Task<DataTable?> ExecuteQueryAsync(ISqlBuilder builder);
+
+        Task<bool> DatabaseExistsAsync(string dbname);
+
+        Task CreateDatabase(DatabaseInfo databaseInfo);
+
+        Task DropDatabase(DatabaseInfo databaseInfo);
     }
 }

@@ -19,7 +19,7 @@ namespace DataSphere.Resources.Locales {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class String {
@@ -241,6 +241,33 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to dalog_db_collation_title.
+        /// </summary>
+        internal static string dalog_db_collation_title {
+            get {
+                return ResourceManager.GetString("dalog_db_collation_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dalog_db_name_title.
+        /// </summary>
+        internal static string dalog_db_name_title {
+            get {
+                return ResourceManager.GetString("dalog_db_name_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dbinf_database_title.
+        /// </summary>
+        internal static string dbinf_database_title {
+            get {
+                return ResourceManager.GetString("dbinf_database_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to dbinf_event_title.
         /// </summary>
         internal static string dbinf_event_title {
@@ -358,6 +385,24 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to dialog_databaseset_title.
+        /// </summary>
+        internal static string dialog_databaseset_title {
+            get {
+                return ResourceManager.GetString("dialog_databaseset_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to err_table_exist_params.
+        /// </summary>
+        internal static string err_table_exist_params {
+            get {
+                return ResourceManager.GetString("err_table_exist_params", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to msgbox_cancel_title.
         /// </summary>
         internal static string msgbox_cancel_title {
@@ -381,6 +426,24 @@ namespace DataSphere.Resources.Locales {
         internal static string msgbox_delete_ques_title {
             get {
                 return ResourceManager.GetString("msgbox_delete_ques_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to msgbox_drop_database_params.
+        /// </summary>
+        internal static string msgbox_drop_database_params {
+            get {
+                return ResourceManager.GetString("msgbox_drop_database_params", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to msgbox_drop_table_params.
+        /// </summary>
+        internal static string msgbox_drop_table_params {
+            get {
+                return ResourceManager.GetString("msgbox_drop_table_params", resourceCulture);
             }
         }
         

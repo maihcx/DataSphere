@@ -2,6 +2,7 @@
 using DataSphere.Services.Database.Interface;
 using MySqlConnector;
 using System.Data;
+using System.Xml.Linq;
 
 namespace DataSphere.Services.Database.Connection
 {
@@ -13,6 +14,8 @@ namespace DataSphere.Services.Database.Connection
         private MySqlConnection? _connection;
 
         private ConnectionModel Model;
+
+        private ObservableCollection<CollationModel>? AllCollation = null;
 
         public MySqlDatabaseConnection(ConnectionModel model)
         {
@@ -35,6 +38,9 @@ namespace DataSphere.Services.Database.Connection
                     $"Server={Model.Host};Port={Model.Port};User ID={Model.User};Password={Model.Password};AllowZeroDateTime=True;";
                 _connection = new MySqlConnection(connStr);
                 await _connection.OpenAsync().ConfigureAwait(false);
+
+                await GetAllCollation();
+
                 return IsConnected;
             }
             catch (Exception ex)
@@ -159,8 +165,10 @@ namespace DataSphere.Services.Database.Connection
             try
             {
                 string countQuery = $"SELECT COUNT(*) FROM `{tableName}`;";
-                using var cmd = new MySqlCommand(countQuery, _connection);
-                table.RowCount = Convert.ToInt64(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
+                using (var cmd = new MySqlCommand(countQuery, _connection))
+                {
+                    table.RowCount = Convert.ToInt64(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
+                }
             }
             catch
             {
@@ -168,6 +176,99 @@ namespace DataSphere.Services.Database.Connection
             }
 
             return table;
+        }
+
+        public async Task<ObservableCollection<CollationModel>?> GetAllCollation()
+        {
+            if (_connection == null || !IsConnected)
+                throw new InvalidOperationException("Database is not connected.");
+
+            if (AllCollation == null)
+            {
+                AllCollation = new();
+                const string query = @"SHOW COLLATION;";
+
+                using (var cmd = new MySqlCommand(query, _connection))
+                {
+                    using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                    while (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        var collation = new CollationModel
+                        {
+                            Collation = reader.IsDBNull("Collation") ? string.Empty : reader.GetString("Collation"),
+                            Charset = reader.IsDBNull("Charset") ? string.Empty : reader.GetString("Charset"),
+                            Compiled = reader.IsDBNull("Compiled") ? string.Empty : reader.GetString("Compiled"),
+                            Default = reader.IsDBNull("Default") ? string.Empty : reader.GetString("Default"),
+                            Id = reader.IsDBNull("Id") ? 0 : reader.GetInt32("Id"),
+                            Sortlen = reader.IsDBNull("Sortlen") ? 0 : reader.GetInt32("Sortlen")
+                        };
+
+                        AllCollation.Add(collation);
+                    }
+                }
+
+                return AllCollation.Count > 0 ? AllCollation : null;
+            }
+
+            return AllCollation;
+        }
+
+        public async Task<CollationModel> GetDefCollation()
+        {
+            if (_connection == null || !IsConnected)
+                throw new InvalidOperationException("Database is not connected.");
+
+            CollationModel? collation = new();
+
+            const string query = @"SHOW VARIABLES LIKE 'collation_server';";
+
+            using (var cmd = new MySqlCommand(query, _connection))
+            {
+                using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                while (await reader.ReadAsync().ConfigureAwait(false))
+                {
+                    collation = new CollationModel { Collation = reader.GetString("Value") };
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(collation.Collation))
+            {
+                collation = await GetCollationInfo(collation.Collation);
+            }
+
+            return collation;
+        }
+
+        public async Task<CollationModel> GetCollationInfo(string strCollation, CollationModel? collation = null)
+        {
+            if (_connection == null || !IsConnected)
+                throw new InvalidOperationException("Database is not connected.");
+
+            collation ??= new CollationModel();
+
+            if (string.IsNullOrWhiteSpace(strCollation))
+            {
+                return collation;
+            }
+
+            if (AllCollation != null && AllCollation.Count > 0)
+            {
+                var cached = AllCollation.FirstOrDefault(x =>
+                    x.Collation.Equals(strCollation, StringComparison.OrdinalIgnoreCase));
+
+                if (cached != null)
+                {
+                    collation.Collation = cached.Collation;
+                    collation.Charset = cached.Charset;
+                    collation.Id = cached.Id;
+                    collation.Default = cached.Default;
+                    collation.Compiled = cached.Compiled;
+                    collation.Sortlen = cached.Sortlen;
+
+                }
+            }
+
+            return collation;
         }
 
         /// <summary>
@@ -228,17 +329,18 @@ namespace DataSphere.Services.Database.Connection
                 FROM INFORMATION_SCHEMA.SCHEMATA
                 ORDER BY SCHEMA_NAME;";
 
-            using var cmd = new MySqlCommand(query, _connection);
-            using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
-
-            while (await reader.ReadAsync().ConfigureAwait(false))
+            using (var cmd = new MySqlCommand(query, _connection))
             {
-                databases.Add(new DatabaseInfo
+                using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                while (await reader.ReadAsync().ConfigureAwait(false))
                 {
-                    Name = reader.GetString("DatabaseName"),
-                    Charset = reader["Charset"].ToString() ?? string.Empty,
-                    Collation = reader["Collation"]?.ToString() ?? string.Empty
-                });
+                    databases.Add(new DatabaseInfo
+                    {
+                        Name = reader.GetString("DatabaseName"),
+                        Charset = reader["Charset"].ToString() ?? string.Empty,
+                        Collation = await GetCollationInfo(reader["Collation"]?.ToString() ?? "")
+                    });
+                }
             }
 
             return databases;
@@ -331,6 +433,40 @@ namespace DataSphere.Services.Database.Connection
 
             string sql = builder.ToSqlString();
             return await ExecuteQueryAsync(sql).ConfigureAwait(false);
+        }
+
+        public async Task<bool> DatabaseExistsAsync(string dbname)
+        {
+            var databases = await GetAllDatabasesAsync();
+            if (databases == null)
+            {
+                return false;
+            }
+            return databases.Any(x =>
+                x.Name.Equals(dbname, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public async Task CreateDatabase(DatabaseInfo databaseInfo)
+        {
+            string query = $@"
+                CREATE DATABASE `{databaseInfo.Name.Trim()}`
+                CHARACTER SET {databaseInfo.Collation.Charset}
+                COLLATE {databaseInfo.Collation.Collation};";
+
+            using (var cmd = new MySqlCommand(query, _connection))
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+
+        public async Task DropDatabase(DatabaseInfo databaseInfo)
+        {
+            string query = $@"DROP DATABASE IF EXISTS `{databaseInfo.Name.Trim()}`;";
+
+            using (var cmd = new MySqlCommand(query, _connection))
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Printing;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -51,9 +52,9 @@ namespace DataSphere.Models.Database
             }
         }
 
-        public string Collation
+        public CollationModel Collation
         {
-            get => field ?? string.Empty;
+            get => field ?? new CollationModel();
             set
             {
                 field = value;
