@@ -8,7 +8,7 @@ using Wpf.Ui.Controls;
 
 namespace DataSphere.Views.Windows
 {
-    public partial class MainWindow : IWindow
+    public partial class MainWindow : INavigationWindow
     {
         public MainWindowViewModel ViewModel { get; }
 
@@ -16,10 +16,8 @@ namespace DataSphere.Views.Windows
 
         public MainWindow(
             MainWindowViewModel viewModel,
-            INavigationService navigationService,
-            IServiceProvider serviceProvider,
-            ISnackbarService snackbarService,
-            IContentDialogService contentDialogService
+            INavigationViewPageProvider navigationViewPageProvider,
+            INavigationService navigationService
         )
         {
             ViewModel = viewModel;
@@ -31,29 +29,34 @@ namespace DataSphere.Views.Windows
             ThemeManagerService.SetApplicationTheme(ThemeManagerService.GetApplicationTheme());
 
             InitializeComponent();
+            SetPageService(navigationViewPageProvider);
 
             navigationService.SetNavigationControl(RootNavigation);
+
+            ContentDialogService contentDialogService = new ContentDialogService();
             contentDialogService.SetDialogHost(RootContentDialog);
+            WindowHelper.ContentDialogService = contentDialogService;
+
+            SnackbarService snackbarService = new SnackbarService();
             snackbarService.SetSnackbarPresenter(GlobalSnackbar);
+            WindowHelper.GlobalSnackbar = snackbarService;
 
             RootNavigation.Navigated += RootNavigation_Navigated;
 
             WindowHelper.OnAutoHideNavChanged += SharedVariable_OnAutoHideNavChanged;
-            WindowHelper.GlobalSnackbar = snackbarService;
-            WindowHelper.ContentDialogService = contentDialogService;
 
             RestoreWindow();
         }
 
         #region INavigationWindow methods
 
-        public INavigationView GetNavigation() => RootNavigation;
-
         public bool Navigate(Type pageType) => RootNavigation.Navigate(pageType);
 
         public void ShowWindow() => Show();
 
         public void CloseWindow() => Close();
+
+        public void SetPageService(INavigationViewPageProvider navigationViewPageProvider) => RootNavigation.SetPageProviderService(navigationViewPageProvider);
 
         #endregion INavigationWindow methods
 
@@ -72,6 +75,11 @@ namespace DataSphere.Views.Windows
         {
             SaveWindow();
             base.OnClosing(e);
+        }
+
+        INavigationView INavigationWindow.GetNavigation()
+        {
+            return RootNavigation;
         }
 
         public void SetServiceProvider(IServiceProvider serviceProvider)

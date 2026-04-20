@@ -21,14 +21,14 @@
     WindowCornerPreference="Round"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
-    <!--<ui:FluentWindow.InputBindings>
+    <ui:FluentWindow.InputBindings>
         <KeyBinding
             Key="F"
             Command="{Binding ElementName=AutoSuggestBox, Path=FocusCommand}"
             Modifiers="Control" />
-    </ui:FluentWindow.InputBindings>-->
+    </ui:FluentWindow.InputBindings>
 
-    <Grid>
+    <Grid x:Name="RootContent" RenderTransformOrigin="0.5,0.5">
         <Grid.RenderTransform>
             <ScaleTransform x:Name="RootScaleTransform" ScaleX="1" ScaleY="1"/>
         </Grid.RenderTransform>
@@ -49,7 +49,7 @@
             BreadcrumbBar="{Binding ElementName=BreadcrumbBar}"
             FooterMenuItemsSource="{Binding ViewModel.FooterMenuItems, Mode=OneWay}"
             FrameMargin="0"
-            IsBackButtonVisible="Visible"
+            IsBackButtonVisible="Auto"
             IsPaneToggleVisible="True"
             MenuItemsSource="{Binding ViewModel.MenuItems, Mode=OneWay}"
             OpenPaneLength="250"
@@ -62,7 +62,7 @@
                     <ui:BreadcrumbBar x:Name="BreadcrumbBarHolder" Margin="10" Visibility="Collapsed"/>
                 </StackPanel>
             </ui:NavigationView.Header>
-            <!--<ui:NavigationView.AutoSuggestBox>
+            <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox x:Name="AutoSuggestBox" PlaceholderText="Search">
                     <ui:AutoSuggestBox.Icon>
                         <ui:IconSourceElement>
@@ -70,7 +70,7 @@
                         </ui:IconSourceElement>
                     </ui:AutoSuggestBox.Icon>
                 </ui:AutoSuggestBox>
-            </ui:NavigationView.AutoSuggestBox>-->
+            </ui:NavigationView.AutoSuggestBox>
             <ui:NavigationView.ContentOverlay>
                 <Grid>
                     <ui:SnackbarPresenter x:Name="SnackbarPresenter" />

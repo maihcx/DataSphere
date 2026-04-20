@@ -59,7 +59,7 @@
                 </Grid>
             </ControlTemplate>
 
-            <Style TargetType="ui:TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Style TargetType="ui:TextBox" BasedOn="{StaticResource DefaultUiTextBoxStyle}">
                 <Setter Property="Validation.ErrorTemplate" Value="{StaticResource StarErrorTemplate}" />
             </Style>
         </ResourceDictionary>

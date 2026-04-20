@@ -39,17 +39,25 @@ namespace DataSphere
             })
             .ConfigureServices((context, services) =>
             {
-                _ = services.AddNavigationViewPageProvider();
+                services.AddNavigationViewPageProvider();
 
                 // App Host
-                _ = services.AddHostedService<ApplicationHostService>();
+                services.AddHostedService<ApplicationHostService>();
 
-                // Main window container with navigation
-                _ = services.AddSingleton<IWindow, MainWindow>();
-                _ = services.AddSingleton<MainWindowViewModel>();
-                _ = services.AddSingleton<INavigationService, NavigationService>();
-                _ = services.AddSingleton<ISnackbarService, SnackbarService>();
-                _ = services.AddSingleton<IContentDialogService, ContentDialogService>();
+                // Theme manipulation
+                services.AddSingleton<IThemeService, ThemeService>();
+
+                // TaskBar manipulation
+                services.AddSingleton<ITaskBarService, TaskBarService>();
+
+                // Service containing navigation, same as INavigationWindow... but without window
+                services.AddSingleton<INavigationService, NavigationService>();
+
+                // Main window with navigation
+                services.AddSingleton<INavigationWindow, MainWindow>();
+                services.AddSingleton<MainWindowViewModel>();
+                services.AddSingleton<ISnackbarService, SnackbarService>();
+                services.AddSingleton<IContentDialogService, ContentDialogService>();
 
                 // All other pages and view models
                 NavigationHandle.SetupPageViewModelPairs(services, "DataSphere.Views.Pages", "DataSphere.ViewModels.Pages");

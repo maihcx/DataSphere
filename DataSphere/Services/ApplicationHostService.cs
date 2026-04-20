@@ -3,6 +3,7 @@ using DataSphere.Views.Pages;
 using DataSphere.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Windows.Navigation;
 using Wpf.Ui;
 
 namespace DataSphere.Services
@@ -13,6 +14,8 @@ namespace DataSphere.Services
     public class ApplicationHostService : IHostedService
     {
         private readonly IServiceProvider _serviceProvider;
+
+        private INavigationWindow _navigationWindow;
 
         public ApplicationHostService(IServiceProvider serviceProvider)
         {
@@ -41,18 +44,21 @@ namespace DataSphere.Services
         /// <summary>
         /// Creates main window during activation.
         /// </summary>
-        private Task HandleActivationAsync()
+        private async Task HandleActivationAsync()
         {
-            if (Application.Current.Windows.OfType<MainWindow>().Any())
+            if (!Application.Current.Windows.OfType<MainWindow>().Any())
             {
-                return Task.CompletedTask;
+                _navigationWindow = (
+                    _serviceProvider.GetService(typeof(INavigationWindow)) as INavigationWindow
+                )!;
+                WindowHelper.BringToFront(App.Current.MainWindow);
+                _navigationWindow!.ShowWindow();
+
+                _navigationWindow.Navigate(typeof(Views.Pages.DashboardPage));
             }
+            else
 
-            IWindow mainWindow = _serviceProvider.GetRequiredService<IWindow>();
-            mainWindow.Loaded += OnMainWindowLoaded;
-            mainWindow?.Show();
-
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
         private void OnMainWindowLoaded(object sender, RoutedEventArgs e)
