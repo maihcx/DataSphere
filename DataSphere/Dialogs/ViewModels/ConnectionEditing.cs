@@ -1,15 +1,30 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using static DataSphere.Resources.ThemeConfigs;
 
 namespace DataSphere.Dialogs.ViewModels
 {
-    public partial class ConnectionEditing : ObservableObject, IDataErrorInfo
+    public partial class ConnectionEditing : ObservableObject, INotifyDataErrorInfo
     {
         private bool _isInitialized = false;
+
+        private readonly TextBoxValidation textBoxValidation = new();
+
+        public bool HasErrors => textBoxValidation.HasErrors;
+
+        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+
+        public IEnumerable GetErrors(string? propertyName)
+        {
+            if (propertyName == null)
+                return Enumerable.Empty<string>();
+
+            return textBoxValidation.GetErrors(propertyName);
+        }
 
         public ConnectionEditing()
         {
@@ -20,27 +35,60 @@ namespace DataSphere.Dialogs.ViewModels
         private void InitializeViewModel()
         {
             _isInitialized = true;
+
+            textBoxValidation.AddValidation(nameof(ConnectionName), () => ConnectionName, TextBoxValidationType.NotEmpty);
+            textBoxValidation.AddValidation(nameof(ConnectionHost), () => ConnectionHost, TextBoxValidationType.NotEmpty);
+            textBoxValidation.AddValidation(nameof(ConnectionUser), () => ConnectionUser, TextBoxValidationType.NotEmpty);
+
+            textBoxValidation.OnErrorsChanged += (prop) =>
+            {
+                ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(prop));
+
+                UpdateAllowSubmit();
+            };
+
+            textBoxValidation.ApplyValidation();
+        }
+
+        private void UpdateAllowSubmit()
+        {
+            IsAllowSubmit = !HasErrors;
         }
 
         [ObservableProperty]
-        private bool _isAllowSubmit = false;
-
-        private void MakeAllowSubmit()
-        {
-            IsAllowSubmit = !string.IsNullOrEmpty(ConnectionName);
-        }
+        private bool _isAllowSubmit;
 
         [ObservableProperty]
         private string _connectionName = string.Empty;
 
+        partial void OnConnectionNameChanged(string value)
+        {
+            textBoxValidation.ApplyValidation(nameof(ConnectionName));
+        }
+
         [ObservableProperty]
         private string _connectionHost = "127.0.0.1";
+
+        partial void OnConnectionHostChanged(string value)
+        {
+            textBoxValidation.ApplyValidation(nameof(ConnectionHost));
+        }
 
         [ObservableProperty]
         private int _connectionPort = 3306;
 
+        partial void OnConnectionPortChanged(int value)
+        {
+            textBoxValidation.ApplyValidation(nameof(ConnectionPort));
+        }
+
         [ObservableProperty]
         private string _connectionUser = "root";
+
+        partial void OnConnectionUserChanged(string value)
+        {
+            textBoxValidation.ApplyValidation(nameof(ConnectionUser));
+        }
 
         [ObservableProperty]
         private string _connectionPassword = string.Empty;
@@ -53,36 +101,6 @@ namespace DataSphere.Dialogs.ViewModels
 
         [ObservableProperty]
         private DatabaseTypes _databaseSelectedType = new DatabaseTypes() { Value = DatabaseType.MySql };
-
-        public string Error => string.Empty;
-
-        partial void OnConnectionNameChanged(string? oldValue, string newValue)
-        {
-            MakeAllowSubmit();
-        }
-
-        public string this[string columnName]
-        {
-            get
-            {
-                switch (columnName)
-                {
-                    case nameof(ConnectionName):
-                        if (string.IsNullOrWhiteSpace(ConnectionName))
-                            return "Connection name is required";
-                        break;
-                    case nameof(ConnectionHost):
-                        if (string.IsNullOrWhiteSpace(ConnectionHost))
-                            return "Connection Host name is required";
-                        break;
-                    case nameof(ConnectionUser):
-                        if (string.IsNullOrWhiteSpace(ConnectionUser))
-                            return "Connection User name is required";
-                        break;
-                }
-                return string.Empty;
-            }
-        }
 
         public ConnectionModel ToConnectionModel()
         {
