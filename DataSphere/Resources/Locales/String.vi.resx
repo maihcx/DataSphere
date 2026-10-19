@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -315,7 +315,40 @@
   <data name="msgbox_drop_table_params" xml:space="preserve">
     <value>Bạn có muốn xóa bảng "{0}" không?</value>
   </data>
-  <data name="msgbox_drop_database_params" xml:space="preserve">
-    <value>Bạn có muốn xóa cơ sở dữ liệu "{0}" không?</value>
+  <data name="page_home_sections_title" xml:space="preserve">
+    <value>Các Phân Hệ Chính</value>
+  </data>
+  <data name="page_home_card_database_desc" xml:space="preserve">
+    <value>Quản lý phiên kết nối, cấu trúc bảng và thực thi truy vấn dữ liệu SQL</value>
+  </data>
+  <data name="page_home_card_settings_desc" xml:space="preserve">
+    <value>Tùy biến chủ đề hiển thị, ngôn ngữ giao diện và thông tin ứng dụng</value>
+  </data>
+  <data name="page_home_banner_desc" xml:space="preserve">
+    <value>Hệ thống quản lý cơ sở dữ liệu hiện đại, hỗ trợ đa tab, đa cửa sổ hiệu năng cao</value>
+  </data>
+  <data name="page_db_subtitle" xml:space="preserve">
+    <value>Quản lý các kết nối máy chủ MySQL và MariaDB</value>
+  </data>
+  <data name="page_db_conn_list_title" xml:space="preserve">
+    <value>Danh Sách Phiên Kết Nối</value>
+  </data>
+  <data name="page_db_conn_list_desc" xml:space="preserve">
+    <value>Chọn kết nối hoặc cấu hình thông số truy cập máy chủ cơ sở dữ liệu.</value>
+  </data>
+  <data name="page_db_ready_title" xml:space="preserve">
+    <value>Sẵn sàng kết nối cơ sở dữ liệu</value>
+  </data>
+  <data name="page_db_ready_desc" xml:space="preserve">
+    <value>Sử dụng MySqlConnector hiệu năng cao để kết nối máy chủ MySQL/MariaDB an toàn</value>
+  </data>
+  <data name="theme_light" xml:space="preserve">
+    <value>Sáng</value>
+  </data>
+  <data name="theme_dark" xml:space="preserve">
+    <value>Tối</value>
+  </data>
+  <data name="theme_default" xml:space="preserve">
+    <value>Mặc định hệ thống</value>
   </data>
 </root>

@@ -1,21 +1,33 @@
-﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using DataSphere.Utils;
 
 namespace DataSphere.Models.Database
 {
+    /// <summary>
+    /// Represents a categorical group node in the database explorer tree (e.g. Tables, Views, Functions).
+    /// </summary>
     public class DatabaseCategory : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        /// <summary>
+        /// Raises the PropertyChanged event.
+        /// </summary>
+        /// <param name="propertyName">The name of the changed property.</param>
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        /// <summary>
+        /// Gets or sets the translation dictionary key for the category name.
+        /// </summary>
         public string NameKey
         {
             get
@@ -30,6 +42,9 @@ namespace DataSphere.Models.Database
             }
         } = string.Empty;
 
+        /// <summary>
+        /// Gets the localized or raw display name of the category.
+        /// </summary>
         public string? Name
         {
             get
@@ -43,19 +58,22 @@ namespace DataSphere.Models.Database
             }
         }
 
-        public SymbolIcon Icon
+        /// <summary>
+        /// Gets or sets the Segoe Fluent Icon glyph representing this category.
+        /// </summary>
+        public string IconGlyph
         {
-            get
-            {
-                return field;
-            }
+            get => field;
             set
             {
                 field = value;
-                OnPropertyChanged(nameof(Icon));
+                OnPropertyChanged(nameof(IconGlyph));
             }
-        } = new SymbolIcon() { Symbol = SymbolRegular.QuestionCircle16 };
+        } = "\uE897";
 
+        /// <summary>
+        /// Gets or sets child database object items nested under this category.
+        /// </summary>
         public IEnumerable Items 
         {
             get
@@ -69,6 +87,9 @@ namespace DataSphere.Models.Database
             }
         } = new ObservableCollection<object>();
 
+        /// <summary>
+        /// Gets or sets the parent node in the object explorer tree.
+        /// </summary>
         public object? Parent {
             get
             {
@@ -81,6 +102,9 @@ namespace DataSphere.Models.Database
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseCategory"/> class.
+        /// </summary>
         public DatabaseCategory()
         {
             TranslationSource.Instance.PropertyChanged += (s, e) =>

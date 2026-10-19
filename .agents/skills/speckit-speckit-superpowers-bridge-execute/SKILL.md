@@ -1,0 +1,1 @@
+../../../.specify/extensions/speckit-superpowers-bridge/.specify-dev/agent-commands/agy/speckit-speckit-superpowers-bridge-execute/SKILL.md

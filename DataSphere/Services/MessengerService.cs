@@ -1,79 +1,58 @@
-﻿using CommunityToolkit.Mvvm.Messaging.Messages;
-using DataSphere.Controls;
-using DataSphere.Dialogs;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace DataSphere.Services
 {
-    public interface IDialogWithResult<TResult>
+    /// <summary>
+    /// Service facilitating decoupled asynchronous message passing and notifications between ViewModels and UI components.
+    /// </summary>
+    public class MessengerService
     {
-        TResult? Result { get; }
-    }
+        private readonly IMessenger _messenger;
 
-    public interface IDialogWithModel
-    {
-        void SetModel(object? model);
-    }
-
-    public static class MessengerService
-    {
-
-        public static void ShowSnackbar(string title, string content, ControlAppearance controlAppearance)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessengerService"/> class using the default WeakReferenceMessenger.
+        /// </summary>
+        public MessengerService() : this(WeakReferenceMessenger.Default)
         {
-            ShowSnackbar(title, content, controlAppearance, null, default);
         }
 
-        public static void ShowSnackbar(string title, string content, ControlAppearance controlAppearance, TimeSpan timeSpan = default)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessengerService"/> class with a custom IMessenger instance.
+        /// </summary>
+        /// <param name="messenger">The messenger instance to delegate communication through.</param>
+        public MessengerService(IMessenger messenger)
         {
-            ShowSnackbar(title, content, controlAppearance, null, timeSpan);
+            _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         }
 
-        public static void ShowSnackbar(string title, string content, ControlAppearance controlAppearance, IconElement? icon = null)
+        /// <summary>
+        /// Sends a message of type <typeparamref name="TMessage"/> to all registered recipients.
+        /// </summary>
+        /// <typeparam name="TMessage">The type of the message payload.</typeparam>
+        /// <param name="message">The message instance to dispatch.</param>
+        public void Send<TMessage>(TMessage message) where TMessage : class
         {
-            ShowSnackbar(title, content, controlAppearance, icon, default);
+            _messenger.Send(message);
         }
 
-        public static void ShowSnackbar(string title, string? content, ControlAppearance controlAppearance, IconElement? icon = null, TimeSpan timeSpan = default)
+        /// <summary>
+        /// Registers a recipient to receive messages of type <typeparamref name="TMessage"/>.
+        /// </summary>
+        /// <typeparam name="TMessage">The type of the message to listen for.</typeparam>
+        /// <param name="recipient">The object receiving the messages.</param>
+        /// <param name="handler">The callback action executed when a message is received.</param>
+        public void Register<TMessage>(object recipient, MessageHandler<object, TMessage> handler) where TMessage : class
         {
-            var ResourceManager = Resources.Locales.String.ResourceManager;
-            var CurrentCulture = TranslationSource.Instance.CurrentCulture;
-            WindowHelper.GlobalSnackbar?.Show(ResourceManager.GetString(title, CurrentCulture) ?? string.Empty, ResourceManager.GetString(content ?? string.Empty, CurrentCulture) ?? string.Empty, controlAppearance, icon, timeSpan);
+            _messenger.Register(recipient, handler);
         }
 
-        public static async Task<TResult?> ShowDialogAsync<TDialog, TResult>(object? model = null, ContentPresenter? dialogHost = null, Func<TDialog, Task>? onShowing = null) where TDialog : ContentDialog, IDialogWithResult<TResult>
+        /// <summary>
+        /// Unregisters a recipient from all received message channels.
+        /// </summary>
+        /// <param name="recipient">The recipient to unregister.</param>
+        public void Unregister(object recipient)
         {
-            var service = WindowHelper.ContentDialogService
-                ?? throw new InvalidOperationException("ContentDialogService is not initialized.");
-
-            dialogHost ??= service.GetDialogHost();
-
-            if (Activator.CreateInstance(typeof(TDialog), dialogHost) is not TDialog dialog)
-                throw new InvalidOperationException($"Cannot create instance of type {typeof(TDialog).FullName}.");
-
-            // Nếu dialog có interface IDialogWithModel → truyền model vào
-            if (dialog is IDialogWithModel modelDialog)
-            {
-                if (onShowing != null)
-                {
-                    await onShowing(dialog);
-                }
-                modelDialog.SetModel(model);
-            }
-            else if (model != null)
-            {
-                if (onShowing != null)
-                {
-                    await onShowing(dialog);
-                }
-                dialog.DataContext = model;
-            }
-
-            await dialog.ShowAsync();
-            return dialog.Result;
+            _messenger.UnregisterAll(recipient);
         }
-    }
-
-    public class GenericMessage<T> : ValueChangedMessage<T>
-    {
-        public GenericMessage(T value) : base(value) { }
     }
 }

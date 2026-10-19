@@ -1,4 +1,4 @@
-﻿global using CommunityToolkit.Mvvm.ComponentModel;
+global using CommunityToolkit.Mvvm.ComponentModel;
 global using CommunityToolkit.Mvvm.Input;
 
 global using System;
@@ -18,35 +18,21 @@ global using System.ComponentModel;
 global using System.Collections.ObjectModel;
 global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
-global using System.Windows;
-global using System.Windows.Input;
-global using System.Windows.Threading;
-global using System.Windows.Controls.Primitives;
-global using System.Windows.Media;
-global using System.Windows.Media.Animation;
-global using System.Windows.Data;
-global using System.Windows.Markup;
-global using System.Windows.Controls;
-global using System.Windows.Interop;
-
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Win32;
 
-global using Wpf.Ui;
-global using Wpf.Ui.Appearance;
-global using Wpf.Ui.Controls;
-global using Wpf.Ui.DependencyInjection;
-global using Wpf.Ui.Abstractions;
-global using Wpf.Ui.Abstractions.Controls;
-global using ThemeType = Wpf.Ui.Appearance.ApplicationTheme;
-global using IRelayCommand = Wpf.Ui.Input.IRelayCommand;
-global using Watcher = Wpf.Ui.Appearance.SystemThemeWatcher;
+global using Microsoft.UI.Xaml;
+global using Microsoft.UI.Xaml.Controls;
+global using Microsoft.UI.Xaml.Controls.Primitives;
+global using Microsoft.UI.Xaml.Data;
+global using Microsoft.UI.Xaml.Input;
+global using Microsoft.UI.Xaml.Media;
+global using Microsoft.UI.Xaml.Navigation;
+global using WinUIEx;
 
 
-global using DataSphere.ControlsLookup;
-global using DataSphere.Helpers;
 global using DataSphere.Models;
 global using DataSphere.Properties;
 global using DataSphere.Resources;
@@ -60,4 +46,3 @@ global using DataSphere.ViewModels.Windows;
 global using DataSphere.Views;
 global using DataSphere.Views.Pages;
 global using DataSphere.Views.Windows;
-global using DataSphere.Controls;

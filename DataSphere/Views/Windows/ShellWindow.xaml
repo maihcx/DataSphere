@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<winex:WindowEx
+    x:Class="DataSphere.Views.Windows.ShellWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:winex="using:WinUIEx"
+    xmlns:models="using:DataSphere.Models"
+    xmlns:vm="using:DataSphere.ViewModels.Windows"
+    Title="DataSphere"
+    Width="1280"
+    Height="800"
+    MinWidth="800"
+    MinHeight="500">
+
+    <Grid x:Name="WindowRoot" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Chrome Browser-style TabView Strip in TitleBar -->
+        <TabView
+            x:Name="ShellTabView"
+            Grid.Row="0"
+            CanDragTabs="True"
+            CanReorderTabs="True"
+            IsAddTabButtonVisible="False"
+            TabItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
+            SelectedItem="{x:Bind ViewModel.SelectedTab, Mode=TwoWay}"
+            TabCloseRequested="OnTabCloseRequested"
+            TabDragStarting="OnTabDragStarting"
+            TabDroppedOutside="OnTabDroppedOutside"
+            TabStripDragOver="OnTabStripDragOver"
+            TabStripDrop="OnTabStripDrop">
+
+            <TabView.TabStripHeader>
+                <Grid x:Name="CustomDragRegionLeft" Background="Transparent" Width="8" />
+            </TabView.TabStripHeader>
+
+            <TabView.TabStripFooter>
+                <Grid x:Name="CustomDragRegion" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="188" />
+            </TabView.TabStripFooter>
+
+            <TabView.TabItemTemplate>
+                <DataTemplate x:DataType="models:TabItemModel">
+                    <TabViewItem
+                        Header="{x:Bind Title, Mode=OneWay}"
+                        IsClosable="{x:Bind IsClosable, Mode=OneWay}">
+                        <TabViewItem.IconSource>
+                            <FontIconSource Glyph="{x:Bind IconGlyph, Mode=OneWay}" />
+                        </TabViewItem.IconSource>
+                    </TabViewItem>
+                </DataTemplate>
+            </TabView.TabItemTemplate>
+        </TabView>
+
+        <!-- Main Viewport Content Presenter -->
+        <ContentPresenter
+            Grid.Row="1"
+            Content="{x:Bind ViewModel.SelectedTab.Content, Mode=OneWay}"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch" />
+    </Grid>
+</winex:WindowEx>

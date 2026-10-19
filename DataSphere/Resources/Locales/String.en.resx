@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -317,5 +317,41 @@
   </data>
   <data name="msgbox_drop_database_params" xml:space="preserve">
     <value>Do you want to delete the database "{0}"?</value>
+  </data>
+  <data name="page_home_sections_title" xml:space="preserve">
+    <value>Main Modules</value>
+  </data>
+  <data name="page_home_card_database_desc" xml:space="preserve">
+    <value>Manage connection sessions, table schemas, and SQL queries</value>
+  </data>
+  <data name="page_home_card_settings_desc" xml:space="preserve">
+    <value>Customize display themes, UI language, and application information</value>
+  </data>
+  <data name="page_home_banner_desc" xml:space="preserve">
+    <value>Modern database management system featuring high-performance multi-tab and multi-window navigation</value>
+  </data>
+  <data name="page_db_subtitle" xml:space="preserve">
+    <value>Manage MySQL and MariaDB server connections</value>
+  </data>
+  <data name="page_db_conn_list_title" xml:space="preserve">
+    <value>Connection Sessions</value>
+  </data>
+  <data name="page_db_conn_list_desc" xml:space="preserve">
+    <value>Select a connection or configure database server access settings.</value>
+  </data>
+  <data name="page_db_ready_title" xml:space="preserve">
+    <value>Ready for Database Connections</value>
+  </data>
+  <data name="page_db_ready_desc" xml:space="preserve">
+    <value>Use high-performance MySqlConnector to securely connect to MySQL/MariaDB servers</value>
+  </data>
+  <data name="theme_light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="theme_dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="theme_default" xml:space="preserve">
+    <value>System Default</value>
   </data>
 </root>

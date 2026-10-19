@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Printing;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace DataSphere.Models.Database
 {
@@ -13,8 +10,14 @@ namespace DataSphere.Models.Database
     /// </summary>
     public class DatabaseInfo : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseInfo"/> class.
+        /// </summary>
         public DatabaseInfo()
         {
             Tables = new ObservableCollection<Table>()
@@ -32,6 +35,9 @@ namespace DataSphere.Models.Database
             };
         }
 
+        /// <summary>
+        /// Gets or sets the name of the database schema.
+        /// </summary>
         public string Name
         {
             get => field ?? string.Empty;
@@ -42,6 +48,9 @@ namespace DataSphere.Models.Database
             }
         }
 
+        /// <summary>
+        /// Gets or sets the default character set of the database.
+        /// </summary>
         public string Charset
         {
             get => field ?? string.Empty;
@@ -52,6 +61,9 @@ namespace DataSphere.Models.Database
             }
         }
 
+        /// <summary>
+        /// Gets or sets the default collation model of the database.
+        /// </summary>
         public CollationModel Collation
         {
             get => field ?? new CollationModel();
@@ -62,6 +74,9 @@ namespace DataSphere.Models.Database
             }
         }
 
+        /// <summary>
+        /// Gets or sets the estimated total storage size in bytes.
+        /// </summary>
         public long? SizeInBytes
         {
             get => field;
@@ -72,6 +87,9 @@ namespace DataSphere.Models.Database
             }
         }
 
+        /// <summary>
+        /// Gets or sets the count of tables contained in this schema.
+        /// </summary>
         public int TableCount
         {
             get => field;
@@ -82,6 +100,9 @@ namespace DataSphere.Models.Database
             }
         } = 0;
 
+        /// <summary>
+        /// Gets or sets schema-level comments or notes.
+        /// </summary>
         public string? Comment
         {
             get => field;
@@ -92,6 +113,9 @@ namespace DataSphere.Models.Database
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether child table definitions have been loaded from the server.
+        /// </summary>
         public bool IsTablesLoaded
         {
             get => field;
@@ -102,6 +126,9 @@ namespace DataSphere.Models.Database
             }
         } = false;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this node is expanded in the explorer tree.
+        /// </summary>
         public bool IsExpanded
         {
             get => field;
@@ -112,10 +139,19 @@ namespace DataSphere.Models.Database
             }
         } = false;
 
+        /// <summary>
+        /// Gets a value indicating whether a dummy child placeholder exists for lazy loading.
+        /// </summary>
         public bool HasDummyChild => true;
 
+        /// <summary>
+        /// Gets or sets the collection of tables loaded under this database.
+        /// </summary>
         public ObservableCollection<Table>? Tables { get; set; }
 
+        /// <summary>
+        /// Returns a display summary string for this database.
+        /// </summary>
         public override string ToString()
         {
             string sizeInfo = SizeInBytes.HasValue
@@ -125,11 +161,18 @@ namespace DataSphere.Models.Database
             return $"{Name} ({TableCount} tables){sizeInfo}";
         }
 
+        /// <summary>
+        /// Raises the PropertyChanged event.
+        /// </summary>
+        /// <param name="propertyName">The name of the changed property.</param>
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        /// <summary>
+        /// Gets child categories for tables, views, procedures, functions, triggers, and events.
+        /// </summary>
         public IEnumerable<DatabaseCategory> Categories
         {
             get
@@ -137,16 +180,16 @@ namespace DataSphere.Models.Database
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_tables_title",
-                    Icon = new SymbolIcon() { Symbol = SymbolRegular.BookDatabase20 },
+                    IconGlyph = "\uE82D",
                     Items = Tables ?? new ObservableCollection<Table>(),
                     Parent = this
                 };
 
-                // Các nhóm khác bạn có thể thêm sau khi có dữ liệu thực:
+                // Additional categories:
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_views_title",
-                    Icon = new SymbolIcon() { Symbol = SymbolRegular.ContentView20 },
+                    IconGlyph = "\uE8B9",
                     Items = new ObservableCollection<object>(),
                     Parent = this
                 };
@@ -154,7 +197,7 @@ namespace DataSphere.Models.Database
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_sps_title",
-                    Icon = new SymbolIcon() { Symbol = SymbolRegular.Code20 },
+                    IconGlyph = "\uE943",
                     Items = new ObservableCollection<object>(),
                     Parent = this
                 };
@@ -162,7 +205,7 @@ namespace DataSphere.Models.Database
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_fncs_title",
-                    Icon = new SymbolIcon() { Symbol = SymbolRegular.AppFolder20 },
+                    IconGlyph = "\uE8B7",
                     Items = new ObservableCollection<object>(),
                     Parent = this
                 };
@@ -170,7 +213,7 @@ namespace DataSphere.Models.Database
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_triggers_title",
-                    Icon = new SymbolIcon() { Symbol = SymbolRegular.Settings20 },
+                    IconGlyph = "\uE713",
                     Items = new ObservableCollection<object>(),
                     Parent = this
                 };
@@ -178,7 +221,7 @@ namespace DataSphere.Models.Database
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_events_title",
-                    Icon = new SymbolIcon() { Symbol = SymbolRegular.CalendarLtr20 },
+                    IconGlyph = "\uE787",
                     Items = new ObservableCollection<object>(),
                     Parent = this
                 };

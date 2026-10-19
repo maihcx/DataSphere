@@ -1,0 +1,1 @@
+../../../.specify/extensions/assess/.specify-dev/agent-commands/agy/speckit-assess-decide/SKILL.md

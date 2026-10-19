@@ -1,69 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace DataSphere
 {
+    /// <summary>
+    /// Coordinates application pre-startup initialization, per-process IPC communication, and background memory maintenance.
+    /// </summary>
     public static class Bootstrap
     {
         private static Thread? _pipeThread;
-
-        private static Mutex? _mutex;
-
-        private static string UniqueAppId = @"Global\DataSphere.SingleInstance.App";
-
-        private static bool _isPrimaryInstance = false;
-
-        private static SplashScreen? SplashScreen;
-
+        private static readonly string UniqueProcessPipeName = $@"DataSphere.Process.{Process.GetCurrentProcess().Id}";
         private static Task? _gcTask;
+        private static readonly CancellationTokenSource _cts = new();
 
-        private static CancellationTokenSource _cts = new();
-
+        /// <summary>
+        /// Executes initialization logic before the main application UI starts, configuring per-process IPC listeners without single-instance blocking.
+        /// </summary>
         public static void OnBeforeStartup()
         {
-            #region Mutex checker
-            try
-            {
-                _mutex = CreateMutexWithSecurity(UniqueAppId);
-                _isPrimaryInstance = _mutex.WaitOne(0, false);
-            }
-            catch
-            {
-                _mutex = new Mutex(true, UniqueAppId, out _isPrimaryInstance);
-            }
+            // T029 & T030: Multi-instance concurrency enabled.
+            // Each process listens on its own unique per-process pipe for external commands without blocking or killing secondary processes.
+            StartProcessIpcServer();
+        }
 
-            if (!_isPrimaryInstance)
-            {
-                try
-                {
-                    using var client = new NamedPipeClientStream(".", UniqueAppId, PipeDirection.Out);
-                    client.Connect(1000);
-                    using var writer = new StreamWriter(client) { AutoFlush = true };
-                    writer.WriteLine("SHOW");
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Failed to connect to pipe: {ex.Message}");
-                }
-
-                Environment.Exit(0);
-                return;
-            }
-            #endregion
-
-            #region SplashScreen Show
-            SplashScreen = new SplashScreen("Assets/wpfui-icon-256.png");
-            SplashScreen.Show(true, true);
-            #endregion
-
-            #region Single App Reader
+        private static void StartProcessIpcServer()
+        {
             _pipeThread = new Thread(() =>
             {
-                while (true)
+                while (!_cts.IsCancellationRequested)
                 {
                     try
                     {
@@ -75,7 +44,7 @@ namespace DataSphere
                         ));
 
                         using var server = NamedPipeServerStreamAcl.Create(
-                            UniqueAppId,
+                            UniqueProcessPipeName,
                             PipeDirection.In,
                             1,
                             PipeTransmissionMode.Byte,
@@ -92,27 +61,28 @@ namespace DataSphere
 
                         if (line == "SHOW")
                         {
-                            App.Current.Dispatcher.Invoke(() =>
-                            {
-                                var mainWindow = Application.Current?.MainWindow;
-                                if (mainWindow != null)
-                                {
-                                    WindowHelper.FocusMainWindow();
-                                }
-                            });
+                            // In WinUI 3, bring the primary window to front if requested
+                            Debug.WriteLine($"[DataSphere IPC] SHOW signal received for process {Process.GetCurrentProcess().Id}");
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        Thread.Sleep(100);
+                        Debug.WriteLine($"[DataSphere IPC] Pipe error: {ex.Message}");
+                        Thread.Sleep(200);
                     }
                 }
-            });
-            _pipeThread.IsBackground = true;
+            })
+            {
+                IsBackground = true,
+                Name = "DataSphere_IPC_Thread"
+            };
+
             _pipeThread.Start();
-            #endregion
         }
 
+        /// <summary>
+        /// Starts periodic background garbage collection optimization tasks during runtime.
+        /// </summary>
         public static void OnStartup()
         {
             _gcTask = Task.Run(async () =>
@@ -123,56 +93,30 @@ namespace DataSphere
                     {
                         GC.Collect(2, GCCollectionMode.Default, blocking: false);
                     }
-                    catch { /* ignore */ }
+                    catch
+                    {
+                        // Ignore background GC exceptions
+                    }
 
-                    await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token)
-                              .ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token).ConfigureAwait(false);
                 }
             });
         }
 
+        /// <summary>
+        /// Cleans up IPC threads and background workers upon application exit.
+        /// </summary>
         public static void OnExit()
         {
-            if (_mutex != null)
+            _cts.Cancel();
+            try
             {
-                try
-                {
-                    _mutex.ReleaseMutex();
-                }
-                catch { }
-                _mutex.Dispose();
+                _gcTask?.Dispose();
             }
-
-            _cts?.Cancel();
-            Thread.Sleep(200);
-            _gcTask?.Dispose();
-        }
-
-        /// <summary>
-        /// Create Mutex for all users with full control permission.
-        /// </summary>
-        private static Mutex CreateMutexWithSecurity(string name)
-        {
-            var allowEveryoneRule = new MutexAccessRule(
-                new SecurityIdentifier(WellKnownSidType.WorldSid, null),
-                MutexRights.FullControl,
-                AccessControlType.Allow
-            );
-
-            var securitySettings = new MutexSecurity();
-            securitySettings.AddAccessRule(allowEveryoneRule);
-
-            bool createdNew;
-
-            var mutex = new Mutex(false, name, out createdNew);
-
-
-            if (createdNew)
+            catch
             {
-                mutex.SetAccessControl(securitySettings);
+                // Ignore disposal errors on exit
             }
-
-            return mutex;
         }
     }
 }

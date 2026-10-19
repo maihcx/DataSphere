@@ -1,82 +1,31 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.ComponentModel;
+using DataSphere.Utils;
 
-namespace DataSphere.ViewModels.Pages
+namespace DataSphere.ViewModels.Pages.DatabaseGroup
 {
-    public partial class DatabaseViewModel : ObservableObject, INavigationAware
+    /// <summary>
+    /// ViewModel for the Database management page, governing connection sessions and SQL query operations.
+    /// </summary>
+    public partial class DatabaseViewModel : ObservableObject
     {
-        private bool _isInitialized = false;
+        /// <summary>
+        /// Gets or sets the display title of the database workspace.
+        /// </summary>
+        [ObservableProperty]
+        public partial string Title { get; set; } = string.Empty;
 
-        public Task OnNavigatedToAsync()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseViewModel"/> class.
+        /// </summary>
+        public DatabaseViewModel()
         {
-            if (!_isInitialized)
-                InitializeViewModel();
-
-            return Task.CompletedTask;
+            UpdateLocalizedStrings();
+            TranslationSource.Instance.PropertyChanged += (s, e) => UpdateLocalizedStrings();
         }
 
-        public Task OnNavigatedFromAsync() => Task.CompletedTask;
-
-        private void InitializeViewModel()
+        private void UpdateLocalizedStrings()
         {
-            _isInitialized = true;
-
-            WeakReferenceMessenger.Default.Register<GenericMessage<(ConnectionModel, string)>>(this, (r, m) =>
-            {
-                var conn = m.Value.Item1;
-                var handleType = m.Value.Item2;
-
-                var existingTab = TabsViewer.FirstOrDefault(t =>
-                    t.Key.Equals(conn.Key));
-
-                if (existingTab != null)
-                {
-                    existingTab.Header = conn.Name;
-                    if (handleType == "add")
-                    {
-                        SelectedTab = existingTab;
-                    }
-                }
-                else if (handleType == "add")
-                {
-                    var newTab = new TabItemView()
-                    {
-                        Header = (conn.Parent == null) ? conn.Name : $"{conn.Parent.Name}/{conn.Name}",
-                        Icon = conn.Icon,
-                        Content = new Views.Pages.DatabaseGroup.DatabaseViewControl(conn),
-                        CanClose = true,
-                        Key = conn.Key,
-                    };
-
-                    conn.PropertyChanged += (s, e) =>
-                    {
-                        if (conn.Parent == null)
-                        {
-                            newTab.Header = conn.Name;
-                        }
-                        else
-                        {
-                            newTab.Header = $"{conn.Parent.Name}/{conn.Name}";
-                        }
-                    };
-
-                    TabsViewer.Add(newTab);
-                    SelectedTab = newTab;
-                }
-            });
+            Title = LanguageBase.GetLangValue("page_db_title");
         }
-
-        [ObservableProperty]
-        private ObservableCollection<TabItemView> _tabsViewer = new()
-        {
-            new TabItemView { 
-                Icon = new SymbolIcon() { Symbol = SymbolRegular.DatabasePlugConnected20 }, 
-                HeaderKey = "connection_title", 
-                Content = new Views.Pages.DatabaseGroup.ConnectViewControl(),
-                CanClose = false
-            }
-        };
-
-        [ObservableProperty]
-        private TabItemView? _selectedTab;
     }
 }

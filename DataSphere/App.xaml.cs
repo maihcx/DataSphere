@@ -1,116 +1,99 @@
-﻿using DataSphere.Services.Contracts;
+using DataSphere.Models;
+using DataSphere.Services;
+using DataSphere.Services.Contracts;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.UI.Xaml;
 
 namespace DataSphere
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Coordinates the application lifecycle, service host, and primary window activation.
     /// </summary>
-    public partial class App
+    public partial class App : Application
     {
-        private string logFile = Path.Combine(AppInfoHelper.GetAppPath(), "crash.log");
+        private static IHost? _host;
+        private static readonly Task<IHost> _hostBuildTask = Task.Run(BuildHost);
 
+        /// <summary>
+        /// Gets the singleton application host instance.
+        /// </summary>
+        public static IHost HostInstance => _host ??= _hostBuildTask.GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Gets the application dependency injection service provider.
+        /// </summary>
+        public static IServiceProvider Services => HostInstance.Services;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="App"/> class.
+        /// </summary>
         public App()
         {
-            RenderOptions.ProcessRenderMode = RenderMode.Default;
+            InitializeComponent();
 
-            Bootstrap.OnBeforeStartup();
-
-            TranslationSource.Instance.CurrentCulture = LanguageBase.GetSetupLanguage();
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-        }
-
-        public void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            var ex = e.ExceptionObject as Exception;
-            File.AppendAllText(logFile, $"[{DateTime.Now}] UnhandledException: {ex}\n");
-        }
-
-        public void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
-        {
-            File.AppendAllText(logFile, $"[{DateTime.Now}] UnobservedTaskException: {e.Exception}\n");
-            e.SetObserved();
-        }
-
-        private static readonly IHost _host = Host.CreateDefaultBuilder()
-            .ConfigureAppConfiguration(c =>
+            UnhandledException += (sender, args) =>
             {
-                _ = c.SetBasePath(AppContext.BaseDirectory);
-            })
-            .ConfigureServices((context, services) =>
-            {
-                services.AddNavigationViewPageProvider();
+                Debug.WriteLine($"[DataSphere] Unhandled WinUI exception: {args.Exception}");
+            };
+        }
 
-                // App Host
-                services.AddHostedService<ApplicationHostService>();
+        private static IHost BuildHost() =>
+            Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(c =>
+                {
+                    c.SetBasePath(AppContext.BaseDirectory);
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    // Hosted lifecycle service
+                    services.AddHostedService<ApplicationHostService>();
 
-                // Theme manipulation
-                services.AddSingleton<IThemeService, ThemeService>();
+                    // Window & Tab management infrastructure
+                    services.AddSingleton<IWindowManager, DataSphere.Services.WindowManager>();
+                    services.AddTransient<ITabService, TabService>();
 
-                // TaskBar manipulation
-                services.AddSingleton<ITaskBarService, TaskBarService>();
+                    // Core Application Services
+                    services.AddSingleton<MessengerService>();
 
-                // Service containing navigation, same as INavigationWindow... but without window
-                services.AddSingleton<INavigationService, NavigationService>();
+                    // ViewModels & Windows
+                    services.AddTransient<ViewModels.Windows.ShellViewModel>();
+                    services.AddTransient<Views.Windows.ShellWindow>();
 
-                // Main window with navigation
-                services.AddSingleton<INavigationWindow, MainWindow>();
-                services.AddSingleton<MainWindowViewModel>();
-                services.AddSingleton<ISnackbarService, SnackbarService>();
-                services.AddSingleton<IContentDialogService, ContentDialogService>();
+                    // Pages & Page ViewModels
+                    services.AddTransient<ViewModels.Pages.HomeViewModel>();
+                    services.AddTransient<Views.Pages.HomePage>();
 
-                // All other pages and view models
-                NavigationHandle.SetupPageViewModelPairs(services, "DataSphere.Views.Pages", "DataSphere.ViewModels.Pages");
-                NavigationHandle.SetupPageViewModelPairs(services, "DataSphere.Views.PagesBottom", "DataSphere.ViewModels.PagesBottom");
-            }).Build();
+                    services.AddTransient<ViewModels.Pages.DatabaseGroup.DatabaseViewModel>();
+                    services.AddTransient<Views.Pages.DatabaseGroup.DatabasePage>();
+
+                    services.AddTransient<ViewModels.PagesBottom.SettingsViewModel>();
+                    services.AddTransient<Views.PagesBottom.SettingsPage>();
+                })
+                .Build();
 
         /// <summary>
-        /// Gets services.
+        /// Invoked when the application is launched, initializing services and activating the primary window.
         /// </summary>
-        public static IServiceProvider Services
+        /// <param name="args">Details about the launch request and process.</param>
+        protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
-            get { return _host.Services; }
+            _host = await _hostBuildTask.ConfigureAwait(true);
+            await _host.StartAsync().ConfigureAwait(true);
         }
 
         /// <summary>
-        /// Occurs when the application is loading.
+        /// Resolves a required service instance of type <typeparamref name="T"/> from the application host.
         /// </summary>
-        private async void OnStartup(object sender, StartupEventArgs e)
-        {
-            await _host.StartAsync();
-
-            Bootstrap.OnStartup();
-        }
+        /// <typeparam name="T">The service type to resolve.</typeparam>
+        /// <returns>The resolved service instance.</returns>
+        public static T GetRequiredService<T>() where T : class => HostInstance.Services.GetRequiredService<T>();
 
         /// <summary>
-        /// Occurs when the application is closing.
+        /// Resolves an optional service instance of type <typeparamref name="T"/> from the application host.
         /// </summary>
-        private async void OnExit(object sender, ExitEventArgs e)
-        {
-            await _host.StopAsync();
-
-            Bootstrap.OnExit();
-
-            _host.Dispose();
-        }
-
-        /// <summary>
-        /// Occurs when an exception is thrown by an application but not handled.
-        /// </summary>
-        private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-        {
-            // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
-        }
-
-        /// <summary>
-        /// Gets registered service.
-        /// </summary>
-        /// <typeparam name="T">Type of the service to get.</typeparam>
-        /// <returns>Instance of the service or <see langword="null"/>.</returns>
-        public static T GetRequiredService<T>()
-            where T : class
-        {
-            return _host.Services.GetRequiredService<T>();
-        }
+        /// <typeparam name="T">The service type to resolve.</typeparam>
+        /// <returns>The resolved service instance, or null if not registered.</returns>
+        public static T? GetService<T>() where T : class => HostInstance.Services.GetService<T>();
     }
 }

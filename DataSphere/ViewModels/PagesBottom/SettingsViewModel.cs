@@ -1,100 +1,106 @@
-﻿using static DataSphere.Resources.ThemeConfigs;
+using System.Collections.ObjectModel;
+using System.Reflection;
+using CommunityToolkit.Mvvm.ComponentModel;
+using DataSphere.Models;
+using DataSphere.Utils;
 
 namespace DataSphere.ViewModels.PagesBottom
 {
-    public partial class SettingsViewModel : ObservableObject, INavigationAware
+    /// <summary>
+    /// ViewModel for the application settings page, governing personalization, language preferences, and version information.
+    /// </summary>
+    public partial class SettingsViewModel : ObservableObject
     {
-        private bool _isInitialized = false;
-
-        private static ApplicationThemeManagerService ThemeManagerService = WindowHelper.ThemeManagerService ?? new ApplicationThemeManagerService(WindowHelper.MainWindow ?? App.Current.MainWindow);
-
+        /// <summary>
+        /// Gets or sets the copyright notice text.
+        /// </summary>
         [ObservableProperty]
-        private string _copyRight = AppInfoHelper.CopyRight;
+        public partial string CopyRight { get; set; } = AppInfoHelper.CopyRight;
 
+        /// <summary>
+        /// Gets or sets the application version text.
+        /// </summary>
         [ObservableProperty]
-        private string _appVersion = string.Empty;
+        public partial string AppVersion { get; set; } = string.Empty;
 
-        public Task OnNavigatedToAsync()
-        {
-            if (!_isInitialized)
-                InitializeViewModel();
 
-            return Task.CompletedTask;
-        }
+        /// <summary>
+        /// Gets or sets the available application theme options.
+        /// </summary>
+        [ObservableProperty]
+        public partial ObservableCollection<SettingOptionItem> ThemeList { get; set; } = new();
 
-        public Task OnNavigatedFromAsync() => Task.CompletedTask;
+        /// <summary>
+        /// Gets or sets the selected application theme.
+        /// </summary>
+        [ObservableProperty]
+        public partial SettingOptionItem? SelectedTheme { get; set; }
 
-        private void InitializeViewModel()
+        /// <summary>
+        /// Gets or sets the available language options.
+        /// </summary>
+        [ObservableProperty]
+        public partial ObservableCollection<LanguageItem> Languages { get; set; } = LanguageBase.GetLanguageItems();
+
+        /// <summary>
+        /// Gets or sets the selected UI display language.
+        /// </summary>
+        [ObservableProperty]
+        public partial LanguageItem SelectedLanguage { get; set; } = LanguageBase.GetCurrentLanguageItem();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SettingsViewModel"/> class.
+        /// </summary>
+        public SettingsViewModel()
         {
             AppVersion = $"{AppInfoHelper.AppName} - {GetAssemblyVersion()}";
-
-            _isInitialized = true;
+            InitializeThemes();
+            UpdateLocalizedStrings();
+            TranslationSource.Instance.PropertyChanged += (s, e) => UpdateLocalizedStrings();
         }
 
-        private string GetAssemblyVersion()
+        private void InitializeThemes()
         {
-            return Assembly.GetExecutingAssembly().GetName().Version?.ToString()
-                ?? string.Empty;
+            ThemeList = new ObservableCollection<SettingOptionItem>
+            {
+                new SettingOptionItem { Value = "Light", Content = LanguageBase.GetLangValue("theme_light") },
+                new SettingOptionItem { Value = "Dark", Content = LanguageBase.GetLangValue("theme_dark") },
+                new SettingOptionItem { Value = "Default", Content = LanguageBase.GetLangValue("theme_default") }
+            };
+
+            var savedTheme = UserDataStore.GetValue<string>("IThemeType");
+            SelectedTheme = ThemeList.FirstOrDefault(t => t.Value == savedTheme) ?? ThemeList.FirstOrDefault();
         }
 
-        #region Navigation panel auto hide
-        [ObservableProperty]
-        private bool _autoHideNavigationPanel = WindowHelper.IsAutoHideNavPanel;
-
-        partial void OnAutoHideNavigationPanelChanged(bool oldValue, bool newValue)
+        private void UpdateLocalizedStrings()
         {
-            WindowHelper.IsAutoHideNavPanel = AutoHideNavigationPanel = newValue;
+            foreach (var theme in ThemeList)
+            {
+                if (theme.Value == "Light") theme.Content = LanguageBase.GetLangValue("theme_light");
+                else if (theme.Value == "Dark") theme.Content = LanguageBase.GetLangValue("theme_dark");
+                else if (theme.Value == "Default") theme.Content = LanguageBase.GetLangValue("theme_default");
+            }
         }
-        #endregion
 
-        #region Language list handle
-        [ObservableProperty]
-        private LanguageItem _selectedLanguage = LanguageBase.GetCurrentLanguageItem();
-
-        [ObservableProperty]
-        private ObservableCollection<LanguageItem> _languages = LanguageBase.GetLanguageItems();
+        private static string GetAssemblyVersion()
+        {
+            return Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
+        }
 
         partial void OnSelectedLanguageChanged(LanguageItem value)
         {
-            LanguageBase.SetLanguage(value.Code ?? "en");
+            if (value?.Code != null)
+            {
+                LanguageBase.SetLanguage(value.Code);
+            }
         }
-        #endregion
 
-        #region Theme list handle
-        [ObservableProperty]
-        private Models.ComboBoxItem _selectedTheme = ThemeManagerService.GetThemeCBBSelected();
-
-        [ObservableProperty]
-        private ObservableCollection<Models.ComboBoxItem> _themeList = ThemeManagerService.GetThemeCBBs();
-
-        partial void OnSelectedThemeChanged(Models.ComboBoxItem value)
+        partial void OnSelectedThemeChanged(SettingOptionItem? value)
         {
-            ThemeManagerService.SetApplicationTheme(Enum.Parse<IThemeType>(value.Value ?? "en"));
+            if (value?.Value != null)
+            {
+                UserDataStore.SetValue("IThemeType", value.Value);
+            }
         }
-        #endregion
-
-        #region Material list handle
-        [ObservableProperty]
-        private Models.ComboBoxItem _selectedMaterial = ThemeManagerService.GetMaterialCBBSelected();
-
-        [ObservableProperty]
-        private ObservableCollection<Models.ComboBoxItem> _materialList = ThemeManagerService.GetMaterialCBBs();
-
-        partial void OnSelectedMaterialChanged(Models.ComboBoxItem value)
-        {
-            ThemeManagerService.SetBackdropType(Enum.Parse<WindowBackdropType>(value.Value ?? WindowBackdropType.Tabbed.ToString()));
-            ThemeManagerService.SetApplicationTheme(Enum.Parse<IThemeType>(SelectedTheme.Value ?? IThemeType.Auto.ToString()));
-        }
-        #endregion
-
-        #region CornerRadius list handle
-        [ObservableProperty]
-        private int _sliderCornerRadius = ThemeManagerService.GlobalCornerRadius;
-
-        partial void OnSliderCornerRadiusChanged(int oldValue, int newValue)
-        {
-            ThemeManagerService.GlobalCornerRadius = newValue;
-        }
-        #endregion
     }
 }

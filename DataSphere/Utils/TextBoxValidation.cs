@@ -1,19 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Controls;
-using System.Xml;
-
 namespace DataSphere.Utils
 {
+    /// <summary>
+    /// Defines the validation rules applicable to text input fields.
+    /// </summary>
     public enum TextBoxValidationType
     {
+        /// <summary>
+        /// No validation rules applied.
+        /// </summary>
         None,
+
+        /// <summary>
+        /// Requires non-null and non-whitespace text.
+        /// </summary>
         NotEmpty,
+
+        /// <summary>
+        /// Requires integer numeric input.
+        /// </summary>
         NumberOnly,
+
+        /// <summary>
+        /// Evaluates a custom predicate function.
+        /// </summary>
         Custom
     }
 
+    /// <summary>
+    /// Metadata for a registered text field validation rule.
+    /// </summary>
     class TextBoxValidationObject
     {
         public TextBoxValidationType ValidationType { get; set; }
@@ -33,23 +48,50 @@ namespace DataSphere.Utils
         }
     }
 
+    /// <summary>
+    /// Manages field-level input validation and error notifications for forms.
+    /// </summary>
     public class TextBoxValidation
     {
         private readonly Dictionary<string, TextBoxValidationObject> validationList = new();
 
         private readonly Dictionary<string, List<string>> _errors = new();
 
+        /// <summary>
+        /// Gets a value indicating whether any validation errors are currently present.
+        /// </summary>
         public bool HasErrors => _errors.Any();
 
+        /// <summary>
+        /// Gets current error messages for the specified field name.
+        /// </summary>
+        /// <param name="fieldName">The field name to query.</param>
+        /// <returns>Collection of error strings.</returns>
         public IEnumerable<string> GetErrors(string fieldName) => _errors.TryGetValue(fieldName, out var errs) ? errs : Enumerable.Empty<string>();
 
+        /// <summary>
+        /// Occurs when error messages for a field are modified.
+        /// </summary>
         public event Action<string>? OnErrorsChanged;
 
+        /// <summary>
+        /// Registers a validation rule for the specified field.
+        /// </summary>
+        /// <param name="field">The name of the field to validate.</param>
+        /// <param name="valueGetter">Delegate retrieving the current value.</param>
+        /// <param name="type">The validation rule type.</param>
+        /// <param name="custom">Optional custom predicate for <see cref="TextBoxValidationType.Custom"/>.</param>
         public void AddValidation(string field, Func<string> valueGetter, TextBoxValidationType type, Func<string, bool>? custom = null)
         {
             validationList[field] = new TextBoxValidationObject(type, valueGetter, custom);
         }
 
+        /// <summary>
+        /// Evaluates validation rules for a specific field against an explicit value.
+        /// </summary>
+        /// <param name="fieldName">The name of the field.</param>
+        /// <param name="value">The value to test.</param>
+        /// <returns>List of validation error messages.</returns>
         public List<string> Validate(string fieldName, string value)
         {
             var errors = new List<string>();
@@ -84,6 +126,10 @@ namespace DataSphere.Utils
             return errors;
         }
 
+        /// <summary>
+        /// Executes validation checks on a single field or all registered fields.
+        /// </summary>
+        /// <param name="fieldName">Optional field name to validate, or null to validate all fields.</param>
         public void ApplyValidation(string? fieldName = null)
         {
             if (fieldName == null)

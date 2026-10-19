@@ -1,26 +1,27 @@
-﻿using DataSphere.Services.Contracts;
-using DataSphere.Views.Pages;
+using DataSphere.Services.Contracts;
 using DataSphere.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Windows.Navigation;
-using Wpf.Ui;
 
 namespace DataSphere.Services
 {
     /// <summary>
-    /// Managed host of the application.
+    /// Coordinates the application host lifecycle and primary shell window activation.
     /// </summary>
     public class ApplicationHostService : IHostedService
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly IWindowManager _windowManager;
 
-        private INavigationWindow _navigationWindow;
-
-        public ApplicationHostService(IServiceProvider serviceProvider)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ApplicationHostService"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The application service provider.</param>
+        /// <param name="windowManager">The application window manager service.</param>
+        public ApplicationHostService(IServiceProvider serviceProvider, IWindowManager windowManager)
         {
-            // If you want, you can do something with these services at the beginning of loading the application.
-            _serviceProvider = serviceProvider;
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _windowManager = windowManager ?? throw new ArgumentNullException(nameof(windowManager));
         }
 
         /// <summary>
@@ -42,33 +43,13 @@ namespace DataSphere.Services
         }
 
         /// <summary>
-        /// Creates main window during activation.
+        /// Creates and activates the primary ShellWindow during startup.
         /// </summary>
-        private async Task HandleActivationAsync()
+        private Task HandleActivationAsync()
         {
-            if (!Application.Current.Windows.OfType<MainWindow>().Any())
-            {
-                _navigationWindow = (
-                    _serviceProvider.GetService(typeof(INavigationWindow)) as INavigationWindow
-                )!;
-                WindowHelper.BringToFront(App.Current.MainWindow);
-                _navigationWindow!.ShowWindow();
-
-                _navigationWindow.Navigate(typeof(Views.Pages.DashboardPage));
-            }
-            else
-
-            await Task.CompletedTask;
-        }
-
-        private void OnMainWindowLoaded(object sender, RoutedEventArgs e)
-        {
-            if (sender is not MainWindow mainWindow)
-            {
-                return;
-            }
-
-            _ = mainWindow.RootNavigation.Navigate(typeof(DashboardPage));
+            var shellWindow = _serviceProvider.GetRequiredService<ShellWindow>();
+            shellWindow.Activate();
+            return Task.CompletedTask;
         }
     }
 }

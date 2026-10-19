@@ -1,21 +1,14 @@
-﻿using DataSphere.Views.Windows;
+using System.Runtime.InteropServices;
+using Microsoft.UI.Xaml;
+using WinUIEx;
 
 namespace DataSphere.Utils
 {
+    /// <summary>
+    /// Helper utilities for native window activation, focus management, and foreground window coordination.
+    /// </summary>
     public static class WindowHelper
     {
-        public static ApplicationThemeManagerService? ThemeManagerService;
-
-        public static Window? MainWindow;
-
-        public static ISnackbarService? GlobalSnackbar;
-
-        public static IContentDialogService? ContentDialogService;
-
-        public delegate void AutoHideNavPanelChanged(bool state);
-        public static event AutoHideNavPanelChanged? OnAutoHideNavChanged;
-
-
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
@@ -38,16 +31,25 @@ namespace DataSphere.Utils
         private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
 
         private const int SW_RESTORE = 9;
-
         private const int KEYEVENTF_KEYUP = 0x0002;
-
         private const byte VK_MENU = 0x12;
 
-        public static void BringToFront(Window window)
+        /// <summary>
+        /// Restores and forcefully brings the specified native window to the foreground.
+        /// </summary>
+        /// <param name="window">The window instance to bring to the front.</param>
+        public static void BringToFront(Window? window)
         {
-            if (window == null) return;
+            if (window == null)
+            {
+                return;
+            }
 
-            var handle = new WindowInteropHelper(window).Handle;
+            IntPtr handle = window.GetWindowHandle();
+            if (handle == IntPtr.Zero)
+            {
+                return;
+            }
 
             ShowWindow(handle, SW_RESTORE);
 
@@ -60,50 +62,16 @@ namespace DataSphere.Utils
             if (foreground != IntPtr.Zero)
             {
                 uint fgThread = GetWindowThreadProcessId(foreground, IntPtr.Zero);
-                AttachThreadInput(fgThread, curThread, true);
-                SetForegroundWindow(handle);
-                AttachThreadInput(fgThread, curThread, false);
-            }
-            else
-            {
-                SetForegroundWindow(handle);
-            }
-
-            window.Activate();
-            window.Focus();
-        }
-
-        public static void FocusMainWindow()
-        {
-            if (Application.Current.MainWindow is MainWindow mw)
-            {
-                if (!mw.IsVisible)
+                if (fgThread != curThread)
                 {
-                    mw.ShowWithEffect();
+                    AttachThreadInput(curThread, fgThread, true);
+                    SetForegroundWindow(handle);
+                    AttachThreadInput(curThread, fgThread, false);
+                    return;
                 }
-                else
-                {
-                    if (mw.WindowState == WindowState.Minimized)
-                    {
-                        mw.WindowState = WindowState.Normal;
-                    }
-                    mw.Activate();
-                }
-                BringToFront(mw);
             }
+
+            SetForegroundWindow(handle);
         }
-
-        public static bool IsAutoHideNavPanel
-        {
-            get;
-            set
-            {
-                if (field == value) return;
-
-                field = value;
-                UserDataStore.SetValue("IsAutoHideNavPanel", field);
-                OnAutoHideNavChanged?.Invoke(value);
-            }
-        } = UserDataStore.GetValue<bool>("IsAutoHideNavPanel");
     }
 }

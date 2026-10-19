@@ -1,16 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+using System.Windows.Input;
+using DataSphere.Utils;
 
 namespace DataSphere.Models
 {
+    /// <summary>
+    /// Represents an individual command item in contextual menus and command bars.
+    /// </summary>
     public class ContextAction : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        /// <summary>
+        /// Gets or sets the localized or raw display name of the context action.
+        /// </summary>
         public string? Name
         {
             get
@@ -29,6 +38,9 @@ namespace DataSphere.Models
             }
         }
 
+        /// <summary>
+        /// Gets or sets the localization translation key for this action's title.
+        /// </summary>
         public string NameKey
         {
             get => field ?? string.Empty;
@@ -40,6 +52,9 @@ namespace DataSphere.Models
             }
         }
 
+        /// <summary>
+        /// Gets or sets the unique action identifier key.
+        /// </summary>
         public string Key
         {
             get => field ?? string.Empty;
@@ -50,6 +65,9 @@ namespace DataSphere.Models
             }
         }
 
+        /// <summary>
+        /// Gets or sets the command executed when the user activates this action.
+        /// </summary>
         public ICommand? Command
         {
             get => field;
@@ -60,6 +78,9 @@ namespace DataSphere.Models
             }
         }
 
+        /// <summary>
+        /// Gets or sets the parameter passed to the command.
+        /// </summary>
         public object? CommandParameter
         {
             get => field;
@@ -70,20 +91,20 @@ namespace DataSphere.Models
             }
         }
 
+        /// <summary>
+        /// Gets or sets the icon symbol glyph code for this action.
+        /// </summary>
         public string? SymbolKey { get; set; }
 
+        /// <summary>
+        /// Gets the resolved Segoe Fluent icon glyph string for presentation.
+        /// </summary>
         [JsonIgnore]
-        public SymbolIcon Icon
-        {
-            get
-            {
-                if (Enum.TryParse(SymbolKey, out SymbolRegular symbol))
-                    return new SymbolIcon() { Symbol = symbol };
+        public string IconGlyph => SymbolKey ?? "\uE897";
 
-                return new SymbolIcon() { Symbol = SymbolRegular.QuestionCircle16 };
-            }
-        }
-
+        /// <summary>
+        /// Gets or sets a value indicating whether this context action is enabled and interactive.
+        /// </summary>
         public bool IsEnabled
         {
             get => field;
@@ -94,6 +115,9 @@ namespace DataSphere.Models
             }
         } = true;
 
+        /// <summary>
+        /// Gets or sets sub-menu child actions nested under this item.
+        /// </summary>
         public ObservableCollection<ContextAction>? Children
         {
             get => field;
@@ -104,6 +128,9 @@ namespace DataSphere.Models
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ContextAction"/> class.
+        /// </summary>
         public ContextAction()
         {
             TranslationSource.Instance.PropertyChanged += (s, e) =>
@@ -112,6 +139,10 @@ namespace DataSphere.Models
             };
         }
 
+        /// <summary>
+        /// Raises the PropertyChanged event for the specified property name.
+        /// </summary>
+        /// <param name="propertyName">The name of the changed property.</param>
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
