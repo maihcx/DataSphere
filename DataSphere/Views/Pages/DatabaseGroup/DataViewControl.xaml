@@ -106,17 +106,25 @@
                 ScrollViewer.VerticalScrollMode="Enabled"
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
                 ScrollViewer.HorizontalScrollMode="Enabled">
+                <ListView.Resources>
+                    <!-- Suppress WinUI 3 deferred virtualization placeholder grey rectangles -->
+                    <SolidColorBrush x:Key="ListViewItemPlaceholderBackgroundThemeResource" Color="Transparent" />
+                    <SolidColorBrush x:Key="ListViewItemPlaceholderBackground" Color="Transparent" />
+                    <SolidColorBrush x:Key="ListViewItemPlaceholderBackgroundPointerOver" Color="Transparent" />
+                    <SolidColorBrush x:Key="ListViewItemPlaceholderBackgroundPressed" Color="Transparent" />
+                </ListView.Resources>
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="Margin" Value="0" />
                         <Setter Property="MinHeight" Value="0" />
                         <Setter Property="HorizontalContentAlignment" Value="Left" />
+                        <Setter Property="Background" Value="Transparent" />
                     </Style>
                 </ListView.ItemContainerStyle>
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <ItemsStackPanel Orientation="Vertical" CacheLength="2.0" />
+                        <ItemsStackPanel Orientation="Vertical" CacheLength="5.0" />
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
                 <ListView.ItemTemplate>
@@ -133,8 +141,7 @@
                                         <Border Width="140" Padding="8,6" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                                             <TextBlock
                                                 Text="{x:Bind}"
-                                                TextTrimming="CharacterEllipsis"
-                                                IsTextSelectionEnabled="True" />
+                                                TextTrimming="CharacterEllipsis" />
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

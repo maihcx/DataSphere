@@ -15,7 +15,7 @@ namespace DataSphere.Views.Pages.DatabaseGroup
     public sealed partial class DataViewControl : UserControl, IDisposable
     {
         private ScrollViewer? _listScrollViewer;
-        private bool _isSyncingScroll;
+        private double _lastHorizontalOffset = -1;
 
         /// <summary>
         /// Gets the ViewModel driving the table data viewport.
@@ -60,11 +60,6 @@ namespace DataSphere.Views.Pages.DatabaseGroup
                     _listScrollViewer.ViewChanged += OnListViewChanged;
                 }
             }
-
-            if (HeaderScrollViewer != null)
-            {
-                HeaderScrollViewer.ViewChanged += OnHeaderViewChanged;
-            }
         }
 
         /// <summary>
@@ -77,57 +72,30 @@ namespace DataSphere.Views.Pages.DatabaseGroup
                 _listScrollViewer.ViewChanged -= OnListViewChanged;
                 _listScrollViewer = null;
             }
-
-            if (HeaderScrollViewer != null)
-            {
-                HeaderScrollViewer.ViewChanged -= OnHeaderViewChanged;
-            }
         }
 
         /// <summary>
         /// Handles changes in the row ListView viewport offset and synchronizes the header ScrollViewer.
+        /// Filters out vertical-only scroll deltas to prevent UI thread layout stalls and event ping-pong.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">Event arguments specifying viewport changes.</param>
         private void OnListViewChanged(object? sender, ScrollViewerViewChangedEventArgs e)
         {
-            if (_isSyncingScroll || _listScrollViewer == null || HeaderScrollViewer == null)
+            if (_listScrollViewer == null || HeaderScrollViewer == null)
             {
                 return;
             }
 
-            try
+            double currentOffset = _listScrollViewer.HorizontalOffset;
+            if (Math.Abs(currentOffset - _lastHorizontalOffset) < 0.5)
             {
-                _isSyncingScroll = true;
-                HeaderScrollViewer.ChangeView(_listScrollViewer.HorizontalOffset, null, null, true);
-            }
-            finally
-            {
-                _isSyncingScroll = false;
-            }
-        }
-
-        /// <summary>
-        /// Handles changes in the header ScrollViewer offset and synchronizes the row ListView ScrollViewer.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">Event arguments specifying viewport changes.</param>
-        private void OnHeaderViewChanged(object? sender, ScrollViewerViewChangedEventArgs e)
-        {
-            if (_isSyncingScroll || _listScrollViewer == null || HeaderScrollViewer == null)
-            {
+                // Purely vertical scroll. Skip header scroll updates completely to avoid UI thread lag.
                 return;
             }
 
-            try
-            {
-                _isSyncingScroll = true;
-                _listScrollViewer.ChangeView(HeaderScrollViewer.HorizontalOffset, null, null, true);
-            }
-            finally
-            {
-                _isSyncingScroll = false;
-            }
+            _lastHorizontalOffset = currentOffset;
+            HeaderScrollViewer.ChangeView(currentOffset, null, null, true);
         }
 
         /// <summary>

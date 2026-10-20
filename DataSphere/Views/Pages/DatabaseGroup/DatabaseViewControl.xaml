@@ -74,7 +74,20 @@
                             Spacing="8"
                             Padding="2,4"
                             ContextRequested="TreeNode_ContextRequested">
-                            <FontIcon Glyph="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IconGlyph, Mode=OneWay}" FontSize="14" />
+                            <Grid Width="16" Height="16">
+                                <FontIcon
+                                    Glyph="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IconGlyph, Mode=OneWay}"
+                                    FontSize="14"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Visibility="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IsLoading, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                <ProgressRing
+                                    Width="14" Height="14"
+                                    IsActive="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IsLoading, Mode=OneWay}"
+                                    Visibility="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                            </Grid>
                             <TextBlock Text="{x:Bind ((dbmodels:DatabaseTreeNode)Content).Title, Mode=OneWay}" VerticalAlignment="Center" />
                         </StackPanel>
                     </DataTemplate>

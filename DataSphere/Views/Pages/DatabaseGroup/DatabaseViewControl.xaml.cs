@@ -214,6 +214,9 @@ namespace DataSphere.Views.Pages.DatabaseGroup
                     args.Node.Children.Add(CreateNode(LanguageBase.GetLangValue("dbinf_views_title"), "\uE890", db));
                     args.Node.Children.Add(CreateNode(LanguageBase.GetLangValue("dbinf_sps_title"), "\uE943", db));
                     args.Node.Children.Add(CreateNode(LanguageBase.GetLangValue("dbinf_fncs_title"), "\uF168", db));
+
+                    // Explicitly set IsExpanded = true so WinUI 3 immediately renders child nodes on single click
+                    args.Node.IsExpanded = true;
                 }
             }
             else if (dtn.DataContext is TableCategoryContext tcc)
@@ -268,14 +271,13 @@ namespace DataSphere.Views.Pages.DatabaseGroup
             if (chevronGrid == null) return;
 
             var expandedGlyph = FindVisualChild<TextBlock>(chevronGrid, "ExpandedGlyph");
+            var collapsedGlyph = FindVisualChild<TextBlock>(chevronGrid, "CollapsedGlyph");
             var existingRings = chevronGrid.Children.OfType<ProgressRing>().ToList();
 
             if (isLoading)
             {
-                if (expandedGlyph != null)
-                {
-                    expandedGlyph.Opacity = 0;
-                }
+                if (expandedGlyph != null) expandedGlyph.Opacity = 0;
+                if (collapsedGlyph != null) collapsedGlyph.Opacity = 0;
 
                 if (existingRings.Count == 0)
                 {
@@ -308,10 +310,8 @@ namespace DataSphere.Views.Pages.DatabaseGroup
                     chevronGrid.Children.Remove(ring);
                 }
 
-                if (expandedGlyph != null)
-                {
-                    expandedGlyph.Opacity = 1;
-                }
+                if (expandedGlyph != null) expandedGlyph.Opacity = 1;
+                if (collapsedGlyph != null) collapsedGlyph.Opacity = 1;
             }
         }
 
