@@ -7,22 +7,22 @@ namespace DataSphere.Utils
     /// </summary>
     public class TranslationSource : INotifyPropertyChanged
     {
-        private static readonly TranslationSource instance = new TranslationSource();
+        private static readonly object syncLock = new();
+        private static readonly List<WeakReference<TranslationSource>> activeInstances = new();
+        private static CultureInfo currentCulture = CultureInfo.CurrentUICulture;
+        private static readonly Lazy<TranslationSource> instance = new(() => new TranslationSource());
 
         /// <summary>
         /// Gets the singleton instance of the translation source.
         /// </summary>
-        public static TranslationSource Instance => instance;
-
-        private static CultureInfo currentCulture = CultureInfo.CurrentUICulture;
-        private static readonly List<WeakReference<TranslationSource>> activeInstances = new();
+        public static TranslationSource Instance => instance.Value;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TranslationSource"/> class and registers it for culture notifications.
         /// </summary>
         public TranslationSource()
         {
-            lock (activeInstances)
+            lock (syncLock)
             {
                 activeInstances.Add(new WeakReference<TranslationSource>(this));
             }
@@ -53,7 +53,7 @@ namespace DataSphere.Utils
 
         private static void NotifyAllInstances()
         {
-            lock (activeInstances)
+            lock (syncLock)
             {
                 for (int i = activeInstances.Count - 1; i >= 0; i--)
                 {
@@ -139,12 +139,36 @@ namespace DataSphere.Utils
         }
 
         /// <summary>
-        /// Reads the persisted language preference from the data store.
+        /// Reads the persisted language preference from the data store with fallback to current UI culture.
         /// </summary>
         /// <returns>Configured CultureInfo.</returns>
         public static CultureInfo GetSetupLanguage()
         {
-            return new CultureInfo(UserDataStore.GetValue<string>("Language"));
+            try
+            {
+                var langCode = UserDataStore.GetValue<string>("Language");
+                if (!string.IsNullOrWhiteSpace(langCode))
+                {
+                    var matchedCulture = SupportedLanguages.FirstOrDefault(
+                        c => c.TwoLetterISOLanguageName.Equals(langCode, StringComparison.OrdinalIgnoreCase));
+                    if (matchedCulture != null)
+                    {
+                        return matchedCulture;
+                    }
+
+                    return new CultureInfo(langCode);
+                }
+            }
+            catch
+            {
+                // Fall back if stored culture code is invalid
+            }
+
+            var currentUi = CultureInfo.CurrentUICulture;
+            var defaultCulture = SupportedLanguages.FirstOrDefault(
+                c => c.TwoLetterISOLanguageName.Equals(currentUi.TwoLetterISOLanguageName, StringComparison.OrdinalIgnoreCase));
+
+            return defaultCulture ?? SupportedLanguages.First();
         }
 
         /// <summary>

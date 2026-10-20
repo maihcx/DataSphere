@@ -1,14 +1,12 @@
 <!--
 Sync Impact Report:
-- Version change: 1.0.0 → 1.1.0 (Minor version bump for new i18n principle & WinUI 3 platform alignment)
+- Version change: 1.4.0 → 1.5.0 (Minor version bump introducing the Zero-Speculation / Mandatory Live UI Verification Gate, strictly prohibiting assumption-based handoff or speculative completion claims, and mandating end-to-end live UI testing on WinSta0\default with verified visual and interaction evidence prior to any delivery)
 - Modified principles:
-  - Principle II: Modern Fluent UI / UX Standards (Updated references to WinUI 3, Windows App SDK, Mica backdrop, TabView, and WinUIEx)
-- Added sections / principles:
-  - Principle VII: Zero Hardcoded User-Facing Strings & Dynamic Internationalization (i18n)
-  - Updated Technology Stack: Windows App SDK 2.5+, WinUI 3, net10.0-windows10.0.26100.0, WinUIEx
-  - Added Internationalization (i18n) Verification Gate
+  - Principle VIII: Visual UI Reproduction, Diagnostic Inspection & Verification Gate (Expanded with strict Zero-Speculation / Zero-Guesswork Invariant, absolute ban on phrases like 'I guess it works' or 'theoretically resolved', mandatory live UI automation execution covering end-to-end user workflows, physical mouse interaction verification, and verified visual evidence as an uncompromising blocker for delivery)
+- Added quality gates:
+  - Zero-Speculation Live UI Verification Gate: Explicit gate prohibiting handoff or marking tasks complete without concrete live UI execution logs, physical interaction proofs, and DirectComposition screenshots.
 - Removed sections: None
-- Follow-up TODOs: None (all requirements concrete and non-negotiable)
+- Follow-up TODOs: None (all requirements strictly specified, declarative, and non-negotiable)
 -->
 
 # DataSphere Constitution
@@ -55,9 +53,31 @@ Every feature, architectural refactoring, and defect resolution MUST follow the 
 ### Principle VII: Zero Hardcoded User-Facing Strings & Dynamic Internationalization (i18n)
 All user-facing text, titles, descriptions, dialog messages, and menu labels MUST support multi-language internationalization and MUST NOT be hardcoded in application code:
 - **Zero Hardcoded Strings in C# & XAML**: Hardcoded string literals for user-facing UI text (such as tab titles, button labels, card headers, error messages, or tooltip content) are STRICTLY FORBIDDEN. All UI text MUST be defined in localization resource files (`Resources/Locales/String.resx`, `String.en.resx`, `String.vi.resx`).
+- **Strict UTF-8 Encoding Without BOM**: All `.resx` files MUST be authored, modified, and saved exclusively in strict UTF-8 encoding without BOM (`System.Text.UTF8Encoding(false)`). Modifying or appending `.resx` entries using shell scripts or PowerShell without explicit UTF-8 encoding is STRICTLY FORBIDDEN to eliminate double-byte Mojibake encoding corruption. Any programmatic resource generation MUST use XML DOM APIs or Unicode escape sequences (`\uXXXX`).
 - **Dynamic Localization Source**: All runtime string resolution MUST use `TranslationSource` (`DataSphere.Utils.Translations`) or `LanguageBase.GetLangValue(key, args)` to allow instant language switching at runtime without requiring an application restart.
 - **Dynamic Binding & Notification**: ViewModels and Models presenting localized properties MUST hook into `TranslationSource.Instance.PropertyChanged` or expose resource keys (`NameKey`, `TitleKey`) so that text refreshes immediately when the user changes language.
-- **XAML Localization Compliance**: In XAML views, user-facing text MUST bind directly to the application's localization resource using indexer syntax: `Text="{Binding [KeyName], Source={StaticResource Localization}, Mode=OneWay}"`. Hardcoding UI strings or introducing redundant string properties on ViewModels when XAML static resource binding can be used is prohibited.
+- **XAML Localization Compliance**: In XAML views, user-facing text MUST bind directly to the application's localization resource using indexer syntax: `Text="{Binding [KeyName], Source={StaticResource Localization}, Mode=OneWay}"`.
+- **XAML Layout Decoupling Mandate**: In WinUI 3, `TabView` controls MUST strictly host only their tab headers/items. Viewport content hosts (such as `<ContentControl>` or `<ContentPresenter>`) MUST NEVER be placed directly inside `<TabView>` tags; they MUST be decoupled into a separate layout grid row to avoid visual tree orphaning and empty viewports.
+
+### Principle VIII: Visual UI Reproduction, Diagnostic Inspection & Verification Gate
+To eliminate guesswork, prevent misdiagnosed root causes, and standardize automated desktop testing without research overhead:
+- **Mandatory Live Diagnostic Reproduction**: When an issue or bug report is received (e.g. during `/speckit-bug-assess` or incident intake), the agent MUST NOT hypothesize or guess the root cause based purely on static code analysis. If the report involves user interface behavior, rendering, navigation, window lifecycle, or localization, the agent MUST run the application and execute automated UI testing to reproduce the failure live, inspect the visual element tree, and capture initial failure screenshots (`.png`) into the session artifact directory (`<appDataDir>/brain/<conversation-id>`).
+- **Interactive Desktop Station Protocol (`WinSta0\default`)**: In Windows agent environments, subshell processes operate by default under an isolated desktop station (`WinSta0\exebox-...`). To ensure testing runs against the user's real interactive desktop and avoids invisible/blank window captures, agents MUST:
+  1. Launch `DataSphere.exe` using Win32 `CreateProcess` with `STARTUPINFO.lpDesktop = @"WinSta0\default"`.
+  2. Switch the test thread's desktop by calling `OpenDesktop("default", 0, false, 0x01FF)` and `SetThreadDesktop(hDesk)` before invoking Windows UI Automation (`System.Windows.Automation`).
+- **Zero-AutomationId Production Code Invariant**: Agents are STRICTLY PROHIBITED from modifying or polluting production XAML markup with temporary or testing-specific attributes such as `AutomationProperties.AutomationId`. Production XAML must remain 100% clean. Automated UI tests MUST locate controls dynamically via:
+  1. **Structural Geometry & Layout Coordinates**: Finding container cards and major panels by their `BoundingRectangle` bounds (e.g., width, height, position offsets).
+  2. **Control Hierarchy & Types**: Traversing `ControlType` (`ControlType.Button`, `ControlType.ComboBox`, `ControlType.Text`).
+  3. **Localized Content Matching**: Inspecting child `TextBlock.Name` attributes against translated localization strings.
+- **Physical Mouse Control & Realistic Interaction**: When testing on the interactive desktop, the automation harness MUST calculate the center point of the target element `(X, Y) = (rect.X + rect.Width / 2, rect.Y + rect.Height / 2)`, move the physical cursor via Win32 `SetCursorPos(X, Y)`, and emit realistic native input events via `mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP)`.
+- **DirectComposition High-Fidelity Capture**: Screenshots of WinUI 3 hardware-accelerated XAML windows MUST be captured using Win32 `PrintWindow` with `PW_RENDERFULLCONTENT` (`flag = 2`) to ensure full visual fidelity (including mica backdrops, acrylic controls, and open dropdowns/dialogs) without black or empty bounding boxes.
+- **Standardized Execution Blueprint**: All UI automation testing MUST reuse or adapt the proven blueprint established in `scripts/test-real-desktop.ps1` and `scripts/verify-real-end-to-end.ps1`. Future agents MUST NOT re-investigate or re-engineer the UI automation pipeline; they MUST execute this established pattern directly.
+- **Zero-Speculation & Mandatory Live UI Verification Gate Before Handoff**:
+  - **Absolute Ban on Speculation & Assumption**: Agents are STRICTLY FORBIDDEN from guessing, speculating, or stating phrases such as "tôi đoán là nó hoạt động" ("I guess it works"), "it should work now", "theoretically fixed", or "likely resolved". No task may be marked as complete, no PR may be approved, and no handoff may occur based on code inspection, compilation success (`dotnet build`), or headless unit tests alone whenever UI, layout, interaction, or rendering is involved.
+  - **Uncompromising Delivery Gate**: Handoff and task completion are PERMITTED ONLY IF live end-to-end UI automation testing has completed successfully on the real desktop station (`WinSta0\default`), fully executing the actual user workflow (opening connections, navigating tabs, expanding tree nodes via exact coordinates, selecting items, interacting with rows/cells), verifying the absence of crashes, and capturing genuine DirectComposition screenshots (`.png`) saved into the session artifact directory (`<appDataDir>/brain/<conversation-id>`).
+  - **Click Target & Interaction Accuracy Mandate**: The automation harness must verify accurate click coordinates and offsets. If an interaction fails to hit the intended control or produces no state change, the agent MUST NOT assume success; the agent MUST inspect the element hierarchy, calibrate the coordinates, and re-execute until unambiguous visual and behavioral proof is obtained.
+- **Mandatory Visual Inspection Prior to Completion**: Before any bug fix or new user-facing feature is signed off (e.g. during `/speckit-bug-test` or `/speckit-converge`), the agent MUST verify the visual presentation of the running application and embed the genuine captured screenshot (`verification_visual_evidence.png` / `real_evidence_*.png`) into the verification report (`test.md`).
+- **Prohibition on Purely Static / Headless Verification**: An agent is STRICTLY FORBIDDEN from diagnosing a UI defect or declaring a UI bug fix / frontend feature complete based solely on compilation success (`dotnet build`), static code inspection, or headless unit tests whenever visual presentation, layout templates, user interaction, or localization strings are involved.
 
 ## Technology Stack & Security Constraints
 
@@ -66,13 +86,18 @@ All user-facing text, titles, descriptions, dialog messages, and menu labels MUS
 - **Host & Dependency Injection**: `Microsoft.Extensions.Hosting` (Generic Host, `IServiceCollection`, hosted application lifecycle).
 - **Database Engine**: `MySqlConnector` (high-performance async MySQL/MariaDB driver), `System.IO.Hashing` (fast data integrity checks).
 - **Inter-Process Communication (IPC)**: Per-process Named Pipe Server with Windows Access Control Lists (ACL) supporting multi-instance process concurrency.
-- **Internationalization (i18n)**: `TranslationSource` with `INotifyPropertyChanged` indexer, `.resx` resource bundles (`String.resx`, `String.en.resx`, `String.vi.resx`), supporting live language switching (English, Vietnamese).
+- **Internationalization (i18n)**: `TranslationSource` with `INotifyPropertyChanged` indexer, `.resx` resource bundles (`String.resx`, `String.en.resx`, `String.vi.resx`) encoded in UTF-8 without BOM, supporting live language switching (English, Vietnamese).
+- **UI Automation & Verification**: Windows UI Automation (`System.Windows.Automation`), Win32 Interactive Desktop (`WinSta0\default`), Physical Cursor Dispatch (`SetCursorPos`/`mouse_event`), High-Fidelity `PW_RENDERFULLCONTENT` Screen Capture, Standardized Runner (`scripts/test-real-desktop.ps1`, `scripts/verify-real-end-to-end.ps1`).
 
 ## Development Workflow & Quality Gates
 
 - **Zero-Error Compilation Gate**: Every pull request and committed change MUST compile cleanly (`dotnet build DataSphere\DataSphere.csproj -c Debug`) with 0 errors and 0 warnings.
 - **Documentation Verification Gate**: All modified or introduced methods, properties, and types MUST meet 100% English XML documentation requirements.
-- **Internationalization (i18n) Gate**: All newly introduced or modified UI elements, commands, and viewmodels MUST NOT contain hardcoded user-facing strings; all user text MUST use `TranslationSource` / `.resx` keys.
+- **Internationalization (i18n) Gate**: All newly introduced or modified UI elements, commands, and viewmodels MUST NOT contain hardcoded user-facing strings; all user text MUST use `TranslationSource` / `.resx` keys with verified UTF-8 encoding.
+- **Diagnostic Reproduction Gate**: Every bug assessment involving UI behavior, window interaction, or visual anomalies MUST produce live reproduction evidence (UI element inspection trace or screenshot) captured via automated UI tooling on `WinSta0\default` during the assessment phase and documented in `assess.md`.
+- **Zero-Pollution XAML Gate**: Automated UI testing MUST NOT add `AutomationId` or testing markers to production XAML files. Production views must remain clean and decoupled.
+- **Zero-Speculation Live UI Verification Gate**: Every frontend feature, UI modification, or defect remediation MUST execute live end-to-end automated UI testing on `WinSta0\default` with verified physical mouse interaction and capture real visual evidence before handoff. Handing off with guesswork, assumptions, or speculative claims ("I guess it works") is an explicit constitutional violation.
+- **Visual Evidence Verification Gate**: Every frontend feature or bug fix MUST provide visual evidence (screenshot of running UI on real desktop) captured via automated UI tooling to prove layout rendering, non-emptiness, and correct typography before handoff.
 - **Convergence Verification Gate**: Prior to feature sign-off, `/speckit-converge` MUST confirm that the implementation exhibits zero gaps against `spec.md`, `plan.md`, and `tasks.md`.
 - **Evidence-Before-Assertion Mandate**: No task may be marked as complete without verifiable execution evidence (passing build logs, test executions, or runtime traces).
 
@@ -88,4 +113,4 @@ All user-facing text, titles, descriptions, dialog messages, and menu labels MUS
      - **PATCH**: Non-semantic clarifications, typo fixes, or wording refinements.
 - **Compliance Enforcement**: All code reviews and agent orchestrations MUST actively verify adherence to these constitutional principles.
 
-**Version**: 1.1.0 | **Ratified**: 2026-10-19 | **Last Amended**: 2026-10-19
+**Version**: 1.5.0 | **Ratified**: 2026-10-19 | **Last Amended**: 2026-10-20

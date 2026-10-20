@@ -13,6 +13,7 @@ namespace DataSphere.Services
         private readonly List<WindowSession> _windows = new();
         private readonly IServiceProvider _serviceProvider;
         private readonly object _syncLock = new();
+        private WindowSession? _activeWindowSession;
 
         /// <summary>
         /// Gets the read-only collection of all currently registered WindowSessions.
@@ -24,6 +25,27 @@ namespace DataSphere.Services
                 lock (_syncLock)
                 {
                     return _windows.ToList().AsReadOnly();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the currently active top-level window session that has user focus.
+        /// </summary>
+        public WindowSession? ActiveWindowSession
+        {
+            get
+            {
+                lock (_syncLock)
+                {
+                    return _activeWindowSession;
+                }
+            }
+            private set
+            {
+                lock (_syncLock)
+                {
+                    _activeWindowSession = value;
                 }
             }
         }
@@ -53,11 +75,23 @@ namespace DataSphere.Services
                 if (!_windows.Any(w => w.WindowId == session.WindowId))
                 {
                     _windows.Add(session);
+                    if (_activeWindowSession == null)
+                    {
+                        _activeWindowSession = session;
+                    }
                 }
             }
 
             if (session.WindowInstance != null)
             {
+                session.WindowInstance.Activated += (sender, args) =>
+                {
+                    if (args.WindowActivationState != Microsoft.UI.Xaml.WindowActivationState.Deactivated)
+                    {
+                        ActiveWindowSession = session;
+                    }
+                };
+
                 session.WindowInstance.Closed += (sender, args) =>
                 {
                     UnregisterWindow(session.WindowId);
@@ -81,6 +115,11 @@ namespace DataSphere.Services
                     _windows.Remove(session);
                 }
 
+                if (_activeWindowSession?.WindowId == windowId)
+                {
+                    _activeWindowSession = _windows.LastOrDefault();
+                }
+
                 if (_windows.Count == 0)
                 {
                     shouldExit = true;
@@ -95,6 +134,13 @@ namespace DataSphere.Services
 
         /// <summary>
         /// Spawns a new independent window hosting a torn-off tab at the specified screen coordinates.
+        /// </summary>
+        /// <param name="tab">The tab model being torn off.</param>
+        /// <param name="screenPosition">The drop coordinates on screen.</param>
+        /// <returns>The newly instantiated WindowSession.</returns>
+        /// <summary>
+        /// Spawns a new independent window hosting a torn-off tab at the specified screen coordinates.
+        /// Reuses the session registered by ShellWindow to avoid duplicate registration.
         /// </summary>
         /// <param name="tab">The tab model being torn off.</param>
         /// <param name="screenPosition">The drop coordinates on screen.</param>
@@ -115,38 +161,50 @@ namespace DataSphere.Services
                 newWindow = (_serviceProvider.GetService(shellWindowType) ?? Activator.CreateInstance(shellWindowType)) as Window;
             }
 
-            var session = new WindowSession
+            WindowSession session;
+            if (newWindow is Views.Windows.ShellWindow sw)
             {
-                WindowInstance = newWindow,
-                IsPrimary = false
-            };
+                // ShellWindow constructor already registers its own session via RegisterWindow
+                session = sw.Session ?? new WindowSession { WindowInstance = sw, IsPrimary = false };
+                session.IsPrimary = false;
 
-            // Register session
-            RegisterWindow(session);
+                if (sw.Session == null)
+                {
+                    RegisterWindow(session);
+                }
+
+                sw.ViewModel.TabService.Tabs.Add(tab);
+                sw.ViewModel.TabService.SelectedTab = tab;
+                tab.State = TabLifecycleState.Active;
+            }
+            else if (newWindow?.Content is FrameworkElement fe && fe.DataContext is ViewModels.Windows.ShellViewModel vm)
+            {
+                session = new WindowSession
+                {
+                    WindowInstance = newWindow,
+                    IsPrimary = false
+                };
+                RegisterWindow(session);
+
+                vm.TabService.Tabs.Add(tab);
+                vm.TabService.SelectedTab = tab;
+                tab.State = TabLifecycleState.Active;
+            }
+            else
+            {
+                session = new WindowSession
+                {
+                    WindowInstance = newWindow,
+                    IsPrimary = false
+                };
+                RegisterWindow(session);
+                session.AddTab(tab);
+            }
 
             if (newWindow != null)
             {
                 // Position window at target coordinates
                 newWindow.AppWindow.Move(new Windows.Graphics.PointInt32((int)screenPosition.X, (int)screenPosition.Y));
-
-                // Add the torn-off tab to the new window's tab service or session
-                if (newWindow is Views.Windows.ShellWindow sw)
-                {
-                    sw.ViewModel.TabService.Tabs.Add(tab);
-                    sw.ViewModel.TabService.SelectedTab = tab;
-                    tab.State = TabLifecycleState.Active;
-                }
-                else if (newWindow.Content is FrameworkElement fe && fe.DataContext is ViewModels.Windows.ShellViewModel vm)
-                {
-                    vm.TabService.Tabs.Add(tab);
-                    vm.TabService.SelectedTab = tab;
-                    tab.State = TabLifecycleState.Active;
-                }
-                else
-                {
-                    session.AddTab(tab);
-                }
-
                 newWindow.Activate();
             }
 
@@ -155,7 +213,8 @@ namespace DataSphere.Services
 
         /// <summary>
         /// Transfers a tab from a donor window to a target window at a specific index.
-        /// Enforces the donor window auto-closure rule if the donor window has only two tabs (Home + ContentTab).
+        /// Enforces the donor window auto-closure rule if the donor window is a secondary window
+        /// and transferring the tab leaves only the non-closable Home tab.
         /// </summary>
         /// <param name="sourceWindowId">The ID of the donor window.</param>
         /// <param name="targetWindowId">The ID of the receiving window.</param>
@@ -182,23 +241,97 @@ namespace DataSphere.Services
                 return;
             }
 
-            // Invariant Check: If the donor window has only 2 tabs (Home + ContentTab),
-            // moving the ContentTab leaves only Home, so the donor window must close.
+            // Invariant Check: If the donor window is secondary and leaves only Home, it must auto-close.
+            // The primary window must never auto-close on transfer.
             bool shouldCloseDonor = sourceSession.CanAutoCloseOnTransfer();
 
-            // Remove from source
-            sourceSession.Tabs.Remove(tab);
+            var donorWindow = sourceSession.WindowInstance as Views.Windows.ShellWindow;
+            var targetWindow = targetSession.WindowInstance as Views.Windows.ShellWindow;
 
-            // Insert into target
-            int insertIndex = Math.Clamp(targetIndex, 0, targetSession.Tabs.Count);
-            targetSession.Tabs.Insert(insertIndex, tab);
-            targetSession.SelectedTab = tab;
-            tab.State = TabLifecycleState.Active;
+            // 1. Remove from source window ViewModel (which automatically synchronizes sourceSession.Tabs)
+            if (donorWindow != null)
+            {
+                ExecuteOnUi(donorWindow, () =>
+                {
+                    if (Equals(donorWindow.ViewModel.SelectedTab, tab))
+                    {
+                        int currentIndex = donorWindow.ViewModel.Tabs.IndexOf(tab);
+                        int fallbackIndex = Math.Max(0, currentIndex - 1);
+                        donorWindow.ViewModel.Tabs.Remove(tab);
+                        if (donorWindow.ViewModel.Tabs.Count > 0)
+                        {
+                            donorWindow.ViewModel.SelectedTab = donorWindow.ViewModel.Tabs[Math.Min(fallbackIndex, donorWindow.ViewModel.Tabs.Count - 1)];
+                        }
+                    }
+                    else
+                    {
+                        donorWindow.ViewModel.Tabs.Remove(tab);
+                    }
+                });
+            }
+            else
+            {
+                sourceSession.Tabs.Remove(tab);
+            }
 
-            // Automatically close donor window if invariant is triggered
+            // 2. Insert into target window ViewModel (which automatically synchronizes targetSession.Tabs)
+            if (targetWindow != null)
+            {
+                ExecuteOnUi(targetWindow, () =>
+                {
+                    int insertIndex = Math.Clamp(targetIndex, 0, targetWindow.ViewModel.Tabs.Count);
+                    targetWindow.ViewModel.Tabs.Insert(insertIndex, tab);
+                    targetWindow.ViewModel.SelectedTab = tab;
+                    tab.State = TabLifecycleState.Active;
+                    targetWindow.Activate();
+                });
+            }
+            else
+            {
+                int insertIndex = Math.Clamp(targetIndex, 0, targetSession.Tabs.Count);
+                targetSession.Tabs.Insert(insertIndex, tab);
+                targetSession.SelectedTab = tab;
+                tab.State = TabLifecycleState.Active;
+            }
+
+            // 3. Automatically close donor window if invariant is triggered
             if (shouldCloseDonor)
             {
-                sourceSession.WindowInstance?.Close();
+                if (donorWindow != null)
+                {
+                    ExecuteOnUi(donorWindow, () =>
+                    {
+                        donorWindow.Close();
+                    });
+                }
+                else
+                {
+                    sourceSession.WindowInstance?.Close();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Executes an action on the UI thread of the target window if required, or immediately if already on the UI thread.
+        /// </summary>
+        /// <param name="window">The target window hosting the UI thread.</param>
+        /// <param name="action">The action to execute.</param>
+        private static void ExecuteOnUi(Window? window, Action action)
+        {
+            if (window?.DispatcherQueue != null)
+            {
+                if (window.DispatcherQueue.HasThreadAccess)
+                {
+                    action();
+                }
+                else
+                {
+                    window.DispatcherQueue.TryEnqueue(() => action());
+                }
+            }
+            else
+            {
+                action();
             }
         }
     }

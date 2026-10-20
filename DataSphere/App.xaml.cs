@@ -55,6 +55,8 @@ namespace DataSphere
 
                     // Core Application Services
                     services.AddSingleton<MessengerService>();
+                    services.AddSingleton<IThemeService, DataSphere.Services.ThemeService>();
+                    services.AddSingleton<IDialogService, DataSphere.Services.DialogService>();
 
                     // ViewModels & Windows
                     services.AddTransient<ViewModels.Windows.ShellViewModel>();
@@ -66,6 +68,8 @@ namespace DataSphere
 
                     services.AddTransient<ViewModels.Pages.DatabaseGroup.DatabaseViewModel>();
                     services.AddTransient<Views.Pages.DatabaseGroup.DatabasePage>();
+                    services.AddTransient<ViewModels.Pages.DatabaseGroup.ConnectControlViewModel>();
+                    services.AddTransient<Views.Pages.DatabaseGroup.ConnectViewControl>();
 
                     services.AddTransient<ViewModels.PagesBottom.SettingsViewModel>();
                     services.AddTransient<Views.PagesBottom.SettingsPage>();

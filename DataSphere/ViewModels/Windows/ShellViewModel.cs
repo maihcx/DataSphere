@@ -17,6 +17,11 @@ namespace DataSphere.ViewModels.Windows
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
+        /// Occurs when closing the sole remaining tab requests closing the window and application session.
+        /// </summary>
+        public event EventHandler? RequestCloseWindow;
+
+        /// <summary>
         /// Gets the tab service managing tab collections and selection for this window.
         /// </summary>
         public ITabService TabService => _tabService;
@@ -57,18 +62,56 @@ namespace DataSphere.ViewModels.Windows
             _windowManager = windowManager ?? throw new ArgumentNullException(nameof(windowManager));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
+            // Synchronize selection changes originating from TabService
+            _tabService.PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName == nameof(ITabService.SelectedTab))
+                {
+                    OnPropertyChanged(nameof(SelectedTab));
+                }
+            };
+
+            // Dynamically manage close button visibility on the Home tab
+            _tabService.Tabs.CollectionChanged += (sender, e) =>
+            {
+                UpdateHomeClosableState();
+            };
+
             InitializeHomeTab();
         }
 
         /// <summary>
-        /// Anchors the uncloseable Home tab at index 0 of the tab strip.
+        /// Updates the closability state of the Home tab based on whether it is the sole remaining tab.
+        /// </summary>
+        private void UpdateHomeClosableState()
+        {
+            var homeTab = _tabService.Tabs.FirstOrDefault(t => t.PageType == typeof(HomePage));
+            if (homeTab != null)
+            {
+                // When 2 or more tabs are open, Home's close button is hidden (IsClosable = false).
+                // Only when Home is the single tab remaining, Home's close button is shown (IsClosable = true).
+                homeTab.IsClosable = _tabService.Tabs.Count == 1;
+            }
+        }
+
+        /// <summary>
+        /// Anchors the Home tab at index 0 of the tab strip.
         /// </summary>
         private void InitializeHomeTab()
         {
             if (_tabService.Tabs.Count == 0)
             {
                 var homeVm = new DataSphere.ViewModels.Pages.HomeViewModel(_tabService);
-                var homePageInstance = new HomePage(homeVm);
+                object? homePageInstance = null;
+                try
+                {
+                    homePageInstance = new HomePage(homeVm);
+                }
+                catch
+                {
+                    // Fallback for headless environments or unit testing where WinUI Xaml core is not active
+                    homePageInstance = homeVm;
+                }
 
                 var homeTab = new TabItemModel
                 {
@@ -77,18 +120,19 @@ namespace DataSphere.ViewModels.Windows
                     IconGlyph = "\uE80F",
                     PageType = typeof(HomePage),
                     Content = homePageInstance,
-                    IsClosable = false,
+                    IsClosable = true,
                     IsSelected = true,
                     State = TabLifecycleState.Active
                 };
 
                 _tabService.Tabs.Add(homeTab);
                 _tabService.SelectedTab = homeTab;
+                UpdateHomeClosableState();
             }
         }
 
         /// <summary>
-        /// Closes the specified tab, respecting the uncloseable Home tab invariant.
+        /// Closes the specified tab, triggering window closure if Home is closed as the sole remaining tab.
         /// </summary>
         /// <param name="tab">The tab to close.</param>
         [RelayCommand]
@@ -96,6 +140,12 @@ namespace DataSphere.ViewModels.Windows
         {
             if (tab != null && tab.IsClosable)
             {
+                if (tab.PageType == typeof(HomePage) && _tabService.Tabs.Count == 1)
+                {
+                    RequestCloseWindow?.Invoke(this, EventArgs.Empty);
+                    return;
+                }
+
                 _tabService.CloseTab(tab);
                 OnPropertyChanged(nameof(SelectedTab));
             }

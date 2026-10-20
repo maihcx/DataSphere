@@ -24,8 +24,12 @@ namespace DataSphere.Utils
         [DllImport("kernel32.dll")]
         private static extern uint GetCurrentThreadId();
 
+        /// <summary>
+        /// Retrieves a handle to the foreground window (the window with which the user is currently working).
+        /// </summary>
+        /// <returns>The handle to the foreground window, or IntPtr.Zero if none.</returns>
         [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
+        public static extern IntPtr GetForegroundWindow();
 
         [DllImport("user32.dll")]
         private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);

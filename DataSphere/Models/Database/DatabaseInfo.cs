@@ -180,7 +180,7 @@ namespace DataSphere.Models.Database
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_tables_title",
-                    IconGlyph = "\uE82D",
+                    IconGlyph = "\uE8B7",
                     Items = Tables ?? new ObservableCollection<Table>(),
                     Parent = this
                 };
@@ -189,7 +189,7 @@ namespace DataSphere.Models.Database
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_views_title",
-                    IconGlyph = "\uE8B9",
+                    IconGlyph = "\uE890",
                     Items = new ObservableCollection<object>(),
                     Parent = this
                 };
@@ -205,7 +205,7 @@ namespace DataSphere.Models.Database
                 yield return new DatabaseCategory
                 {
                     NameKey = "dbinf_fncs_title",
-                    IconGlyph = "\uE8B7",
+                    IconGlyph = "\uF168",
                     Items = new ObservableCollection<object>(),
                     Parent = this
                 };

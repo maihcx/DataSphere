@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DataSphere.Models;
+using DataSphere.Services.Contracts;
 using DataSphere.Utils;
 
 namespace DataSphere.ViewModels.PagesBottom
@@ -11,6 +12,8 @@ namespace DataSphere.ViewModels.PagesBottom
     /// </summary>
     public partial class SettingsViewModel : ObservableObject
     {
+        private readonly IThemeService? _themeService;
+
         /// <summary>
         /// Gets or sets the copyright notice text.
         /// </summary>
@@ -49,10 +52,19 @@ namespace DataSphere.ViewModels.PagesBottom
         public partial LanguageItem SelectedLanguage { get; set; } = LanguageBase.GetCurrentLanguageItem();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SettingsViewModel"/> class.
+        /// Initializes a new instance of the <see cref="SettingsViewModel"/> class resolving dependencies from the service provider.
         /// </summary>
-        public SettingsViewModel()
+        public SettingsViewModel() : this(App.GetService<IThemeService>())
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SettingsViewModel"/> class with the specified theme service.
+        /// </summary>
+        /// <param name="themeService">The application theme service.</param>
+        public SettingsViewModel(IThemeService? themeService)
+        {
+            _themeService = themeService;
             AppVersion = $"{AppInfoHelper.AppName} - {GetAssemblyVersion()}";
             InitializeThemes();
             UpdateLocalizedStrings();
@@ -68,7 +80,7 @@ namespace DataSphere.ViewModels.PagesBottom
                 new SettingOptionItem { Value = "Default", Content = LanguageBase.GetLangValue("theme_default") }
             };
 
-            var savedTheme = UserDataStore.GetValue<string>("IThemeType");
+            var savedTheme = _themeService?.CurrentTheme ?? UserDataStore.GetValue<string>("IThemeType");
             SelectedTheme = ThemeList.FirstOrDefault(t => t.Value == savedTheme) ?? ThemeList.FirstOrDefault();
         }
 
@@ -99,7 +111,14 @@ namespace DataSphere.ViewModels.PagesBottom
         {
             if (value?.Value != null)
             {
-                UserDataStore.SetValue("IThemeType", value.Value);
+                if (_themeService != null)
+                {
+                    _themeService.SetTheme(value.Value);
+                }
+                else
+                {
+                    UserDataStore.SetValue("IThemeType", value.Value);
+                }
             }
         }
     }

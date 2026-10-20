@@ -89,12 +89,18 @@ namespace DataSphere.Models
 
         /// <summary>
         /// Determines whether this donor window meets the condition to auto-close when a content tab is transferred out.
-        /// Returns <c>true</c> if there are currently exactly two tabs (Home and one content tab).
+        /// Returns <c>true</c> if this is a secondary window and transferring a tab leaves only the non-closable Home tab.
+        /// The primary application window never auto-closes on tab transfer.
         /// </summary>
-        /// <returns><c>true</c> if transferring a tab leaves only the non-closable Home tab.</returns>
+        /// <returns><c>true</c> if transferring a tab leaves only the non-closable Home tab in a secondary window.</returns>
         public bool CanAutoCloseOnTransfer()
         {
-            return Tabs.Count == 2 || (Tabs.Count == 1 && !Tabs[0].IsClosable);
+            if (IsPrimary)
+            {
+                return false;
+            }
+
+            return Tabs.Count <= 1 || (Tabs.Count == 2 && Tabs.Any(t => !t.IsClosable));
         }
     }
 }

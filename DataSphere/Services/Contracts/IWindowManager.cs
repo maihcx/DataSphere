@@ -14,6 +14,11 @@ namespace DataSphere.Services.Contracts
         IReadOnlyList<WindowSession> Windows { get; }
 
         /// <summary>
+        /// Gets the currently active top-level window session that has user focus.
+        /// </summary>
+        WindowSession? ActiveWindowSession { get; }
+
+        /// <summary>
         /// Registers a newly created top-level window session.
         /// </summary>
         /// <param name="session">The window session to register.</param>

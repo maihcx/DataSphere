@@ -10,6 +10,11 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
             <utils:TranslationSource x:Key="Localization" />
+            <helpers:InverseBooleanConverter x:Key="InverseBooleanConverter" xmlns:helpers="using:DataSphere.Helpers" />
+            <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" xmlns:helpers="using:DataSphere.Helpers" />
+            <helpers:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" xmlns:helpers="using:DataSphere.Helpers" />
+            <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" xmlns:helpers="using:DataSphere.Helpers" />
+            <helpers:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" xmlns:helpers="using:DataSphere.Helpers" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using DataSphere.Models;
 
 namespace DataSphere.Services.Contracts
@@ -6,7 +7,7 @@ namespace DataSphere.Services.Contracts
     /// <summary>
     /// Service responsible for managing tabbed navigation and tab lifecycle inside a window shell.
     /// </summary>
-    public interface ITabService
+    public interface ITabService : INotifyPropertyChanged
     {
         /// <summary>
         /// Gets the observable collection of tabs active in the current window.

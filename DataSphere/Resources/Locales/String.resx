@@ -354,4 +354,73 @@
   <data name="theme_default" xml:space="preserve">
     <value>System Default</value>
   </data>
+  <data name="btn_test_connection" xml:space="preserve">
+    <value>Test Connection</value>
+  </data>
+  <data name="btn_new_connection" xml:space="preserve">
+    <value>New Connection</value>
+  </data>
+  <data name="msg_test_connection_success" xml:space="preserve">
+    <value>Connection successful!</value>
+  </data>
+  <data name="msg_test_connection_failed" xml:space="preserve">
+    <value>Connection failed: {0}</value>
+  </data>
+  <data name="pagination_rows_per_page" xml:space="preserve">
+    <value>Rows per page:</value>
+  </data>
+  <data name="pagination_page_info" xml:space="preserve">
+    <value>Page {0} of {1} ({2} records)</value>
+  </data>
+  <data name="btn_refresh_table" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="lbl_total_records" xml:space="preserve">
+    <value>Total records: {0}</value>
+  </data>
+  <data name="dialog_delete_connection_title" xml:space="preserve">
+    <value>Delete Connection</value>
+  </data>
+  <data name="dialog_delete_connection_message" xml:space="preserve">
+    <value>Are you sure you want to delete '{0}'?</value>
+  </data>
+  <data name="lbl_connection_database" xml:space="preserve">
+    <value>Default Database</value>
+  </data>
+  <data name="lbl_optional" xml:space="preserve">
+    <value>Optional</value>
+  </data>
+  <data name="lbl_collation" xml:space="preserve">
+    <value>Collation</value>
+  </data>
+  <data name="lbl_charset" xml:space="preserve">
+    <value>Character Set</value>
+  </data>
+  <data name="status_connecting" xml:space="preserve">
+    <value>Connecting...</value>
+  </data>
+  <data name="status_testing" xml:space="preserve">
+    <value>Testing connection...</value>
+  </data>
+  <data name="err_name_required" xml:space="preserve">
+    <value>Connection name is required</value>
+  </data>
+  <data name="err_host_required" xml:space="preserve">
+    <value>Host is required</value>
+  </data>
+  <data name="err_user_required" xml:space="preserve">
+    <value>Username is required</value>
+  </data>
+  <data name="tab_connections_header" xml:space="preserve">
+    <value>Connections</value>
+  </data>
+  <data name="lbl_database_type" xml:space="preserve">
+    <value>Database Type</value>
+  </data>
+  <data name="msg_test_pg_socket" xml:space="preserve">
+    <value>PostgreSQL server reachable on port {0}. Full query engine integration in progress.</value>
+  </data>
+  <data name="page_db_select_table_hint" xml:space="preserve">
+    <value>Select a table in the explorer to browse its records</value>
+  </data>
 </root>

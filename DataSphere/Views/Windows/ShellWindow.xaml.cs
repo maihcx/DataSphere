@@ -7,7 +7,9 @@ using Microsoft.UI.Xaml.Controls;
 using WinUIEx;
 using DataSphere.Models;
 using DataSphere.Services.Contracts;
+using DataSphere.Utils;
 using DataSphere.ViewModels.Windows;
+using DataSphere.Views.Pages;
 
 namespace DataSphere.Views.Windows
 {
@@ -82,7 +84,41 @@ namespace DataSphere.Views.Windows
                 }
             };
 
+            ViewModel.RequestCloseWindow += (s, e) =>
+            {
+                Close();
+            };
+
+            if (_session.IsPrimary)
+            {
+                WindowPlacementHelper.RestorePlacement(this);
+            }
+
+            AppWindow.Closing += (sender, args) =>
+            {
+                if (_session != null && _session.IsPrimary)
+                {
+                    WindowPlacementHelper.SavePlacement(this);
+                }
+            };
+
+            Closed += (sender, args) =>
+            {
+                if (_session != null && _session.IsPrimary)
+                {
+                    WindowPlacementHelper.SavePlacement(this);
+                }
+            };
+
             _windowManager.RegisterWindow(_session);
+        }
+
+        private void OnTabViewSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ShellTabView.SelectedItem is TabItemModel selectedTab && !Equals(ViewModel.SelectedTab, selectedTab))
+            {
+                ViewModel.SelectedTab = selectedTab;
+            }
         }
 
         private void OnTabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
@@ -98,7 +134,7 @@ namespace DataSphere.Views.Windows
             if (args.Item is TabItemModel tabModel)
             {
                 // Invariant: Anchored Home tab cannot be dragged or torn off
-                if (!tabModel.IsClosable)
+                if (tabModel.PageType == typeof(HomePage) || !tabModel.IsClosable)
                 {
                     args.Cancel = true;
                     return;
@@ -122,25 +158,29 @@ namespace DataSphere.Views.Windows
         {
             if (args.Item is TabItemModel tabModel && tabModel.IsClosable)
             {
-                // Invariant check: Check if donor window had only 2 tabs (Home + ContentTab)
-                bool shouldCloseDonor = _session != null && _session.CanAutoCloseOnTransfer();
-
-                // Remove tab from current window
-                ViewModel.Tabs.Remove(tabModel);
-                _session?.Tabs.Remove(tabModel);
+                // Switch active selection if the torn-off tab is currently selected
+                if (Equals(ViewModel.SelectedTab, tabModel))
+                {
+                    int index = ViewModel.Tabs.IndexOf(tabModel);
+                    int fallbackIndex = Math.Max(0, index - 1);
+                    ViewModel.Tabs.Remove(tabModel);
+                    if (ViewModel.Tabs.Count > 0)
+                    {
+                        ViewModel.SelectedTab = ViewModel.Tabs[Math.Min(fallbackIndex, ViewModel.Tabs.Count - 1)];
+                    }
+                }
+                else
+                {
+                    // Remove tab from current window (automatically synchronizes _session.Tabs)
+                    ViewModel.Tabs.Remove(tabModel);
+                }
 
                 // Get cursor position on screen
                 var cursorPos = SimpleCursorPosition.GetCursorPos();
                 var screenPoint = new Point(cursorPos.X, cursorPos.Y);
 
-                // Tear off into new window
+                // Tear off into new window while leaving donor window open
                 _windowManager.TearOffTabToNewWindow(tabModel, screenPoint);
-
-                // Invariant: Auto-close donor window if only Home remains from a 2-tab window
-                if (shouldCloseDonor)
-                {
-                    Close();
-                }
             }
         }
 

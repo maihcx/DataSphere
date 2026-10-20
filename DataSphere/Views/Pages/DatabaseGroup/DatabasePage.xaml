@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:models="using:DataSphere.Models"
     xmlns:vm="using:DataSphere.ViewModels.Pages.DatabaseGroup"
     mc:Ignorable="d">
 
@@ -13,41 +14,43 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+        
+        <!-- Inner Tab Workspace -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <!-- Database Module Header -->
-        <Border Grid.Row="0" Padding="24,16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Spacing="12">
-                <FontIcon Glyph="&#xE774;" FontSize="24" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="{Binding [page_db_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" />
-                    <TextBlock Text="{Binding [page_db_subtitle], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                </StackPanel>
-            </StackPanel>
-        </Border>
+            <TabView
+                Grid.Row="0"
+                x:Name="InnerTabView"
+                TabItemsSource="{x:Bind ViewModel.InnerTabs, Mode=OneWay}"
+                SelectedItem="{x:Bind ViewModel.SelectedInnerTab, Mode=TwoWay}"
+                SelectionChanged="InnerTabView_SelectionChanged"
+                TabCloseRequested="InnerTabView_TabCloseRequested"
+                IsAddTabButtonVisible="False"
+                CanReorderTabs="False"
+                HorizontalAlignment="Stretch">
+                <TabView.TabItemTemplate>
+                    <DataTemplate x:DataType="models:InnerTabItemModel">
+                        <TabViewItem
+                            Header="{x:Bind Header, Mode=OneWay}"
+                            IsClosable="{x:Bind IsClosable, Mode=OneWay}">
+                            <TabViewItem.IconSource>
+                                <FontIconSource Glyph="{x:Bind IconGlyph, Mode=OneWay}" />
+                            </TabViewItem.IconSource>
+                        </TabViewItem>
+                    </DataTemplate>
+                </TabView.TabItemTemplate>
+            </TabView>
 
-        <!-- Connection Management Content Area -->
-        <Border Grid.Row="1" Padding="24">
-            <StackPanel Spacing="16" MaxWidth="800" HorizontalAlignment="Left">
-                <TextBlock Text="{Binding [page_db_conn_list_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                <TextBlock Text="{Binding [page_db_conn_list_desc], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-
-                <Border
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="20">
-                    <StackPanel Spacing="12">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <FontIcon Glyph="&#xE753;" FontSize="24" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{Binding [page_db_ready_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                                <TextBlock Text="{Binding [page_db_ready_desc], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            </StackPanel>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </Border>
+            <!-- Active Tab Content Area -->
+            <ContentControl
+                Grid.Row="1"
+                Content="{x:Bind ViewModel.SelectedInnerTab.Content, Mode=OneWay}"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch" />
+        </Grid>
     </Grid>
 </Page>

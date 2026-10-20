@@ -34,7 +34,7 @@ DataSphere là ứng dụng quản lý và truy vấn cơ sở dữ liệu (MySQ
 
 ## 2. Bất Biến Ranh Giới & Hiến Chương Dự Án (`CONSTITUTION.md`)
 
-Mọi đề xuất mã nguồn hoặc thay đổi kiến trúc **bắt buộc tuân thủ 100%** Hiến chương dự án v1.0.0 ([`.specify/memory/constitution.md`](file:///d:/DEV/C%23DOTNET/DataSphere/.specify/memory/constitution.md)):
+Mọi đề xuất mã nguồn hoặc thay đổi kiến trúc **bắt buộc tuân thủ 100%** Hiến chương dự án v1.5.0 ([`.specify/memory/constitution.md`](file:///d:/DEV/C%23DOTNET/DataSphere/.specify/memory/constitution.md)):
 
 1. **Principle I: Clean MVVM & Type Safety**:
    - Sử dụng triệt để `CommunityToolkit.Mvvm` (`[ObservableProperty]`, `[RelayCommand]`).
@@ -58,6 +58,22 @@ Mọi đề xuất mã nguồn hoặc thay đổi kiến trúc **bắt buộc tu
 7. **Principle VII: Zero Hardcoded User-Facing Strings & Dynamic Internationalization (i18n)**:
    - Nghiêm cấm tuyệt đối hardcode chuỗi ký tự hiển thị người dùng (tiêu đề tab, tên card, thông báo lỗi, menu...) trong C# và XAML. Toàn bộ text UI bắt buộc dùng `TranslationSource` (`DataSphere.Utils.Translations`) và tài nguyên `.resx` (`String.resx`, `String.en.resx`, `String.vi.resx`) để hỗ trợ chuyển đổi ngôn ngữ động ngay khi người dùng chọn trong Cài đặt mà không cần khởi động lại ứng dụng.
    - Trong XAML, toàn bộ text hiển thị bắt buộc bind trực tiếp qua: `Text="{Binding [KeyName], Source={StaticResource Localization}, Mode=OneWay}"` thay vì khai báo các thuộc tính string dư thừa trên ViewModel.
+   - **Mã hóa file tài nguyên**: Tất cả file `.resx` bắt buộc lưu ở định dạng **UTF-8 without BOM**. Tuyệt đối không dùng shell script appending để tránh lỗi hỏng font (Mojibake).
+   - **Tách biệt TabView và Viewport**: Trong WinUI 3, `TabView` chỉ chứa header/items; cấm đặt trực tiếp `<ContentControl>` bên trong `<TabView>` (bắt buộc tách ra dòng Grid riêng biệt).
+8. **Principle VIII: Visual UI Reproduction, Diagnostic Inspection & Verification Gate**:
+   - **Tái hiện chẩn đoán khi báo lỗi (Diagnostic Reproduction Gate)**: Khi người dùng báo lỗi liên quan đến UI/UX, nghiêm cấm suy đoán nguyên nhân qua đọc code thuần túy. Bắt buộc khởi chạy app và thực thi kiểm thử UI Automation để tự động tái hiện lỗi thực tế, kiểm tra cây UI Automation element và chụp ảnh lỗi làm bằng chứng chẩn đoán trực tiếp vào tài liệu thẩm định lỗi (`assess.md`).
+   - **Giao thức Desktop Station thực (`WinSta0\default`)**: Môi trường subshell agent mặc định nằm trong `WinSta0\exebox-...`. Để tương tác với desktop thật của người dùng và chụp ảnh màn hình chính xác, agent bắt buộc:
+     1. Khởi chạy app qua Win32 `CreateProcess` với `STARTUPINFO.lpDesktop = @"WinSta0\default"`.
+     2. Đổi desktop của thread kiểm thử qua `OpenDesktop("default", ...)` và `SetThreadDesktop(hDesk)`.
+   - **Bảo toàn XAML sạch (Zero-AutomationId Invariant)**: Nghiêm cấm tuyệt đối thêm các thuộc tính kiểm thử tạm thời như `AutomationProperties.AutomationId` vào tệp XAML sản phẩm. Mọi định vị điều khiển tự động bắt buộc dựa vào:
+     1. Hình học bố cục (`BoundingRectangle` x, y, width, height).
+     2. Phân cấp điều khiển (`ControlType`: `Button`, `ComboBox`, `Text`).
+     3. Khớp chuỗi ký tự hiển thị con từ tệp tài nguyên (`TextBlock.Name`).
+   - **Điều khiển chuột vật lý & Chụp ảnh DirectComposition chuẩn**: Tính toán tọa độ tâm của control `(X, Y) = (rect.X + rect.Width / 2, rect.Y + rect.Height / 2)`, di chuyển chuột bằng `SetCursorPos(X, Y)`, kích hoạt click thật bằng `mouse_event`, và chụp ảnh cửa sổ WinUI 3 qua `PrintWindow` với cờ `PW_RENDERFULLCONTENT` (`flag = 2`).
+   - **Tập lệnh mẫu chuẩn hóa (Standard Execution Blueprint)**: Tái sử dụng trực tiếp kịch bản mẫu đã kiểm chứng tại [`scripts/test-real-desktop.ps1`](file:///d:/DEV/C%23DOTNET/DataSphere/scripts/test-real-desktop.ps1) và [`scripts/verify-real-end-to-end.ps1`](file:///d:/DEV/C%23DOTNET/DataSphere/scripts/verify-real-end-to-end.ps1). Nghiêm cấm agent tương lai tự tìm hiểu lại từ đầu.
+   - **Nghiêm cấm tuyệt đối suy đoán & Bắt buộc kiểm thử UI thực tế trước khi bàn giao (Zero-Speculation Live UI Verification Gate)**:
+     - Nghiêm cấm tuyệt đối việc suy đoán, giả định, hoặc tuyên bố kiểu *"tôi đoán là nó hoạt động"*, *"về lý thuyết đã xong"*, hay *"chắc chắn đã fix"*.
+     - Mọi tính năng giao diện, tương tác người dùng hoặc sửa lỗi UI/UX **CHỈ ĐƯỢC PHÉP BÀN GIAO** khi và chỉ khi đã chạy kịch bản kiểm thử tự động hóa thực tế trên desktop thật (`WinSta0\default`), thực hiện click chuột vật lý và tương tác chính xác (đúng tọa độ, đúng thao tác đóng/mở/chọn), chứng minh ứng dụng không bị crash và thu thập đầy đủ bằng chứng ảnh chụp màn hình DirectComposition (`PW_RENDERFULLCONTENT`) lưu vào thư mục artifacts (`<appDataDir>/brain/<conversation-id>`). Mọi nghiệm thu chỉ dựa trên `dotnet build` hoặc headless test khi có liên quan đến UI đều bị coi là vi phạm nghiêm trọng Hiến chương.
 
 ---
 
@@ -189,3 +205,10 @@ Mọi lớp (classes), giao diện (interfaces), hàm, phương thức (methods)
 powershell -ExecutionPolicy Bypass -File .\.specify\extensions\speckit-superpowers-bridge\scripts\powershell\bridge-status.ps1 -Readiness
 ```
 *(Yêu cầu: Readiness PASS)*
+
+### 4. Tái Hiện Lỗi & Kiểm Thử Trực Quan UI (Diagnostic Reproduction & Visual Evidence Gates):
+Mọi báo cáo lỗi hoặc tính năng giao diện người dùng bắt buộc phải được kiểm định thực tế qua UI Automation trên Desktop thực (`WinSta0\default`):
+- **Kịch bản tự động hóa chuẩn**: Sử dụng mẫu chuẩn tại [`scripts/test-real-desktop.ps1`](file:///d:/DEV/C%23DOTNET/DataSphere/scripts/test-real-desktop.ps1) (khởi chạy trên `WinSta0\default`, đổi Desktop thread, điều khiển chuột vật lý, không thêm `AutomationId` vào XAML, chụp ảnh `PW_RENDERFULLCONTENT`).
+- **Khi tiếp nhận lỗi (Bug Assessment Phase — `/speckit-bug-assess`)**: Bắt buộc khởi chạy ứng dụng thực tế để tái hiện lỗi, trích xuất cấu trúc element tree và chụp ảnh lỗi làm bằng chứng chẩn đoán trực tiếp vào tài liệu thẩm định lỗi (`assess.md`).
+- **Khi nghiệm thu hoàn thành (Verification Gate — `/speckit-bug-test`, `/speckit-converge`)**: Bắt buộc khởi chạy ứng dụng sau khi sửa mã nguồn, chụp ảnh màn hình giao diện đã khắc phục, lưu vào thư mục artifacts và nhúng vào báo cáo nghiệm thu (`test.md`).
+*(Yêu cầu: Không suy đoán lỗi trên lý thuyết, không làm bẩn XAML với AutomationId, giao diện hiển thị đúng layout, không bị trống nội dung, không vỡ font/Mojibake)*

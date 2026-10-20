@@ -45,12 +45,34 @@ namespace DataSphere.ViewModels.Pages
         public partial string AppDescription { get; set; } = AppInfoHelper.AppDescription;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HomeViewModel"/> class.
+        /// Initializes a new instance of the <see cref="HomeViewModel"/> class resolving the active window's tab service.
+        /// </summary>
+        public HomeViewModel() : this(ResolveActiveTabService())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HomeViewModel"/> class with the specified tab service.
         /// </summary>
         /// <param name="tabService">The tab service associated with the host window.</param>
         public HomeViewModel(ITabService tabService)
         {
             _tabService = tabService ?? throw new ArgumentNullException(nameof(tabService));
+        }
+
+        private static ITabService ResolveActiveTabService()
+        {
+            var windowManager = App.GetService<IWindowManager>();
+            if (windowManager?.Windows.Count > 0)
+            {
+                var activeSession = windowManager.Windows.FirstOrDefault(w => w.IsPrimary) ?? windowManager.Windows[0];
+                if (activeSession.WindowInstance is Views.Windows.ShellWindow sw)
+                {
+                    return sw.ViewModel.TabService;
+                }
+            }
+
+            return App.GetRequiredService<ITabService>();
         }
 
         /// <summary>

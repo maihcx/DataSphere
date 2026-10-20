@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="DataSphere.Views.Dialogs.DatabaseEditingDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DataSphere.ViewModels.Dialogs"
+    mc:Ignorable="d"
+    Title="{Binding [dialog_databaseset_title], Source={StaticResource Localization}, Mode=OneWay}"
+    PrimaryButtonText="{Binding [save_title], Source={StaticResource Localization}, Mode=OneWay}"
+    CloseButtonText="{Binding [close_title], Source={StaticResource Localization}, Mode=OneWay}"
+    DefaultButton="Primary"
+    IsPrimaryButtonEnabled="{x:Bind ViewModel.IsAllowSubmit, Mode=OneWay}">
+
+    <StackPanel Spacing="14" Width="400" Margin="0,8,0,0">
+        <!-- Database Name -->
+        <TextBox
+            Header="{Binding [dalog_db_name_title], Source={StaticResource Localization}, Mode=OneWay}"
+            Text="{x:Bind ViewModel.DatabaseName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            PlaceholderText="e.g. my_new_database" />
+
+        <!-- Collation Selection -->
+        <ComboBox
+            Header="{Binding [dalog_db_collation_title], Source={StaticResource Localization}, Mode=OneWay}"
+            ItemsSource="{x:Bind ViewModel.DatabaseCollation, Mode=OneWay}"
+            SelectedItem="{x:Bind ViewModel.DatabaseCollationSelected, Mode=TwoWay}"
+            DisplayMemberPath="Collation"
+            HorizontalAlignment="Stretch" />
+    </StackPanel>
+</ContentDialog>

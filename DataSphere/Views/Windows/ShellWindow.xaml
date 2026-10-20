@@ -27,6 +27,7 @@
             IsAddTabButtonVisible="False"
             TabItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
             SelectedItem="{x:Bind ViewModel.SelectedTab, Mode=TwoWay}"
+            SelectionChanged="OnTabViewSelectionChanged"
             TabCloseRequested="OnTabCloseRequested"
             TabDragStarting="OnTabDragStarting"
             TabDroppedOutside="OnTabDroppedOutside"

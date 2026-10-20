@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="DataSphere.Views.Dialogs.ConnectionEditingDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DataSphere.ViewModels.Dialogs"
+    mc:Ignorable="d"
+    Title="{Binding [dialog_connectset_title], Source={StaticResource Localization}, Mode=OneWay}"
+    PrimaryButtonText="{Binding [save_title], Source={StaticResource Localization}, Mode=OneWay}"
+    CloseButtonText="{Binding [close_title], Source={StaticResource Localization}, Mode=OneWay}"
+    DefaultButton="Primary"
+    IsPrimaryButtonEnabled="{x:Bind ViewModel.IsAllowSubmit, Mode=OneWay}">
+
+    <StackPanel Spacing="14" Width="420" Margin="0,8,0,0">
+        <!-- Database Engine Type -->
+        <ComboBox
+            Header="{Binding [lbl_database_type], Source={StaticResource Localization}, Mode=OneWay}"
+            ItemsSource="{x:Bind ViewModel.AvailableDatabaseTypes}"
+            SelectedItem="{x:Bind ViewModel.SelectedDatabaseType, Mode=TwoWay}"
+            HorizontalAlignment="Stretch" />
+
+        <!-- Connection Name -->
+        <TextBox
+            Header="{Binding [dalog_conn_name_title], Source={StaticResource Localization}, Mode=OneWay}"
+            Text="{x:Bind ViewModel.ConnectionName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            PlaceholderText="e.g. Localhost MySQL" />
+
+        <!-- Host and Port -->
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox
+                Grid.Column="0"
+                Header="{Binding [dalog_conn_host_title], Source={StaticResource Localization}, Mode=OneWay}"
+                Text="{x:Bind ViewModel.ConnectionHost, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                PlaceholderText="127.0.0.1" />
+
+            <NumberBox
+                Grid.Column="1"
+                Header="{Binding [dalog_conn_port_title], Source={StaticResource Localization}, Mode=OneWay}"
+                Value="{x:Bind ViewModel.ConnectionPort, Mode=TwoWay}"
+                SpinButtonPlacementMode="Inline"
+                SmallChange="1" />
+        </Grid>
+
+        <!-- Username and Password -->
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox
+                Grid.Column="0"
+                Header="{Binding [dalog_conn_usname_title], Source={StaticResource Localization}, Mode=OneWay}"
+                Text="{x:Bind ViewModel.ConnectionUser, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                PlaceholderText="root" />
+
+            <PasswordBox
+                Grid.Column="1"
+                Header="{Binding [dalog_conn_password_title], Source={StaticResource Localization}, Mode=OneWay}"
+                Password="{x:Bind ViewModel.ConnectionPassword, Mode=TwoWay}"
+                PasswordChanged="PasswordBox_PasswordChanged" />
+        </Grid>
+
+        <!-- Default Database (Optional) -->
+        <TextBox
+            Header="{Binding [lbl_connection_database], Source={StaticResource Localization}, Mode=OneWay}"
+            Text="{x:Bind ViewModel.ConnectionDatabase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            PlaceholderText="{Binding [lbl_optional], Source={StaticResource Localization}, Mode=OneWay}" />
+
+        <!-- Connection Test Bar -->
+        <Border
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="6"
+            Padding="12,10">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Button
+                    Grid.Column="0"
+                    Command="{x:Bind ViewModel.TestConnectionCommand}"
+                    IsEnabled="{x:Bind ViewModel.IsTesting, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <ProgressRing
+                            Width="16" Height="16"
+                            IsActive="{x:Bind ViewModel.IsTesting, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.IsTesting, Mode=OneWay}" />
+                        <TextBlock Text="{Binding [btn_test_connection], Source={StaticResource Localization}, Mode=OneWay}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Text="{x:Bind ViewModel.TestStatusMessage, Mode=OneWay}"
+                    VerticalAlignment="Center"
+                    TextWrapping="Wrap"
+                    Style="{StaticResource CaptionTextBlockStyle}" />
+            </Grid>
+        </Border>
+    </StackPanel>
+</ContentDialog>

@@ -130,6 +130,19 @@ namespace DataSphere.Models
         }
 
         /// <summary>
+        /// Gets or sets the optional default database schema name.
+        /// </summary>
+        public string? Database
+        {
+            get => field;
+            set
+            {
+                field = value;
+                OnPropertyChanged(nameof(Database));
+            }
+        }
+
+        /// <summary>
         /// Gets the Segoe Fluent Icon glyph representing this connection or folder node.
         /// </summary>
         [JsonIgnore]
@@ -143,6 +156,8 @@ namespace DataSphere.Models
                         return "\uE838";
 
                     case DatabaseType.MySql:
+                    case DatabaseType.MariaDB:
+                    case DatabaseType.PostgreSql:
                         return "\uE774";
                 }
                 return "\uE897";
@@ -286,6 +301,8 @@ namespace DataSphere.Models
                     break;
 
                 case DatabaseType.MySql:
+                case DatabaseType.MariaDB:
+                case DatabaseType.PostgreSql:
                     ContextMenuItems = new ObservableCollection<ContextAction>()
                     {
                         new ContextAction()

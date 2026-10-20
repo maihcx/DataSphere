@@ -1,12 +1,12 @@
 ﻿{
     "schema_version":  1,
-    "updated_at":  "2026-10-19T09:55:43.8011954Z",
-    "feature_directory":  "specs/002-dynamic-i18n-localization",
+    "updated_at":  "2026-10-20T08:25:08.1386098Z",
+    "feature_directory":  "specs/005-data-and-tree-virtualization",
     "source_of_truth":  {
                             "constitution":  ".specify/memory/constitution.md",
-                            "spec":  "specs/002-dynamic-i18n-localization/spec.md",
-                            "plan":  "specs/002-dynamic-i18n-localization/plan.md",
-                            "tasks":  "specs/002-dynamic-i18n-localization/tasks.md"
+                            "spec":  "specs/005-data-and-tree-virtualization/spec.md",
+                            "plan":  "specs/005-data-and-tree-virtualization/plan.md",
+                            "tasks":  "specs/005-data-and-tree-virtualization/tasks.md"
                         },
     "supersedes":  [
                        "speckit.implement"
@@ -26,11 +26,11 @@
 
                            ],
     "notes":  null,
-    "last_snapshot_id":  "20261019T0955437804020Z-complete",
+    "last_snapshot_id":  "20261020T0825081300986Z-complete",
     "instructions":  "Use /speckit-superpowers-bridge (Claude Code) or $speckit-superpowers-bridge (Codex). The bridge orchestrates native Superpowers skills against tasks.md; do not run speckit.implement and do not invoke superpowers:writing-plans / :brainstorming for an active Spec Kit feature.",
     "artifacts_sha256":  {
-                             "spec.md":  "c61661941ce550d89a962fddc629903cad9d73cff563cdb46607605a238b3fe7",
-                             "plan.md":  "b27df2b17bfd084990eb72e32fde5c96ad17f3e497a5c93f546e756557ab87ad",
-                             "tasks.md":  "2745d022b7daaa382c1241c8414bb3bbadfd7d622ce75393e0eb3580e5163a0f"
+                             "spec.md":  "038be1230147bda828eb0c230b0934f4da4cfd43b46be17c1ff941ffdd297694",
+                             "plan.md":  "8a6f2ad1701d1dc5e66723478f60806d5aa7d01b40bf71ad0b356bd434593348",
+                             "tasks.md":  "ff7e85726377169c5e6301a8616bb5c29ce2c50f43827ee600ef45653529969e"
                          }
 }

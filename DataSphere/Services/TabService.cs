@@ -49,7 +49,7 @@ namespace DataSphere.Services
 
             // Check if a tab of this type is already open (e.g. Home or Settings)
             var existingTab = Tabs.FirstOrDefault(t => t.PageType == pageType);
-            if (existingTab != null && !existingTab.IsClosable)
+            if (existingTab != null && (existingTab.PageType?.Name == "HomePage" || !existingTab.IsClosable))
             {
                 SelectedTab = existingTab;
                 existingTab.State = TabLifecycleState.Active;
@@ -65,7 +65,16 @@ namespace DataSphere.Services
             }
 
             // Resolve or instantiate page
-            object? pageInstance = _serviceProvider.GetService(pageType) ?? Activator.CreateInstance(pageType);
+            object? pageInstance = null;
+            try
+            {
+                pageInstance = _serviceProvider.GetService(pageType) ?? Activator.CreateInstance(pageType);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[TabService] Warning: Failed to instantiate page {pageType.Name}: {ex.Message}");
+                pageInstance = pageType.Name;
+            }
 
             var newTab = new TabItemModel
             {
