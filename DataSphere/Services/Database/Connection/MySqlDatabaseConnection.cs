@@ -1,4 +1,6 @@
-﻿using DataSphere.Models.Database;
+﻿using DataSphere.Models;
+using DataSphere.Services.Database.Dialect;
+using DataSphere.Models.Database;
 using DataSphere.Services.Database.Interface;
 using MySqlConnector;
 using System.Data;
@@ -469,9 +471,9 @@ namespace DataSphere.Services.Database.Connection
             }
         }
             /// <summary>
-        /// Retrieves a paginated slice of records along with table columns and total record count.
+        /// Retrieves a paginated slice of records along with table columns, optional server-side sorting, and total record count.
         /// </summary>
-        public async Task<TableDataPage> GetTableDataPageAsync(string databaseName, string tableName, int page, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<TableDataPage> GetTableDataPageAsync(string databaseName, string tableName, int page, int pageSize, ColumnSortDescriptor? sort = null, CancellationToken cancellationToken = default)
         {
             if (_connection == null || !IsConnected)
             {
@@ -484,34 +486,15 @@ namespace DataSphere.Services.Database.Connection
                 PageSize = Math.Max(1, pageSize)
             };
 
-            // 1. Get total record count
-            try
-            {
-                string countQuery = $"SELECT COUNT(*) FROM {databaseName}.{tableName};";
-                using (var countCmd = new MySqlCommand(countQuery, _connection))
-                {
-                    var countObj = await countCmd.ExecuteScalarAsync(cancellationToken);
-                    if (countObj != null && long.TryParse(countObj.ToString(), out long total))
-                    {
-                        resultPage.TotalRecords = total;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[MySQL] Count query failed: {ex.Message}");
-            }
-
-            // 2. Query paginated records
             int offset = (resultPage.CurrentPage - 1) * resultPage.PageSize;
-            string dataQuery = $"SELECT * FROM {databaseName}.{tableName} LIMIT @Limit OFFSET @Offset;";
+            string dataQuery = MySqlDialect.Instance.BuildSelectPageQuery(databaseName, tableName, offset, resultPage.PageSize, sort);
 
             using (var dataCmd = new MySqlCommand(dataQuery, _connection))
             {
                 dataCmd.Parameters.AddWithValue("@Limit", resultPage.PageSize);
                 dataCmd.Parameters.AddWithValue("@Offset", offset);
 
-                using var reader = await dataCmd.ExecuteReaderAsync(cancellationToken);
+                using var reader = await dataCmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
 
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
@@ -523,24 +506,184 @@ namespace DataSphere.Services.Database.Connection
                 }
 
                 int rowIndex = offset + 1;
-                while (await reader.ReadAsync(cancellationToken))
+                var rowBatch = new List<TableRowData>(resultPage.PageSize);
+                while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
                 {
-                    var rowData = new TableRowData
-                    {
-                        RowIndex = rowIndex++
-                    };
-
+                    var cells = new List<string>(reader.FieldCount);
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
                         object val = reader.GetValue(i);
-                        rowData.Cells.Add(val == DBNull.Value || val == null ? "NULL" : val.ToString() ?? string.Empty);
+                        cells.Add(val == DBNull.Value || val == null ? "NULL" : val.ToString() ?? string.Empty);
                     }
 
-                    resultPage.Rows.Add(rowData);
+                    var rowData = new TableRowData
+                    {
+                        RowIndex = rowIndex++,
+                        Cells = cells,
+                        OriginalCells = cells.ToList()
+                    };
+                    rowBatch.Add(rowData);
+                }
+
+                foreach (var row in rowBatch)
+                {
+                    resultPage.Rows.Add(row);
+                }
+            }
+
+            // Determine total records: if page 1 has fewer rows than PageSize, total is known exactly without querying
+            if (resultPage.CurrentPage == 1 && resultPage.Rows.Count < resultPage.PageSize)
+            {
+                resultPage.TotalRecords = resultPage.Rows.Count;
+                resultPage.IsEstimatedTotal = false;
+            }
+            else
+            {
+                try
+                {
+                    string estimateQuery = MySqlDialect.Instance.BuildRowCountEstimateQuery(databaseName, tableName);
+                    using var estCmd = new MySqlCommand(estimateQuery, _connection);
+                    estCmd.Parameters.AddWithValue("@Schema", databaseName);
+                    estCmd.Parameters.AddWithValue("@Table", tableName);
+                    var estObj = await estCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+                    if (estObj != null && long.TryParse(estObj.ToString(), out long estimated) && estimated > 0)
+                    {
+                        resultPage.TotalRecords = Math.Max(estimated, offset + resultPage.Rows.Count);
+                        resultPage.IsEstimatedTotal = true;
+                    }
+                    else
+                    {
+                        resultPage.TotalRecords = offset + resultPage.Rows.Count;
+                        resultPage.IsEstimatedTotal = false;
+                    }
+                }
+                catch
+                {
+                    resultPage.TotalRecords = offset + resultPage.Rows.Count;
+                    resultPage.IsEstimatedTotal = false;
                 }
             }
 
             return resultPage;
+        }
+
+        /// <inheritdoc/>
+        public async Task ExecuteUpdateRowsAsync(string databaseName, string tableName, IEnumerable<PendingRowUpdate> updates, CancellationToken cancellationToken = default)
+        {
+            if (_connection == null || !IsConnected)
+            {
+                throw new InvalidOperationException("Database is not connected.");
+            }
+
+            var updateList = updates?.ToList() ?? new List<PendingRowUpdate>();
+            if (updateList.Count == 0) return;
+
+            using var transaction = await _connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                foreach (var update in updateList)
+                {
+                    if (update.ChangedColumns.Count == 0 || update.PrimaryKeyValues.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    var changedParams = new Dictionary<string, string>();
+                    var pkParams = new Dictionary<string, string>();
+
+                    int paramIndex = 0;
+                    foreach (var col in update.ChangedColumns.Keys)
+                    {
+                        changedParams[col] = $"@p{paramIndex++}";
+                    }
+
+                    int pkIndex = 0;
+                    foreach (var pk in update.PrimaryKeyValues.Keys)
+                    {
+                        pkParams[pk] = $"@k{pkIndex++}";
+                    }
+
+                    string updateSql = MySqlDialect.Instance.BuildUpdateRowQuery(databaseName, tableName, changedParams, pkParams);
+
+                    using var cmd = new MySqlCommand(updateSql, _connection, transaction);
+
+                    foreach (var kvp in update.ChangedColumns)
+                    {
+                        string paramName = changedParams[kvp.Key];
+                        string val = kvp.Value;
+                        if (string.Equals(val, "NULL", StringComparison.OrdinalIgnoreCase) || val == null)
+                        {
+                            cmd.Parameters.AddWithValue(paramName, DBNull.Value);
+                        }
+                        else
+                        {
+                            cmd.Parameters.AddWithValue(paramName, val);
+                        }
+                    }
+
+                    foreach (var kvp in update.PrimaryKeyValues)
+                    {
+                        string paramName = pkParams[kvp.Key];
+                        cmd.Parameters.AddWithValue(paramName, kvp.Value ?? string.Empty);
+                    }
+
+                    await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+
+                // Commit the in-memory row snapshots
+                foreach (var update in updateList)
+                {
+                    update.Row.CommitChanges();
+                }
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves the primary key column names for the specified database table.
+        /// </summary>
+        /// <param name="databaseName">The owning database schema name.</param>
+        /// <param name="tableName">The target table name.</param>
+        /// <param name="cancellationToken">Cancellation token to abort the query.</param>
+        /// <returns>A read-only list of primary key column names in ordinal sequence.</returns>
+        public async Task<IReadOnlyList<string>> GetPrimaryKeysAsync(string databaseName, string tableName, CancellationToken cancellationToken = default)
+        {
+            if (_connection == null || !IsConnected)
+                throw new InvalidOperationException("Database is not connected.");
+
+            if (string.IsNullOrWhiteSpace(databaseName))
+                throw new ArgumentException("Database name cannot be null or empty.", nameof(databaseName));
+
+            if (string.IsNullOrWhiteSpace(tableName))
+                throw new ArgumentException("Table name cannot be null or empty.", nameof(tableName));
+
+            var primaryKeys = new List<string>();
+            const string pkQuery = @"
+                SELECT COLUMN_NAME
+                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                WHERE TABLE_SCHEMA = @schema AND TABLE_NAME = @table AND CONSTRAINT_NAME = 'PRIMARY'
+                ORDER BY ORDINAL_POSITION;";
+
+            using (var cmd = new MySqlCommand(pkQuery, _connection))
+            {
+                cmd.Parameters.AddWithValue("@schema", databaseName);
+                cmd.Parameters.AddWithValue("@table", tableName);
+
+                using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+                while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    primaryKeys.Add(reader.GetString(0));
+                }
+            }
+
+            return primaryKeys;
         }
     }
 }

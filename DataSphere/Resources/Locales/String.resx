@@ -423,4 +423,28 @@
   <data name="page_db_select_table_hint" xml:space="preserve">
     <value>Select a table in the explorer to browse its records</value>
   </data>
+  <data name="btn_commit_changes" xml:space="preserve">
+    <value>Commit</value>
+  </data>
+  <data name="btn_discard_changes" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="tooltip_commit_changes" xml:space="preserve">
+    <value>Commit pending cell modifications to database</value>
+  </data>
+  <data name="tooltip_discard_changes" xml:space="preserve">
+    <value>Discard pending modifications and restore original values</value>
+  </data>
+  <data name="msg_commit_success" xml:space="preserve">
+    <value>Changes committed successfully</value>
+  </data>
+  <data name="msg_no_primary_key_edit_disabled" xml:space="preserve">
+    <value>In-place editing is disabled because this table has no primary key</value>
+  </data>
+  <data name="dialog_uncommitted_changes_title" xml:space="preserve">
+    <value>Uncommitted Changes</value>
+  </data>
+  <data name="dialog_uncommitted_changes_message" xml:space="preserve">
+    <value>You have uncommitted modifications. Do you want to commit or discard them before proceeding?</value>
+  </data>
 </root>

@@ -86,8 +86,34 @@ namespace DataSphere.Services.Database.Interface
         Task DropDatabase(DatabaseInfo databaseInfo);
 
         /// <summary>
-        /// Retrieves a paginated slice of records along with table columns and total record count.
+        /// Retrieves a paginated slice of records along with table columns, optional server-side sorting, and total record count.
         /// </summary>
-        Task<TableDataPage> GetTableDataPageAsync(string databaseName, string tableName, int page, int pageSize, CancellationToken cancellationToken = default);
+        /// <param name="databaseName">The target database or schema name.</param>
+        /// <param name="tableName">The target table name.</param>
+        /// <param name="page">The 1-based page number.</param>
+        /// <param name="pageSize">The page size.</param>
+        /// <param name="sort">Optional column sort descriptor for server-side ORDER BY.</param>
+        /// <param name="cancellationToken">Cancellation token to abort in-flight query.</param>
+        /// <returns>A populated <see cref="TableDataPage"/> object.</returns>
+        Task<TableDataPage> GetTableDataPageAsync(string databaseName, string tableName, int page, int pageSize, ColumnSortDescriptor? sort = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Commits pending row updates to the database engine using parameterized UPDATE statements.
+        /// </summary>
+        /// <param name="databaseName">The database name.</param>
+        /// <param name="tableName">The table name.</param>
+        /// <param name="updates">The collection of pending row modifications.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        Task ExecuteUpdateRowsAsync(string databaseName, string tableName, IEnumerable<PendingRowUpdate> updates, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously retrieves the primary key column names for the specified database table.
+        /// </summary>
+        /// <param name="databaseName">The owning database schema name.</param>
+        /// <param name="tableName">The target table name.</param>
+        /// <param name="cancellationToken">Cancellation token to abort the query.</param>
+        /// <returns>A read-only list of primary key column names in ordinal sequence.</returns>
+        Task<IReadOnlyList<string>> GetPrimaryKeysAsync(string databaseName, string tableName, CancellationToken cancellationToken = default);
     }
 }

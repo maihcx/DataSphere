@@ -8,6 +8,7 @@
     xmlns:dbmodels="using:DataSphere.Models.Database"
     xmlns:models="using:DataSphere.Models"
     xmlns:vm="using:DataSphere.ViewModels.Pages.DatabaseGroup"
+    xmlns:vt="using:DataSphere.Controls.VirtualTable"
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -35,9 +36,37 @@
                         Width="16" Height="16"
                         IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                         Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                    <TextBlock
+                        Text="{x:Bind ViewModel.EditingNoticeText, Mode=OneWay}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        VerticalAlignment="Center" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <!-- Commit Changes Button -->
+                    <Button
+                        Command="{x:Bind ViewModel.CommitChangesCommand}"
+                        IsEnabled="{x:Bind ViewModel.CanCommit, Mode=OneWay}"
+                        ToolTipService.ToolTip="{Binding [tooltip_commit_changes], Source={StaticResource Localization}, Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE74E;" FontSize="14" />
+                            <TextBlock Text="{Binding [btn_commit_changes], Source={StaticResource Localization}, Mode=OneWay}" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Discard Changes Button -->
+                    <Button
+                        Command="{x:Bind ViewModel.DiscardChangesCommand}"
+                        IsEnabled="{x:Bind ViewModel.CanDiscard, Mode=OneWay}"
+                        ToolTipService.ToolTip="{Binding [tooltip_discard_changes], Source={StaticResource Localization}, Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE711;" FontSize="14" />
+                            <TextBlock Text="{Binding [btn_discard_changes], Source={StaticResource Localization}, Mode=OneWay}" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Refresh Button -->
                     <Button Command="{x:Bind ViewModel.RefreshCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE72C;" FontSize="14" />
@@ -48,109 +77,14 @@
             </Grid>
         </Border>
 
-        <!-- Two-Tier Viewport-Pinned Records Grid Viewport -->
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <!-- Sticky Column Headers Row (Synchronized Horizontal Offset) -->
-            <ScrollViewer
-                x:Name="HeaderScrollViewer"
-                Grid.Row="0"
-                HorizontalScrollBarVisibility="Hidden"
-                HorizontalScrollMode="Enabled"
-                VerticalScrollBarVisibility="Disabled"
-                VerticalScrollMode="Disabled">
-                <Border
-                    MinWidth="{x:Bind ViewModel.DataPage.TotalTableWidth, Mode=OneWay}"
-                    Background="{ThemeResource LayerFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="0,0,0,1"
-                    Padding="8,8,24,8">
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.DataPage.Columns, Mode=OneWay}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="8" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="dbmodels:Column">
-                                <Border
-                                    Width="140"
-                                    Padding="8,4"
-                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="4">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{x:Bind DataType}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Border>
-            </ScrollViewer>
-
-            <!-- Virtualized Data Rows List (Pinned to Viewport Boundaries) -->
-            <ListView
-                x:Name="DataRowsListView"
-                Grid.Row="1"
-                ItemsSource="{x:Bind ViewModel.DataPage.Rows, Mode=OneWay}"
-                SelectionMode="Single"
-                Padding="0"
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                ScrollViewer.VerticalScrollMode="Enabled"
-                ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                ScrollViewer.HorizontalScrollMode="Enabled">
-                <ListView.Resources>
-                    <!-- Suppress WinUI 3 deferred virtualization placeholder grey rectangles -->
-                    <SolidColorBrush x:Key="ListViewItemPlaceholderBackgroundThemeResource" Color="Transparent" />
-                    <SolidColorBrush x:Key="ListViewItemPlaceholderBackground" Color="Transparent" />
-                    <SolidColorBrush x:Key="ListViewItemPlaceholderBackgroundPointerOver" Color="Transparent" />
-                    <SolidColorBrush x:Key="ListViewItemPlaceholderBackgroundPressed" Color="Transparent" />
-                </ListView.Resources>
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0" />
-                        <Setter Property="MinHeight" Value="0" />
-                        <Setter Property="HorizontalContentAlignment" Value="Left" />
-                        <Setter Property="Background" Value="Transparent" />
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <ItemsStackPanel Orientation="Vertical" CacheLength="5.0" />
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="models:TableRowData">
-                        <Border Padding="8,0">
-                            <ItemsControl ItemsSource="{x:Bind Cells}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" Spacing="8" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="x:String">
-                                        <Border Width="140" Padding="8,6" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
-                                            <TextBlock
-                                                Text="{x:Bind}"
-                                                TextTrimming="CharacterEllipsis" />
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </Border>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Grid>
+        <!-- Table Records Viewport via High-Performance VirtualTable Control -->
+        <Border Grid.Row="1" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <vt:VirtualTable
+                RowHeight="34"
+                DataProvider="{x:Bind ViewModel.TableDataProvider, Mode=OneWay}"
+                SortCommand="{x:Bind ViewModel.SortCommand, Mode=OneWay}"
+                CellEditedCommand="{x:Bind ViewModel.CellEditedCommand, Mode=OneWay}" />
+        </Border>
 
         <!-- Pagination Footer -->
         <Border

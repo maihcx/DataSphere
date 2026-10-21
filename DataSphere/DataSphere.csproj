@@ -30,15 +30,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
     <PackageReference Include="WinUIEx" Version="2.9.3" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
-    <PackageReference Include="MySqlConnector" Version="2.4.0" />
-    <PackageReference Include="System.IO.Hashing" Version="10.0.0" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.13" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.13" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.13" />
   </ItemGroup>
 
   <ItemGroup>
