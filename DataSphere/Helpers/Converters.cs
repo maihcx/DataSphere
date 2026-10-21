@@ -121,4 +121,30 @@ namespace DataSphere.Helpers
             throw new NotSupportedException();
         }
     }
+
+    /// <summary>
+    /// Preserves full four-corner <see cref="CornerRadius"/> values for pill-shaped controls, overriding top-only filtering.
+    /// </summary>
+    public class FullCornerRadiusConverter : IValueConverter
+    {
+        /// <inheritdoc/>
+        public object Convert(object? value, Type targetType, object? parameter, string language)
+        {
+            if (value is CornerRadius cr)
+            {
+                return cr;
+            }
+            if (value is double d)
+            {
+                return new CornerRadius(d);
+            }
+            return new CornerRadius(16);
+        }
+
+        /// <inheritdoc/>
+        public object ConvertBack(object? value, Type targetType, object? parameter, string language)
+        {
+            throw new NotSupportedException();
+        }
+    }
 }

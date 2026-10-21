@@ -6,96 +6,143 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DataSphere.ViewModels.PagesBottom"
+    Background="Transparent"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1000" HorizontalAlignment="Stretch">
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent">
+        <ScrollViewer
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto"
+            Background="Transparent">
+            <StackPanel
+                HorizontalAlignment="Center"
+                MaxWidth="900"
+                Padding="24,24,24,32"
+                Spacing="14"
+                Background="Transparent">
 
-            <!-- Section: Personalization -->
-            <TextBlock Text="{Binding [page_settings_personalization_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <!-- Section: Personalization -->
+                <TextBlock Text="{Binding [page_settings_personalization_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" />
 
-            <!-- App Theme Card -->
-            <Border
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="16,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                <!-- App Theme Card -->
+                <Border
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16,14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <FontIcon Grid.Column="0" Glyph="&#xE790;" FontSize="24" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <FontIcon Grid.Column="0" Glyph="&#xE790;" FontSize="20" Margin="0,0,16,0" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding [page_settings_app_theme_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                        <TextBlock Text="{Binding [page_settings_app_theme_summary], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="{Binding [page_settings_app_theme_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="{Binding [page_settings_app_theme_summary], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
 
-                    <ComboBox
-                        Grid.Column="2"
-                        MinWidth="160"
-                        VerticalAlignment="Center"
-                        ItemsSource="{x:Bind ViewModel.ThemeList, Mode=OneWay}"
-                        SelectedItem="{x:Bind ViewModel.SelectedTheme, Mode=TwoWay}"
-                        DisplayMemberPath="Content" />
-                </Grid>
-            </Border>
+                        <ComboBox
+                            Grid.Column="2"
+                            MinWidth="200"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            ItemsSource="{x:Bind ViewModel.ThemeList, Mode=OneWay}"
+                            SelectedItem="{x:Bind ViewModel.SelectedTheme, Mode=TwoWay}"
+                            DisplayMemberPath="DisplayName" />
+                    </Grid>
+                </Border>
 
-            <!-- Language Card -->
-            <Border
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="16,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                <!-- System Backdrop Card -->
+                <Border
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16,14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <FontIcon Grid.Column="0" Glyph="&#xE775;" FontSize="24" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <FontIcon Grid.Column="0" Glyph="&#xE771;" FontSize="20" Margin="0,0,16,0" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding [page_settings_languageset_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                        <TextBlock Text="{Binding [page_settings_languageset_display_summary], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="{Binding [page_settings_backdrop_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="{Binding [page_settings_backdrop_summary], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
 
-                    <ComboBox
-                        Grid.Column="2"
-                        MinWidth="160"
-                        VerticalAlignment="Center"
-                        ItemsSource="{x:Bind ViewModel.Languages, Mode=OneWay}"
-                        SelectedItem="{x:Bind ViewModel.SelectedLanguage, Mode=TwoWay}"
-                        DisplayMemberPath="NativeName" />
-                </Grid>
-            </Border>
+                        <ComboBox
+                            Grid.Column="2"
+                            MinWidth="200"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            ItemsSource="{x:Bind ViewModel.BackdropList, Mode=OneWay}"
+                            SelectedItem="{x:Bind ViewModel.SelectedBackdrop, Mode=TwoWay}"
+                            DisplayMemberPath="DisplayName" />
+                    </Grid>
+                </Border>
 
-            <!-- Section: About -->
-            <TextBlock Text="{Binding [page_settings_about_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,12,0,0" />
+                <!-- Language Card -->
+                <Border
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16,14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-            <Border
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="20">
-                <StackPanel Spacing="12">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE946;" FontSize="28" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="{x:Bind ViewModel.AppVersion, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                            <TextBlock Text="{x:Bind ViewModel.CopyRight, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <FontIcon Grid.Column="0" Glyph="&#xE775;" FontSize="20" Margin="0,0,16,0" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="{Binding [page_settings_languageset_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="{Binding [page_settings_languageset_display_summary], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <ComboBox
+                            Grid.Column="2"
+                            MinWidth="200"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            ItemsSource="{x:Bind ViewModel.Languages, Mode=OneWay}"
+                            SelectedItem="{x:Bind ViewModel.SelectedLanguage, Mode=TwoWay}"
+                            DisplayMemberPath="NativeName" />
+                    </Grid>
+                </Border>
+
+                <!-- Section: About -->
+                <TextBlock Text="{Binding [page_settings_about_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,12,0,0" />
+
+                <Border
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="14">
+                            <FontIcon Glyph="&#xE946;" FontSize="24" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <StackPanel VerticalAlignment="Center" Spacing="2">
+                                <TextBlock Text="{x:Bind ViewModel.AppVersion, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.CopyRight, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
-                </StackPanel>
-            </Border>
+                </Border>
 
-        </StackPanel>
-    </ScrollViewer>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </Page>

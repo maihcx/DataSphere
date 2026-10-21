@@ -6,10 +6,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DataSphere.ViewModels.Pages"
+    Background="Transparent"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Spacing="24" Padding="32,24,32,32" MaxWidth="1000" HorizontalAlignment="Stretch">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="Transparent">
+        <StackPanel Spacing="24" Padding="32,24,32,32" MaxWidth="1000" HorizontalAlignment="Stretch" Background="Transparent">
 
             <!-- Banner / Header Card -->
             <Border

@@ -128,6 +128,25 @@ namespace DataSphere.Utils
         }
 
         /// <summary>
+        /// Retrieves the list of available languages formatted as selectable observable option items.
+        /// </summary>
+        /// <returns>Collection of <see cref="LanguageOptionItem"/> entries.</returns>
+        public static ObservableCollection<LanguageOptionItem> GetLanguageOptionItems()
+        {
+            ObservableCollection<LanguageOptionItem> languageItems = new();
+
+            foreach (var item in SupportedLanguages)
+            {
+                languageItems.Add(new LanguageOptionItem(
+                    item.TwoLetterISOLanguageName,
+                    item.NativeName,
+                    item.EnglishName));
+            }
+
+            return languageItems;
+        }
+
+        /// <summary>
         /// Sets the current application display language and persists user preference.
         /// </summary>
         /// <param name="language">Two-letter language code (e.g., "en", "vi").</param>
@@ -193,6 +212,19 @@ namespace DataSphere.Utils
                 NativeName = currentLang.NativeName,
                 EnglishName = currentLang.EnglishName,
             };
+        }
+
+        /// <summary>
+        /// Gets the current language formatted as a <see cref="LanguageOptionItem"/>.
+        /// </summary>
+        /// <returns>Current language option model.</returns>
+        public static LanguageOptionItem GetCurrentLanguageOptionItem()
+        {
+            var currentLang = GetCurrentLanguage();
+            return new LanguageOptionItem(
+                currentLang.TwoLetterISOLanguageName,
+                currentLang.NativeName,
+                currentLang.EnglishName);
         }
 
         /// <summary>

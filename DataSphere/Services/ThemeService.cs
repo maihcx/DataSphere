@@ -1,18 +1,23 @@
 using System;
 using Microsoft.UI;
+using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using DataSphere.Models;
 using DataSphere.Services.Contracts;
 using DataSphere.Utils;
 
 namespace DataSphere.Services
 {
     /// <summary>
-    /// Service responsible for managing application-wide theme preferences and applying them across open windows.
+    /// Service responsible for managing application-wide theme preferences and system backdrops across open windows.
     /// </summary>
     public class ThemeService : IThemeService
     {
         private readonly IServiceProvider _serviceProvider;
         private string _currentTheme = "Default";
+        private string _currentBackdrop = "Mica";
 
         /// <summary>
         /// Gets the current theme preference string ("Light", "Dark", "Default").
@@ -20,9 +25,39 @@ namespace DataSphere.Services
         public string CurrentTheme => _currentTheme;
 
         /// <summary>
+        /// Gets the active Windows system backdrop material type ("Mica", "Tabbed", "Acrylic", "Solid").
+        /// </summary>
+        public string CurrentBackdrop => _currentBackdrop;
+
+        /// <summary>
+        /// Gets the currently active application theme domain mode.
+        /// </summary>
+        public AppThemeMode CurrentThemeMode => ToThemeMode(_currentTheme);
+
+        /// <summary>
+        /// Gets the currently active system backdrop material domain mode.
+        /// </summary>
+        public AppBackdropMode CurrentBackdropMode => ToBackdropMode(_currentBackdrop);
+
+        /// <summary>
         /// Occurs when the application theme changes.
         /// </summary>
         public event EventHandler<string>? ThemeChanged;
+
+        /// <summary>
+        /// Occurs when the active system backdrop material changes.
+        /// </summary>
+        public event EventHandler<string>? BackdropChanged;
+
+        /// <summary>
+        /// Occurs when the active application theme domain mode changes.
+        /// </summary>
+        public event EventHandler<AppThemeMode>? ThemeModeChanged;
+
+        /// <summary>
+        /// Occurs when the active system backdrop material domain mode changes.
+        /// </summary>
+        public event EventHandler<AppBackdropMode>? BackdropModeChanged;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ThemeService"/> class.
@@ -34,7 +69,7 @@ namespace DataSphere.Services
         }
 
         /// <summary>
-        /// Initializes the theme from persistent storage and applies it to the application.
+        /// Initializes the theme and system backdrop from persistent storage and applies them to the application.
         /// </summary>
         public void Initialize()
         {
@@ -43,8 +78,27 @@ namespace DataSphere.Services
             {
                 savedTheme = "Default";
             }
-
             _currentTheme = savedTheme;
+
+            var savedBackdrop = UserDataStore.GetValue<string>("ISystemBackdropType");
+            if (string.IsNullOrWhiteSpace(savedBackdrop))
+            {
+                savedBackdrop = "Mica";
+            }
+            else if (string.Equals(savedBackdrop, "Default", StringComparison.OrdinalIgnoreCase))
+            {
+                savedBackdrop = "Solid";
+            }
+            _currentBackdrop = savedBackdrop;
+        }
+
+        /// <summary>
+        /// Sets and persists the application theme domain mode, notifying all active windows to refresh their visual state.
+        /// </summary>
+        /// <param name="theme">The target domain theme mode.</param>
+        public void SetTheme(AppThemeMode theme)
+        {
+            SetTheme(theme.ToString());
         }
 
         /// <summary>
@@ -58,6 +112,11 @@ namespace DataSphere.Services
                 themeName = "Default";
             }
 
+            if (_currentTheme == themeName)
+            {
+                return;
+            }
+
             _currentTheme = themeName;
             UserDataStore.SetValue("IThemeType", _currentTheme);
 
@@ -68,12 +127,61 @@ namespace DataSphere.Services
                 {
                     if (session.WindowInstance != null)
                     {
-                        ApplyThemeToWindow(session.WindowInstance);
+                        ApplyThemeAndBackdrop(session.WindowInstance);
                     }
                 }
             }
 
             ThemeChanged?.Invoke(this, _currentTheme);
+            ThemeModeChanged?.Invoke(this, CurrentThemeMode);
+        }
+
+        /// <summary>
+        /// Sets and persists the Windows system backdrop material domain mode, notifying all active windows to update their backdrop.
+        /// </summary>
+        /// <param name="backdrop">The target domain backdrop material mode.</param>
+        public void SetBackdrop(AppBackdropMode backdrop)
+        {
+            SetBackdrop(backdrop.ToString());
+        }
+
+        /// <summary>
+        /// Sets and persists the Windows system backdrop material, notifying all active windows to update their backdrop.
+        /// </summary>
+        /// <param name="backdrop">The backdrop material name ("Mica", "Tabbed", "Acrylic", "Solid").</param>
+        public void SetBackdrop(string backdrop)
+        {
+            if (string.IsNullOrWhiteSpace(backdrop))
+            {
+                backdrop = "Mica";
+            }
+            else if (string.Equals(backdrop, "Default", StringComparison.OrdinalIgnoreCase))
+            {
+                backdrop = "Solid";
+            }
+
+            if (_currentBackdrop == backdrop)
+            {
+                return;
+            }
+
+            _currentBackdrop = backdrop;
+            UserDataStore.SetValue("ISystemBackdropType", _currentBackdrop);
+
+            var windowManager = _serviceProvider.GetService(typeof(IWindowManager)) as IWindowManager;
+            if (windowManager != null)
+            {
+                foreach (var session in windowManager.Windows)
+                {
+                    if (session.WindowInstance != null)
+                    {
+                        ApplyThemeAndBackdrop(session.WindowInstance);
+                    }
+                }
+            }
+
+            BackdropChanged?.Invoke(this, _currentBackdrop);
+            BackdropModeChanged?.Invoke(this, CurrentBackdropMode);
         }
 
         /// <summary>
@@ -81,6 +189,24 @@ namespace DataSphere.Services
         /// </summary>
         /// <param name="window">The window to theme.</param>
         public void ApplyThemeToWindow(object window)
+        {
+            ApplyThemeAndBackdrop(window);
+        }
+
+        /// <summary>
+        /// Applies the active system backdrop material to the specified window instance.
+        /// </summary>
+        /// <param name="window">The window to apply the backdrop material to.</param>
+        public void ApplyBackdropToWindow(object window)
+        {
+            ApplyThemeAndBackdrop(window);
+        }
+
+        /// <summary>
+        /// Applies both the active theme and system backdrop material to the specified window instance in a unified step.
+        /// </summary>
+        /// <param name="window">The window to theme and apply backdrop material to.</param>
+        public void ApplyThemeAndBackdrop(object window)
         {
             if (window is Window win)
             {
@@ -109,6 +235,35 @@ namespace DataSphere.Services
                             break;
                     }
                 }
+
+                switch (_currentBackdrop)
+                {
+                    case "Mica":
+                        win.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.Base };
+                        break;
+                    case "Tabbed":
+                        win.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
+                        break;
+                    case "Acrylic":
+                        win.SystemBackdrop = new DesktopAcrylicBackdrop();
+                        break;
+                    case "Solid":
+                    default:
+                        win.SystemBackdrop = null;
+                        break;
+                }
+
+                if (win.Content is Panel rootPanel)
+                {
+                    if (win.SystemBackdrop != null)
+                    {
+                        rootPanel.Background = new SolidColorBrush(Colors.Transparent);
+                    }
+                    else
+                    {
+                        rootPanel.ClearValue(Panel.BackgroundProperty);
+                    }
+                }
             }
         }
 
@@ -119,6 +274,27 @@ namespace DataSphere.Services
                 "Light" => ElementTheme.Light,
                 "Dark" => ElementTheme.Dark,
                 _ => ElementTheme.Default
+            };
+        }
+
+        private static AppThemeMode ToThemeMode(string themeName)
+        {
+            return themeName switch
+            {
+                "Light" => AppThemeMode.Light,
+                "Dark" => AppThemeMode.Dark,
+                _ => AppThemeMode.Default
+            };
+        }
+
+        private static AppBackdropMode ToBackdropMode(string backdropName)
+        {
+            return backdropName switch
+            {
+                "Tabbed" => AppBackdropMode.Tabbed,
+                "Acrylic" => AppBackdropMode.Acrylic,
+                "Solid" => AppBackdropMode.Solid,
+                _ => AppBackdropMode.Mica
             };
         }
     }

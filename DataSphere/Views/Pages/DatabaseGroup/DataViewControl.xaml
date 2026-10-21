@@ -11,7 +11,7 @@
     xmlns:vt="using:DataSphere.Controls.VirtualTable"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -78,7 +78,7 @@
         </Border>
 
         <!-- Table Records Viewport via High-Performance VirtualTable Control -->
-        <Border Grid.Row="1" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Border Grid.Row="1" Background="Transparent">
             <vt:VirtualTable
                 RowHeight="34"
                 DataProvider="{x:Bind ViewModel.TableDataProvider, Mode=OneWay}"

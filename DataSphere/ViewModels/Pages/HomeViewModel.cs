@@ -76,12 +76,13 @@ namespace DataSphere.ViewModels.Pages
         }
 
         /// <summary>
-        /// Opens or focuses the Database tab in the current window's tab strip using the dynamic resource key.
+        /// Opens a new Database workspace tab in the current window's tab strip using the dynamic resource key.
+        /// Each invocation spawns an independent database session tab.
         /// </summary>
         [RelayCommand]
         public void OpenDatabase()
         {
-            _tabService.OpenTab(typeof(DatabasePage), "page_db_title", "\uE774");
+            _tabService.OpenTab(typeof(DatabasePage), "page_db_title", "\uE774", forceNewTab: true);
         }
 
         /// <summary>

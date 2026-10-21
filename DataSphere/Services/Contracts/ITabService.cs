@@ -26,8 +26,9 @@ namespace DataSphere.Services.Contracts
         /// <param name="titleKey">The localization resource key for the tab header.</param>
         /// <param name="iconGlyph">Fluent icon glyph for the tab.</param>
         /// <param name="parameter">Optional navigation parameter passed to the ViewModel.</param>
+        /// <param name="forceNewTab">Optional flag indicating whether to force creating a new tab instance instead of focusing an existing one.</param>
         /// <returns>The opened or focused TabItemModel instance.</returns>
-        TabItemModel OpenTab(Type pageType, string titleKey, string iconGlyph, object? parameter = null);
+        TabItemModel OpenTab(Type pageType, string titleKey, string iconGlyph, object? parameter = null, bool forceNewTab = false);
 
         /// <summary>
         /// Requests closing of the specified tab.

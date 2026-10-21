@@ -12,7 +12,182 @@
     MinWidth="800"
     MinHeight="500">
 
-    <Grid x:Name="WindowRoot" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid x:Name="WindowRoot" Background="Transparent">
+        <Grid.Resources>
+            <!-- Pill-Shaped TabViewItem Style -->
+            <Style x:Key="PillTabViewItemStyle" TargetType="TabViewItem">
+                <Setter Property="CornerRadius" Value="16" />
+                <Setter Property="Margin" Value="3,4,3,4" />
+                <Setter Property="MinHeight" Value="34" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabViewItem">
+                            <Grid x:Name="LayoutRoot">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+                                            <VisualState.Setters>
+                                                <Setter Target="PillBorder.Background" Value="Transparent" />
+                                                <Setter Target="PillBorder.BorderBrush" Value="Transparent" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <Setter Target="IconControl.Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <Setter Target="CloseButton.Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Target="PillBorder.Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+                                                <Setter Target="PillBorder.BorderBrush" Value="Transparent" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                <Setter Target="IconControl.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                <Setter Target="CloseButton.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Target="PillBorder.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}" />
+                                                <Setter Target="PillBorder.BorderBrush" Value="Transparent" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                <Setter Target="IconControl.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                <Setter Target="CloseButton.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Target="PillBorder.Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
+                                                <Setter Target="PillBorder.BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                <Setter Target="ContentPresenter.FontWeight" Value="SemiBold" />
+                                                <Setter Target="IconControl.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                <Setter Target="CloseButton.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="PointerOverSelected">
+                                            <VisualState.Setters>
+                                                <Setter Target="PillBorder.Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
+                                                <Setter Target="PillBorder.BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                <Setter Target="ContentPresenter.FontWeight" Value="SemiBold" />
+                                                <Setter Target="IconControl.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                <Setter Target="CloseButton.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="PressedSelected">
+                                            <VisualState.Setters>
+                                                <Setter Target="PillBorder.Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
+                                                <Setter Target="PillBorder.BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                <Setter Target="ContentPresenter.FontWeight" Value="SemiBold" />
+                                                <Setter Target="IconControl.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                <Setter Target="CloseButton.Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <VisualState.Setters>
+                                                <Setter Target="PillBorder.Background" Value="Transparent" />
+                                                <Setter Target="PillBorder.BorderBrush" Value="Transparent" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource TextFillColorDisabledBrush}" />
+                                                <Setter Target="IconControl.Foreground" Value="{ThemeResource TextFillColorDisabledBrush}" />
+                                                <Setter Target="CloseButton.Foreground" Value="{ThemeResource TextFillColorDisabledBrush}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+
+                                    <VisualStateGroup x:Name="CloseIconStates">
+                                        <VisualState x:Name="CloseButtonVisible" />
+                                        <VisualState x:Name="CloseButtonCollapsed">
+                                            <VisualState.Setters>
+                                                <Setter Target="CloseButton.Visibility" Value="Collapsed" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+
+                                    <VisualStateGroup x:Name="IconStates">
+                                        <VisualState x:Name="Icon" />
+                                        <VisualState x:Name="NoIcon">
+                                            <VisualState.Setters>
+                                                <Setter Target="IconBox.Visibility" Value="Collapsed" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+
+                                <!-- Capsule Pill Container: All 4 corners rounded -->
+                                <Border
+                                    x:Name="PillBorder"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="1"
+                                    CornerRadius="16"
+                                    Padding="14,4,10,4"
+                                    MinHeight="34"
+                                    VerticalAlignment="Center">
+                                    <Grid VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition x:Name="IconColumn" Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition x:Name="CloseColumn" Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Viewbox
+                                            x:Name="IconBox"
+                                            Grid.Column="0"
+                                            MaxWidth="16"
+                                            MaxHeight="16"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center">
+                                            <ContentControl
+                                                x:Name="IconControl"
+                                                Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TabViewTemplateSettings.IconElement}"
+                                                IsTabStop="False"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </Viewbox>
+
+                                        <ContentPresenter
+                                            x:Name="ContentPresenter"
+                                            Grid.Column="1"
+                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalAlignment="Center"
+                                            Content="{TemplateBinding Header}"
+                                            ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                            FontSize="{ThemeResource TabViewItemHeaderFontSize}"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                                        <Button
+                                            x:Name="CloseButton"
+                                            Grid.Column="2"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="6,0,0,0"
+                                            Padding="0"
+                                            CornerRadius="12"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Content="&#xE711;"
+                                            FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                            FontSize="10"
+                                            IsTabStop="False"
+                                            VerticalAlignment="Center">
+                                            <Button.Resources>
+                                                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#20808080" />
+                                                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#30808080" />
+                                            </Button.Resources>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Background" Value="{ThemeResource ApplicationPageBackgroundThemeBrush}" />
+            </Style>
+        </Grid.Style>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -22,6 +197,9 @@
         <TabView
             x:Name="ShellTabView"
             Grid.Row="0"
+            Background="Transparent"
+            BorderThickness="0"
+            BorderBrush="Transparent"
             CanDragTabs="True"
             CanReorderTabs="True"
             IsAddTabButtonVisible="False"
@@ -34,6 +212,52 @@
             TabStripDragOver="OnTabStripDragOver"
             TabStripDrop="OnTabStripDrop">
 
+            <TabView.Resources>
+                <ResourceDictionary>
+                    <ResourceDictionary.ThemeDictionaries>
+                        <ResourceDictionary x:Key="Default">
+                            <SolidColorBrush x:Key="TabViewItemHeaderBackground" Color="#2D2D2D" />
+                            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="Transparent" />
+                            <SolidColorBrush x:Key="TabViewSelectedItemBorderBrush" Color="#3FFFFFFF" />
+                            <SolidColorBrush x:Key="TabViewBorderBrush" Color="Transparent" />
+                            <SolidColorBrush x:Key="TabViewItemSeparator" Color="Transparent" />
+                            <SolidColorBrush x:Key="TabViewItemStroke" Color="Transparent" />
+                        </ResourceDictionary>
+                        <ResourceDictionary x:Key="Dark">
+                            <SolidColorBrush x:Key="TabViewItemHeaderBackground" Color="#2D2D2D" />
+                            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="Transparent" />
+                            <SolidColorBrush x:Key="TabViewSelectedItemBorderBrush" Color="#3FFFFFFF" />
+                            <SolidColorBrush x:Key="TabViewBorderBrush" Color="Transparent" />
+                            <SolidColorBrush x:Key="TabViewItemSeparator" Color="Transparent" />
+                            <SolidColorBrush x:Key="TabViewItemStroke" Color="Transparent" />
+                        </ResourceDictionary>
+                        <ResourceDictionary x:Key="Light">
+                            <SolidColorBrush x:Key="TabViewItemHeaderBackground" Color="#FFFFFF" />
+                            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="Transparent" />
+                            <SolidColorBrush x:Key="TabViewSelectedItemBorderBrush" Color="#1F000000" />
+                            <SolidColorBrush x:Key="TabViewBorderBrush" Color="Transparent" />
+                            <SolidColorBrush x:Key="TabViewItemSeparator" Color="Transparent" />
+                            <SolidColorBrush x:Key="TabViewItemStroke" Color="Transparent" />
+                        </ResourceDictionary>
+                    </ResourceDictionary.ThemeDictionaries>
+
+                    <!-- Borderless TabStrip Overrides -->
+                    <Thickness x:Key="TabViewBorderThickness">0</Thickness>
+                    <SolidColorBrush x:Key="TabViewBorderBrush" Color="Transparent" />
+                    <Thickness x:Key="TabViewTabStripBorderThickness">0</Thickness>
+                    <SolidColorBrush x:Key="TabViewItemStroke" Color="Transparent" />
+                    <SolidColorBrush x:Key="TabViewItemSeparator" Color="Transparent" />
+                    <Thickness x:Key="TabViewItemBorderThickness">0</Thickness>
+                    <Thickness x:Key="TabViewSelectedItemBorderThickness">1</Thickness>
+                    <Thickness x:Key="TabViewSelectedItemHeaderMargin">0</Thickness>
+
+                    <!-- Pill Geometry Overrides -->
+                    <CornerRadius x:Key="TabViewItemCornerRadius">16</CornerRadius>
+                    <CornerRadius x:Key="OverlayCornerRadius">16</CornerRadius>
+                    <x:Double x:Key="TabViewItemHeaderMinHeight">34</x:Double>
+                </ResourceDictionary>
+            </TabView.Resources>
+
             <TabView.TabStripHeader>
                 <Grid x:Name="CustomDragRegionLeft" Background="Transparent" Width="8" />
             </TabView.TabStripHeader>
@@ -45,6 +269,7 @@
             <TabView.TabItemTemplate>
                 <DataTemplate x:DataType="models:TabItemModel">
                     <TabViewItem
+                        Style="{StaticResource PillTabViewItemStyle}"
                         Header="{x:Bind Title, Mode=OneWay}"
                         IsClosable="{x:Bind IsClosable, Mode=OneWay}">
                         <TabViewItem.IconSource>
@@ -58,6 +283,7 @@
         <!-- Main Viewport Content Presenter -->
         <ContentPresenter
             Grid.Row="1"
+            Background="Transparent"
             Content="{x:Bind ViewModel.SelectedTab.Content, Mode=OneWay}"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch" />

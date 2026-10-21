@@ -444,4 +444,22 @@
   <data name="dialog_uncommitted_changes_message" xml:space="preserve">
     <value>Bạn có thay đổi chưa lưu. Bạn có muốn lưu hoặc hủy trước khi tiếp tục không?</value>
   </data>
+  <data name="page_settings_backdrop_title" xml:space="preserve">
+    <value>Hiệu ứng nền</value>
+  </data>
+  <data name="page_settings_backdrop_summary" xml:space="preserve">
+    <value>Chọn hiệu ứng chất liệu nền hệ thống (Mica, Tabbed, Acrylic, Đơn sắc)</value>
+  </data>
+  <data name="backdrop_tabbed" xml:space="preserve">
+    <value>Tabbed (Mica Alt)</value>
+  </data>
+  <data name="backdrop_mica" xml:space="preserve">
+    <value>Mica (Tiêu chuẩn)</value>
+  </data>
+  <data name="backdrop_acrylic" xml:space="preserve">
+    <value>Acrylic (Kính mờ)</value>
+  </data>
+  <data name="backdrop_solid" xml:space="preserve">
+    <value>Đơn sắc (Solid)</value>
+  </data>
 </root>

@@ -39,17 +39,18 @@ namespace DataSphere.Services
         /// <param name="titleKey">The localization resource key for the tab header.</param>
         /// <param name="iconGlyph">Fluent icon glyph for the tab.</param>
         /// <param name="parameter">Optional navigation parameter passed to the ViewModel.</param>
+        /// <param name="forceNewTab">Optional flag indicating whether to force creating a new tab instance instead of focusing an existing one.</param>
         /// <returns>The opened or focused TabItemModel instance.</returns>
-        public TabItemModel OpenTab(Type pageType, string titleKey, string iconGlyph, object? parameter = null)
+        public TabItemModel OpenTab(Type pageType, string titleKey, string iconGlyph, object? parameter = null, bool forceNewTab = false)
         {
             if (pageType == null)
             {
                 throw new ArgumentNullException(nameof(pageType));
             }
 
-            // Check if a tab of this type is already open (e.g. Home or Settings)
+            // Check if a tab of this type is already open and is a singleton (e.g. Home or non-closable tab)
             var existingTab = Tabs.FirstOrDefault(t => t.PageType == pageType);
-            if (existingTab != null && (existingTab.PageType?.Name == "HomePage" || !existingTab.IsClosable))
+            if (!forceNewTab && existingTab != null && (existingTab.PageType?.Name == "HomePage" || !existingTab.IsClosable))
             {
                 SelectedTab = existingTab;
                 existingTab.State = TabLifecycleState.Active;
@@ -57,12 +58,16 @@ namespace DataSphere.Services
             }
 
             // If it's a singleton-style settings page, focus existing if found
-            if (existingTab != null && (existingTab.TitleKey == titleKey || existingTab.Title == LanguageBase.GetLangValue(titleKey)))
+            if (!forceNewTab && existingTab != null && existingTab.PageType?.Name == "SettingsPage")
             {
                 SelectedTab = existingTab;
                 existingTab.State = TabLifecycleState.Active;
                 return existingTab;
             }
+
+            // Calculate instance index for multi-instance tabs of the same type
+            int existingTypeCount = Tabs.Count(t => t.PageType == pageType);
+            int nextInstanceIndex = existingTypeCount + 1;
 
             // Resolve or instantiate page
             object? pageInstance = null;
@@ -78,8 +83,8 @@ namespace DataSphere.Services
 
             var newTab = new TabItemModel
             {
+                InstanceIndex = nextInstanceIndex,
                 TitleKey = titleKey,
-                Title = LanguageBase.GetLangValue(titleKey),
                 IconGlyph = iconGlyph,
                 PageType = pageType,
                 Content = pageInstance,
@@ -116,11 +121,8 @@ namespace DataSphere.Services
             bool wasSelected = Equals(SelectedTab, tab);
 
             // Clean up resources if disposable
-            if (tab.Content is IDisposable pageDisposable)
-            {
-                pageDisposable.Dispose();
-            }
-            else if (tab.Content is FrameworkElement fe && fe.DataContext is IDisposable vmDisposable)
+            tab.Dispose();
+            if (tab.Content is FrameworkElement fe && fe.DataContext is IDisposable vmDisposable)
             {
                 vmDisposable.Dispose();
             }

@@ -9,7 +9,7 @@
     xmlns:vm="using:DataSphere.ViewModels.Pages.DatabaseGroup"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />

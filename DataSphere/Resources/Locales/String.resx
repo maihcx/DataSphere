@@ -447,4 +447,22 @@
   <data name="dialog_uncommitted_changes_message" xml:space="preserve">
     <value>You have uncommitted modifications. Do you want to commit or discard them before proceeding?</value>
   </data>
+  <data name="page_settings_backdrop_title" xml:space="preserve">
+    <value>Backdrop Material</value>
+  </data>
+  <data name="page_settings_backdrop_summary" xml:space="preserve">
+    <value>Select Windows system backdrop material (Mica, Tabbed, Acrylic, Solid)</value>
+  </data>
+  <data name="backdrop_tabbed" xml:space="preserve">
+    <value>Tabbed (Mica Alt)</value>
+  </data>
+  <data name="backdrop_mica" xml:space="preserve">
+    <value>Mica (Standard)</value>
+  </data>
+  <data name="backdrop_acrylic" xml:space="preserve">
+    <value>Acrylic (Frosted Glass)</value>
+  </data>
+  <data name="backdrop_solid" xml:space="preserve">
+    <value>Solid</value>
+  </data>
 </root>

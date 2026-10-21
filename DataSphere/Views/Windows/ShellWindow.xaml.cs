@@ -19,6 +19,7 @@ namespace DataSphere.Views.Windows
     public sealed partial class ShellWindow : WindowEx
     {
         private readonly IWindowManager _windowManager;
+        private readonly IThemeService _themeService;
         private WindowSession? _session;
 
         /// <summary>
@@ -36,10 +37,12 @@ namespace DataSphere.Views.Windows
         /// </summary>
         /// <param name="viewModel">The shell view model.</param>
         /// <param name="windowManager">The application window manager service.</param>
-        public ShellWindow(ShellViewModel viewModel, IWindowManager windowManager)
+        /// <param name="themeService">The application theme and system backdrop service.</param>
+        public ShellWindow(ShellViewModel viewModel, IWindowManager windowManager, IThemeService themeService)
         {
             ViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
             _windowManager = windowManager ?? throw new ArgumentNullException(nameof(windowManager));
+            _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
 
             InitializeComponent();
 
@@ -48,6 +51,11 @@ namespace DataSphere.Views.Windows
             CustomDragRegion.MinWidth = 188;
             AppWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
             AppWindow.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+
+            // Apply active theme and system backdrop to this window
+            _themeService.ApplyThemeAndBackdrop(this);
+            _themeService.ThemeChanged += OnThemeChanged;
+            _themeService.BackdropChanged += OnBackdropChanged;
 
             // Register session
             _session = new WindowSession
@@ -104,6 +112,8 @@ namespace DataSphere.Views.Windows
 
             Closed += (sender, args) =>
             {
+                _themeService.ThemeChanged -= OnThemeChanged;
+                _themeService.BackdropChanged -= OnBackdropChanged;
                 if (_session != null && _session.IsPrimary)
                 {
                     WindowPlacementHelper.SavePlacement(this);
@@ -111,6 +121,22 @@ namespace DataSphere.Views.Windows
             };
 
             _windowManager.RegisterWindow(_session);
+        }
+
+        private void OnThemeChanged(object? sender, string theme)
+        {
+            DispatcherQueue?.TryEnqueue(() =>
+            {
+                _themeService.ApplyThemeAndBackdrop(this);
+            });
+        }
+
+        private void OnBackdropChanged(object? sender, string backdrop)
+        {
+            DispatcherQueue?.TryEnqueue(() =>
+            {
+                _themeService.ApplyThemeAndBackdrop(this);
+            });
         }
 
         private void OnTabViewSelectionChanged(object sender, SelectionChangedEventArgs e)

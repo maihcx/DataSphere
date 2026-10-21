@@ -62,8 +62,8 @@ namespace DataSphere.Services
 
             var shellWindow = _serviceProvider.GetRequiredService<ShellWindow>();
 
-            // Apply theme to the root visual before activation
-            _themeService.ApplyThemeToWindow(shellWindow);
+            // Apply theme and backdrop to the root visual before activation
+            _themeService.ApplyThemeAndBackdrop(shellWindow);
 
             shellWindow.Activate();
             return Task.CompletedTask;
