@@ -16,10 +16,10 @@ namespace DataSphere.Models
         public partial int CurrentPage { get; set; } = 1;
 
         /// <summary>
-        /// Gets or sets the maximum number of rows retrieved per page (e.g. 100, 500, 1000).
+        /// Gets or sets the maximum number of rows retrieved per page (e.g. 1000, 5000, 10000, or <see cref="int.MaxValue"/> for infinity).
         /// </summary>
         [ObservableProperty]
-        public partial int PageSize { get; set; } = 100;
+        public partial int PageSize { get; set; } = 1000;
 
         /// <summary>
         /// Gets or sets the total number of records available in the queried table.
@@ -35,8 +35,9 @@ namespace DataSphere.Models
 
         /// <summary>
         /// Gets the total number of pages based on total records and page size.
+        /// When page size is unbounded (<see cref="int.MaxValue"/>), exactly 1 page exists.
         /// </summary>
-        public int TotalPages => (int)Math.Ceiling((double)TotalRecords / Math.Max(1, PageSize));
+        public int TotalPages => PageSize == int.MaxValue ? 1 : (int)Math.Ceiling((double)TotalRecords / Math.Max(1, PageSize));
 
         /// <summary>
         /// Gets the collection of column metadata definitions for the queried table.

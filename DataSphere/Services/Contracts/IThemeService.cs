@@ -94,5 +94,11 @@ namespace DataSphere.Services.Contracts
         /// </summary>
         /// <param name="window">The window to theme and apply backdrop material to.</param>
         void ApplyThemeAndBackdrop(object window);
+
+        /// <summary>
+        /// Applies the current theme to a ContentDialog.
+        /// </summary>
+        /// <param name="dialog">The ContentDialog to theme.</param>
+        void ApplyThemeToDialog(ContentDialog dialog);
     }
 }

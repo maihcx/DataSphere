@@ -1,9 +1,11 @@
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
+using System.Runtime.InteropServices;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using WinUIEx;
 using DataSphere.Models;
 using DataSphere.Services.Contracts;
@@ -64,7 +66,7 @@ namespace DataSphere.Views.Windows
                 IsPrimary = _windowManager.Windows.Count == 0
             };
 
-            // Mirror tabs from viewmodel into session and keep synchronized
+            // Mirror dynamic tabs from viewmodel into session and keep synchronized
             foreach (var tab in ViewModel.Tabs)
             {
                 _session.Tabs.Add(tab);
@@ -88,6 +90,18 @@ namespace DataSphere.Views.Windows
                     foreach (TabItemModel tab in e.OldItems)
                     {
                         _session.Tabs.Remove(tab);
+                    }
+                }
+            };
+
+            // Deselect dynamic tabs in ShellTabView whenever Home is selected
+            ViewModel.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(ShellViewModel.IsHomeSelected))
+                {
+                    if (ViewModel.IsHomeSelected)
+                    {
+                        ShellTabView.SelectedItem = null;
                     }
                 }
             };
@@ -139,6 +153,32 @@ namespace DataSphere.Views.Windows
             });
         }
 
+        /// <summary>
+        /// Handles the Tapped event on the anchored Home TabViewItem to select Home.
+        /// </summary>
+        /// <param name="sender">The source of the tapped event.</param>
+        /// <param name="e">The tapped event arguments.</param>
+        private void OnHomeTabTapped(object sender, TappedRoutedEventArgs e)
+        {
+            ViewModel.SelectHomeCommand.Execute(null);
+            ShellTabView.SelectedItem = null;
+        }
+
+        /// <summary>
+        /// Handles the CloseRequested event on the anchored Home TabViewItem to close the application.
+        /// </summary>
+        /// <param name="sender">The Home TabViewItem requesting close.</param>
+        /// <param name="args">The tab close requested event arguments.</param>
+        private void OnHomeTabCloseRequested(TabViewItem sender, TabViewTabCloseRequestedEventArgs args)
+        {
+            ViewModel.CloseHomeCommand.Execute(null);
+        }
+
+        /// <summary>
+        /// Handles selection changes on dynamic workspace tabs.
+        /// </summary>
+        /// <param name="sender">The TabView source.</param>
+        /// <param name="e">The selection changed event arguments.</param>
         private void OnTabViewSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ShellTabView.SelectedItem is TabItemModel selectedTab && !Equals(ViewModel.SelectedTab, selectedTab))
@@ -147,6 +187,11 @@ namespace DataSphere.Views.Windows
             }
         }
 
+        /// <summary>
+        /// Handles tab close requests on dynamic workspace tabs.
+        /// </summary>
+        /// <param name="sender">The TabView source.</param>
+        /// <param name="args">The tab close requested event arguments.</param>
         private void OnTabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
         {
             if (args.Item is TabItemModel tabModel)
@@ -155,6 +200,11 @@ namespace DataSphere.Views.Windows
             }
         }
 
+        /// <summary>
+        /// Handles tab drag starting events, preventing anchored Home tabs from being dragged or torn off.
+        /// </summary>
+        /// <param name="sender">The TabView source.</param>
+        /// <param name="args">The drag starting event arguments.</param>
         private void OnTabDragStarting(TabView sender, TabViewTabDragStartingEventArgs args)
         {
             if (args.Item is TabItemModel tabModel)
@@ -180,6 +230,11 @@ namespace DataSphere.Views.Windows
             }
         }
 
+        /// <summary>
+        /// Handles tab dropped outside events to tear off the tab into a new window.
+        /// </summary>
+        /// <param name="sender">The TabView source.</param>
+        /// <param name="args">The tab dropped outside event arguments.</param>
         private void OnTabDroppedOutside(TabView sender, TabViewTabDroppedOutsideEventArgs args)
         {
             if (args.Item is TabItemModel tabModel && tabModel.IsClosable)
@@ -193,6 +248,10 @@ namespace DataSphere.Views.Windows
                     if (ViewModel.Tabs.Count > 0)
                     {
                         ViewModel.SelectedTab = ViewModel.Tabs[Math.Min(fallbackIndex, ViewModel.Tabs.Count - 1)];
+                    }
+                    else
+                    {
+                        ViewModel.SelectHome();
                     }
                 }
                 else
@@ -210,11 +269,18 @@ namespace DataSphere.Views.Windows
             }
         }
 
-        private void OnTabStripDragOver(object sender, DragEventArgs e)
+        /// <summary>
+        /// Handles drag over events across the tab bar area (including the anchored Home tab, title bar drag region,
+        /// and TabView host) to enable cross-window tab docking even when zero dynamic tabs exist or when hovering over empty strip space.
+        /// </summary>
+        /// <param name="sender">The drag event source.</param>
+        /// <param name="e">The drag event arguments.</param>
+        private void OnTabAreaDragOver(object sender, DragEventArgs e)
         {
             if (e.DataView.Properties.ContainsKey("DataSphereTabPayload"))
             {
                 e.AcceptedOperation = DataPackageOperation.Move;
+                e.Handled = true;
             }
             else
             {
@@ -222,8 +288,63 @@ namespace DataSphere.Views.Windows
             }
         }
 
+        /// <summary>
+        /// Handles drop events across the tab bar area to accept transferred tabs from another window,
+        /// inserting at index 0 when dropped on the anchored Home tab, or appending to the end of dynamic tabs.
+        /// </summary>
+        /// <param name="sender">The drag event source.</param>
+        /// <param name="e">The drag event arguments.</param>
+        private void OnTabAreaDrop(object sender, DragEventArgs e)
+        {
+            if (e.Handled)
+            {
+                return;
+            }
+
+            if (e.DataView.Properties.TryGetValue("DataSphereTabPayload", out object? rawPayload) &&
+                rawPayload is TabDragPayload payload)
+            {
+                if (_session != null && payload.SourceWindowId != _session.WindowId)
+                {
+                    // If dropped directly onto the anchored Home tab, insert at index 0;
+                    // otherwise append to the end of the dynamic tab collection.
+                    int targetIndex = ReferenceEquals(sender, HomeTabItem) ? 0 : ViewModel.Tabs.Count;
+                    _windowManager.TransferTab(payload.SourceWindowId, _session.WindowId, payload.Tab, targetIndex);
+                    e.Handled = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles tab strip drag over events for inter-window tab transfer.
+        /// </summary>
+        /// <param name="sender">The TabView source.</param>
+        /// <param name="e">The drag event arguments.</param>
+        private void OnTabStripDragOver(object sender, DragEventArgs e)
+        {
+            if (e.DataView.Properties.ContainsKey("DataSphereTabPayload"))
+            {
+                e.AcceptedOperation = DataPackageOperation.Move;
+                e.Handled = true;
+            }
+            else
+            {
+                e.AcceptedOperation = DataPackageOperation.None;
+            }
+        }
+
+        /// <summary>
+        /// Handles tab strip drop events to accept transferred tabs from another window.
+        /// </summary>
+        /// <param name="sender">The TabView source.</param>
+        /// <param name="e">The drag event arguments.</param>
         private void OnTabStripDrop(object sender, DragEventArgs e)
         {
+            if (e.Handled)
+            {
+                return;
+            }
+
             if (e.DataView.Properties.TryGetValue("DataSphereTabPayload", out object? rawPayload) &&
                 rawPayload is TabDragPayload payload)
             {
@@ -232,6 +353,7 @@ namespace DataSphere.Views.Windows
                     // Calculate drop index or append
                     int targetIndex = ViewModel.Tabs.Count;
                     _windowManager.TransferTab(payload.SourceWindowId, _session.WindowId, payload.Tab, targetIndex);
+                    e.Handled = true;
                 }
             }
         }

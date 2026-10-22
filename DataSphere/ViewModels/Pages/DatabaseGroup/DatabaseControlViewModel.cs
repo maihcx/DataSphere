@@ -167,12 +167,19 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
 
         /// <summary>
         /// Selects a table and displays its paginated data viewport in the right panel.
+        /// Reuses the existing viewport if already initialized to eliminate visual tree allocation churn.
         /// </summary>
         /// <param name="database">The owning database schema.</param>
         /// <param name="table">The selected table definition.</param>
         public void SelectTable(DatabaseInfo database, Table table)
         {
             if (Connection == null || database == null || table == null) return;
+
+            if (RightPanelContent is DataViewControl existingView)
+            {
+                existingView.LoadTable(database, table);
+                return;
+            }
 
             if (RightPanelContent is IDisposable disposable)
             {

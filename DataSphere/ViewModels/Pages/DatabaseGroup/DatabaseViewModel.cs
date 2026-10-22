@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using DataSphere.Models;
 using DataSphere.Services.Contracts;
 using DataSphere.Utils;
@@ -9,7 +10,7 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
 {
     /// <summary>
     /// ViewModel for the Database management workspace page, governing the inner TabView strip.
-    /// Tab 0 is anchored to the connection catalog explorer; subsequent tabs host active database sessions.
+    /// Anchors the permanent Connection catalog explorer in TabStripHeader and hosts open database sessions as dynamic tabs.
     /// </summary>
     public partial class DatabaseViewModel : ObservableObject
     {
@@ -21,15 +22,38 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
         public ConnectControlViewModel ConnectViewModel { get; }
 
         /// <summary>
-        /// Gets the collection of open inner tabs hosted inside the Database workspace.
+        /// Gets the dedicated anchored tab item model for the Connection Catalog Explorer.
+        /// Rendered permanently inside <c>InnerTabView.TabStripHeader</c>.
+        /// </summary>
+        public InnerTabItemModel ConnectionTab { get; }
+
+        /// <summary>
+        /// Gets the collection of open dynamic inner tabs (active database sessions) hosted inside the Database workspace.
         /// </summary>
         public ObservableCollection<InnerTabItemModel> InnerTabs { get; } = new();
 
         /// <summary>
-        /// Gets or sets the currently active inner tab.
+        /// Gets or sets a value indicating whether the anchored Connection tab in TabStripHeader is selected.
+        /// Mutual exclusion: setting this to true deselects <see cref="SelectedInnerTab"/>.
         /// </summary>
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ActiveInnerContent))]
+        public partial bool IsConnectionSelected { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the currently active dynamic database tab, or null if Connection is active.
+        /// Mutual exclusion: setting this to a non-null tab sets <see cref="IsConnectionSelected"/> to false.
+        /// </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ActiveInnerContent))]
         public partial InnerTabItemModel? SelectedInnerTab { get; set; }
+
+        /// <summary>
+        /// Gets the active content for the viewport ContentControl.
+        /// Resolves to <see cref="ConnectionTab"/>.Content when <see cref="IsConnectionSelected"/> is true,
+        /// otherwise <see cref="SelectedInnerTab"/>.Content.
+        /// </summary>
+        public object? ActiveInnerContent => IsConnectionSelected ? ConnectionTab.Content : SelectedInnerTab?.Content;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseViewModel"/> class.
@@ -44,12 +68,12 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
                 OnOpenConnection = OpenConnectionTab
             };
 
-            InitializeTabs();
+            ConnectionTab = CreateConnectionTab();
 
             TranslationSource.Instance.PropertyChanged += (s, e) => UpdateLocalizedStrings();
         }
 
-        private void InitializeTabs()
+        private InnerTabItemModel CreateConnectionTab()
         {
             object? connectControl = null;
             try
@@ -62,24 +86,48 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
                 connectControl = ConnectViewModel;
             }
 
-            var tab0 = new InnerTabItemModel
+            return new InnerTabItemModel
             {
                 Header = LanguageBase.GetLangValue("tab_connections_header"),
-                IconGlyph = "\uE774",
+                IconGlyph = "\uE703",
                 Content = connectControl,
                 IsClosable = false,
                 ConnectionKey = "tab_connections_explorer"
             };
+        }
 
-            InnerTabs.Add(tab0);
-            SelectedInnerTab = tab0;
+        partial void OnSelectedInnerTabChanged(InnerTabItemModel? value)
+        {
+            if (value != null)
+            {
+                IsConnectionSelected = false;
+            }
+        }
+
+        partial void OnIsConnectionSelectedChanged(bool value)
+        {
+            if (value)
+            {
+                SelectedInnerTab = null;
+            }
+        }
+
+        /// <summary>
+        /// Activates the anchored Connection tab and deselects any open dynamic database tabs.
+        /// </summary>
+        [RelayCommand]
+        public void SelectConnection()
+        {
+            IsConnectionSelected = true;
+            SelectedInnerTab = null;
+            OnPropertyChanged(nameof(ActiveInnerContent));
         }
 
         private void UpdateLocalizedStrings()
         {
-            if (InnerTabs.Count > 0 && InnerTabs[0].ConnectionKey == "tab_connections_explorer")
+            if (ConnectionTab != null)
             {
-                InnerTabs[0].Header = LanguageBase.GetLangValue("tab_connections_header");
+                ConnectionTab.Header = LanguageBase.GetLangValue("tab_connections_header");
             }
         }
 
@@ -95,6 +143,7 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
             if (existing != null)
             {
                 SelectedInnerTab = existing;
+                IsConnectionSelected = false;
                 return;
             }
 
@@ -122,10 +171,12 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
 
             InnerTabs.Add(newTab);
             SelectedInnerTab = newTab;
+            IsConnectionSelected = false;
         }
 
         /// <summary>
-        /// Closes an open inner tab and disposes its database connection resources.
+        /// Closes an open dynamic inner tab and disposes its database connection resources.
+        /// If all dynamic tabs are closed, selection automatically falls back to the Connection tab.
         /// </summary>
         /// <param name="tab">The inner tab to close.</param>
         public void CloseTab(InnerTabItemModel tab)
@@ -140,10 +191,17 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
             tab.DisposableContext?.Dispose();
             InnerTabs.RemoveAt(index);
 
-            if (wasSelected && InnerTabs.Count > 0)
+            if (wasSelected)
             {
-                int newIndex = Math.Max(0, index - 1);
-                SelectedInnerTab = InnerTabs[newIndex];
+                if (InnerTabs.Count > 0)
+                {
+                    int newIndex = Math.Clamp(index - 1, 0, InnerTabs.Count - 1);
+                    SelectedInnerTab = InnerTabs[newIndex];
+                }
+                else
+                {
+                    SelectConnection();
+                }
             }
         }
     }

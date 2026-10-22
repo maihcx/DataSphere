@@ -15,14 +15,17 @@ namespace DataSphere.Services
     public class DialogService : IDialogService
     {
         private readonly IWindowManager _windowManager;
+        private readonly IThemeService _themeService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DialogService"/> class.
         /// </summary>
         /// <param name="windowManager">The window manager used to resolve active window XamlRoot anchors.</param>
-        public DialogService(IWindowManager windowManager)
+        /// <param name="themeService">The theme service used to synchronize dialog themes.</param>
+        public DialogService(IWindowManager windowManager, IThemeService themeService)
         {
             _windowManager = windowManager ?? throw new ArgumentNullException(nameof(windowManager));
+            _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         }
 
         private XamlRoot? ResolveXamlRoot(object? explicitRoot = null)
@@ -76,8 +79,11 @@ namespace DataSphere.Services
 
             var dialog = new Views.Dialogs.ConnectionEditingDialog(existingConnection)
             {
-                XamlRoot = root
+                XamlRoot = root,
+                Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style
             };
+
+            _themeService.ApplyThemeToDialog(dialog);
 
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
@@ -99,8 +105,11 @@ namespace DataSphere.Services
 
             var dialog = new Views.Dialogs.DatabaseEditingDialog(connection)
             {
-                XamlRoot = root
+                XamlRoot = root,
+                Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style
             };
+
+            _themeService.ApplyThemeToDialog(dialog);
 
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
@@ -128,12 +137,15 @@ namespace DataSphere.Services
             var dialog = new ContentDialog
             {
                 XamlRoot = root,
+                Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
                 Title = title,
                 Content = message,
                 PrimaryButtonText = LanguageBase.GetLangValue("msgbox_ok_title"),
                 CloseButtonText = LanguageBase.GetLangValue("msgbox_cancel_title"),
                 DefaultButton = ContentDialogButton.Close
             };
+
+            _themeService.ApplyThemeToDialog(dialog);
 
             var result = await dialog.ShowAsync();
             return result == ContentDialogResult.Primary;

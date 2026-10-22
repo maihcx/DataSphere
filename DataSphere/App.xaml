@@ -8,16 +8,20 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="ms-appx:///Themes/TabStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
-                    <SolidColorBrush x:Key="TabViewBackground" Color="Transparent" />
+                    <SolidColorBrush x:Key="TabViewBackground"
+                                     Color="Transparent" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Light">
-                    <SolidColorBrush x:Key="TabViewBackground" Color="Transparent" />
+                    <SolidColorBrush x:Key="TabViewBackground"
+                                     Color="Transparent" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="TabViewBackground" Color="Transparent" />
+                    <SolidColorBrush x:Key="TabViewBackground"
+                                     Color="Transparent" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
             <utils:TranslationSource x:Key="Localization" />
@@ -27,6 +31,7 @@
             <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" xmlns:helpers="using:DataSphere.Helpers" />
             <helpers:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" xmlns:helpers="using:DataSphere.Helpers" />
             <helpers:FullCornerRadiusConverter x:Key="TopCornerRadiusFilterConverter" xmlns:helpers="using:DataSphere.Helpers" />
+            <helpers:StringToVisibilityConverter x:Key="StringToVisibilityConverter" xmlns:helpers="using:DataSphere.Helpers" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

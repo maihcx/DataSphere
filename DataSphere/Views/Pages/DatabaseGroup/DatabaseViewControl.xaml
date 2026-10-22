@@ -9,7 +9,7 @@
     xmlns:vm="using:DataSphere.ViewModels.Pages.DatabaseGroup"
     mc:Ignorable="d">
 
-    <Grid Background="Transparent">
+    <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="280" MinWidth="200" MaxWidth="500" />
             <ColumnDefinition Width="Auto" />
@@ -73,7 +73,8 @@
                             Orientation="Horizontal"
                             Spacing="8"
                             Padding="2,4"
-                            ContextRequested="TreeNode_ContextRequested">
+                            ContextRequested="TreeNode_ContextRequested"
+                            DoubleTapped="TreeNode_DoubleTapped">
                             <Grid Width="16" Height="16">
                                 <FontIcon
                                     Glyph="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IconGlyph, Mode=OneWay}"

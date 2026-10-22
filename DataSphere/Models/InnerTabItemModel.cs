@@ -15,9 +15,10 @@ namespace DataSphere.Models
 
         /// <summary>
         /// Gets or sets the Segoe Fluent Icon glyph displayed next to the tab header.
+        /// Defaults to "\uE703" (Connect).
         /// </summary>
         [ObservableProperty]
-        public partial string IconGlyph { get; set; } = "\uE774";
+        public partial string IconGlyph { get; set; } = "\uE703";
 
         /// <summary>
         /// Gets or sets the visual content element or UserControl hosted within this tab.

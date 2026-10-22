@@ -1,45 +1,25 @@
 using System;
-using System.IO;
-using System.Text;
+using MySqlConnector;
 
-namespace ResxUpdater
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        try
         {
-            UpdateResx("DataSphere/Resources/Locales/String.resx", "Select a table in the explorer to browse its records");
-            UpdateResx("DataSphere/Resources/Locales/String.en.resx", "Select a table in the explorer to browse its records");
-            UpdateResx("DataSphere/Resources/Locales/String.vi.resx", "Chọn một bảng trong danh sách để xem dữ liệu");
+            using var conn = new MySqlConnection("Server=localhost;Port=3306;User ID=root;Password=;");
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT table_schema, table_name, table_rows FROM information_schema.tables WHERE table_schema='ngocthamcatalog' AND table_name LIKE '%products_new%';";
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                Console.WriteLine($"{reader.GetString(0)}.{reader.GetString(1)} (Rows: {reader.GetValue(2)})");
+            }
         }
-
-        static void UpdateResx(string filePath, string value)
+        catch (Exception ex)
         {
-            if (!File.Exists(filePath))
-            {
-                Console.WriteLine($"File not found: {filePath}");
-                return;
-            }
-
-            string content = File.ReadAllText(filePath, Encoding.UTF8);
-            if (content.Contains("page_db_select_table_hint"))
-            {
-                Console.WriteLine($"Already exists in {filePath}");
-                return;
-            }
-
-            int rootIndex = content.LastIndexOf("</root>");
-            if (rootIndex == -1)
-            {
-                Console.WriteLine($"</root> tag not found in {filePath}");
-                return;
-            }
-
-            string entry = $"  <data name=\"page_db_select_table_hint\" xml:space=\"preserve\">\r\n    <value>{value}</value>\r\n  </data>\r\n";
-            string updated = content.Insert(rootIndex, entry);
-
-            File.WriteAllText(filePath, updated, new UTF8Encoding(false));
-            Console.WriteLine($"Successfully updated {filePath}");
+            Console.WriteLine("Error: " + ex.Message);
         }
     }
 }

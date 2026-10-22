@@ -82,7 +82,6 @@ namespace DataSphere.Controls.VirtualTable
         public void EnsureColumns(int visibleSlotCount)
         {
             var gridlineBrush = ResolveThemeBrush("CardStrokeColorDefaultBrush", DefaultBorderBrush);
-            var textBrush = ResolveThemeBrush("TextFillColorPrimaryBrush", new SolidColorBrush(Colors.White));
 
             while (_cellBorders.Count < visibleSlotCount)
             {
@@ -91,8 +90,7 @@ namespace DataSphere.Controls.VirtualTable
                     VerticalAlignment = VerticalAlignment.Center,
                     Padding = new Thickness(10, 0, 10, 0),
                     TextTrimming = TextTrimming.CharacterEllipsis,
-                    FontSize = 13,
-                    Foreground = textBrush
+                    FontSize = 13
                 };
 
                 var cellBorder = new Border

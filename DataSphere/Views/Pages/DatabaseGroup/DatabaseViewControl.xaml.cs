@@ -342,6 +342,32 @@ namespace DataSphere.Views.Pages.DatabaseGroup
             return null;
         }
 
+        /// <summary>
+        /// Handles double-tapping a schema tree node to toggle expansion for database and category nodes.
+        /// </summary>
+        /// <param name="sender">The source element emitting the event.</param>
+        /// <param name="e">The double-tapped routed event data.</param>
+        private void TreeNode_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.DataContext is TreeViewNode node && node.Content is DatabaseTreeNode dtn)
+            {
+                if (dtn.DataContext is TableCategoryContext || dtn.DataContext is DatabaseInfo || dtn.DataContext is ConnectionRoot)
+                {
+                    if (!dtn.IsLoading)
+                    {
+                        node.IsExpanded = !node.IsExpanded;
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles invoking a schema tree node. Selects table content when a table leaf node is invoked.
+        /// Does not expand parent database or category nodes on single click.
+        /// </summary>
+        /// <param name="sender">The TreeView emitting the event.</param>
+        /// <param name="args">The item invocation event arguments.</param>
         private void SchemaTree_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
         {
             if (args.InvokedItem is TreeViewNode node && node.Content is DatabaseTreeNode dtn)
@@ -349,13 +375,6 @@ namespace DataSphere.Views.Pages.DatabaseGroup
                 if (dtn.DataContext is TableNodeContext tnc)
                 {
                     ViewModel.SelectTable(tnc.Database, tnc.Table);
-                }
-                else if (dtn.DataContext is TableCategoryContext || dtn.DataContext is DatabaseInfo)
-                {
-                    if (!dtn.IsLoading)
-                    {
-                        node.IsExpanded = !node.IsExpanded;
-                    }
                 }
             }
         }

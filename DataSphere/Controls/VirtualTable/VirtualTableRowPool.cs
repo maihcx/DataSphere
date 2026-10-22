@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace DataSphere.Controls.VirtualTable
 {
@@ -23,6 +25,35 @@ namespace DataSphere.Controls.VirtualTable
         /// Gets the number of instantiated visual row containers in the pool.
         /// </summary>
         public int PoolSize => _rows.Count;
+
+        /// <summary>
+        /// Clears all visual row elements from the pool and removes them from the parent canvas.
+        /// </summary>
+        /// <param name="parentCanvas">The visual canvas hosting the row elements.</param>
+        public void Clear(Canvas? parentCanvas)
+        {
+            if (parentCanvas != null)
+            {
+                foreach (var row in _rows)
+                {
+                    parentCanvas.Children.Remove(row.VisualBorder);
+                }
+            }
+            _rows.Clear();
+            _columnOffsets.Clear();
+        }
+
+        /// <summary>
+        /// Collapses all instantiated visual row containers immediately to avoid rendering stale rows.
+        /// </summary>
+        public void CollapseAll()
+        {
+            for (int i = 0; i < _rows.Count; i++)
+            {
+                _rows[i].VisualBorder.Visibility = Visibility.Collapsed;
+                _rows[i].DataRowIndex = -1;
+            }
+        }
 
         /// <summary>
         /// Ensures that the pool contains the exact number of visual row elements required to fill the viewport
@@ -56,7 +87,7 @@ namespace DataSphere.Controls.VirtualTable
             {
                 _rows[i].RowHeight = rowHeight;
                 _rows[i].EnsureColumns(requiredCellSlots);
-                _rows[i].VisualBorder.Visibility = i < requiredCount ? Visibility.Visible : Visibility.Collapsed;
+                _rows[i].VisualBorder.Visibility = (totalColumnCount > 0 && i < requiredCount) ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -88,7 +119,11 @@ namespace DataSphere.Controls.VirtualTable
             int selectedColumnIndex,
             int hoveredRowIndex)
         {
-            if (columns == null || columns.Count == 0) return;
+            if (columns == null || columns.Count == 0 || dataProvider == null || totalRowCount <= 0)
+            {
+                CollapseAll();
+                return;
+            }
 
             // Cache column horizontal offsets
             _columnOffsets.Clear();

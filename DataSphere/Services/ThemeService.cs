@@ -261,10 +261,28 @@ namespace DataSphere.Services
                     }
                     else
                     {
-                        rootPanel.ClearValue(Panel.BackgroundProperty);
+                        // Solid backdrop requires an explicit, theme-synchronized opaque background
+                        // to prevent the Win32 window canvas from falling back to default white.
+                        bool isDark = elementTheme == ElementTheme.Dark ||
+                                     (elementTheme == ElementTheme.Default && Application.Current?.RequestedTheme == ApplicationTheme.Dark);
+
+                        rootPanel.Background = isDark
+                            ? new SolidColorBrush(Windows.UI.Color.FromArgb(255, 32, 32, 32))   // WinUI 3 SolidBackgroundFillColorBase Dark (#202020)
+                            : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 243, 243, 243)); // WinUI 3 SolidBackgroundFillColorBase Light (#F3F3F3)
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Applies the current theme to a ContentDialog.
+        /// </summary>
+        /// <param name="dialog"></param>
+        public void ApplyThemeToDialog(ContentDialog dialog)
+        {
+            if (dialog == null) return;
+            var elementTheme = GetElementTheme(_currentTheme);
+            dialog.RequestedTheme = elementTheme;
         }
 
         private static ElementTheme GetElementTheme(string themeName)

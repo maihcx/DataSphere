@@ -9,7 +9,7 @@
     xmlns:vm="using:DataSphere.ViewModels.Pages.DatabaseGroup"
     mc:Ignorable="d">
 
-    <Grid Background="Transparent">
+    <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -90,7 +90,7 @@
                 x:Name="ConnectionsTree"
                 Visibility="{x:Bind ViewModel.IsNotEmptyView, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
                 ItemsSource="{x:Bind ViewModel.ConnectItems, Mode=OneWay}"
-                ItemInvoked="ConnectionsTree_ItemInvoked"
+                KeyDown="ConnectionsTree_KeyDown"
                 SelectionMode="Single"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
@@ -98,8 +98,58 @@
                     <DataTemplate x:DataType="models:ConnectionModel">
                         <TreeViewItem
                             ItemsSource="{x:Bind Children, Mode=OneWay}"
-                            DoubleTapped="TreeViewItem_DoubleTapped"
-                            ContextRequested="TreeViewItem_ContextRequested">
+                            DoubleTapped="TreeViewItem_DoubleTapped">
+                            <TreeViewItem.ContextFlyout>
+                                <MenuFlyout>
+                                    <!-- Connection Actions -->
+                                    <MenuFlyoutItem
+                                        Text="{Binding [ctx_opencnn_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                        Command="{x:Bind OpenCommand, Mode=OneWay}"
+                                        Visibility="{x:Bind IsConnection, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE774;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+
+                                    <MenuFlyoutItem
+                                        Text="{Binding [ctx_edit_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                        Command="{x:Bind EditCommand, Mode=OneWay}"
+                                        Visibility="{x:Bind IsConnection, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE70F;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+
+                                    <!-- Folder Actions -->
+                                    <MenuFlyoutItem
+                                        Text="{Binding [ctx_mysql_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                        Command="{x:Bind AddConnectionCommand, Mode=OneWay}"
+                                        Visibility="{x:Bind IsFolder, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE774;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+
+                                    <MenuFlyoutSeparator />
+
+                                    <!-- Common Actions -->
+                                    <MenuFlyoutItem
+                                        Text="{Binding [ctx_rename_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                        Command="{x:Bind RenameCommand, Mode=OneWay}">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE8AC;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+
+                                    <MenuFlyoutItem
+                                        Text="{Binding [ctx_delete_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                        Command="{x:Bind DeleteCommand, Mode=OneWay}">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE74D;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </TreeViewItem.ContextFlyout>
                             <Grid ColumnSpacing="8" Padding="4,2">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />

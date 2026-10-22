@@ -79,6 +79,13 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
 
         private void OnConnectionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            if (e.NewItems != null)
+            {
+                foreach (ConnectionModel item in e.NewItems)
+                {
+                    ModelInitialize(item, null);
+                }
+            }
             _ = ConnectionStorageService.SaveAsync(ConnectItems);
             UpdateViewVisibility();
         }
@@ -89,59 +96,20 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
             UpdateViewVisibility();
         }
 
-        private void ModelInitialize(ConnectionModel model, ConnectionModel? parent = null)
+        /// <summary>
+        /// Initializes runtime properties, contextual command bindings, and property change listeners for a connection node and its children.
+        /// </summary>
+        /// <param name="model">The connection node to initialize.</param>
+        /// <param name="parent">The optional parent folder node.</param>
+        public void ModelInitialize(ConnectionModel model, ConnectionModel? parent = null)
         {
             model.Parent = parent;
 
             model.InitializeRuntimeProperties(
-                addConnectionCallback: async folder =>
-                {
-                    var result = await _dialogService.ShowConnectionEditingDialogAsync();
-                    if (result != null)
-                    {
-                        ModelInitialize(result, folder);
-                        folder.Children.Add(result);
-                        await ConnectionStorageService.SaveAsync(ConnectItems);
-                    }
-                },
-                removeConnectionCallback: async target =>
-                {
-                    bool confirmed = await _dialogService.ShowConfirmationDialogAsync(
-                        "dialog_delete_connection_title",
-                        "dialog_delete_connection_message",
-                        new object[] { target.Name });
-
-                    if (confirmed)
-                    {
-                        if (target.Parent != null)
-                        {
-                            target.Parent.Children.Remove(target);
-                        }
-                        else
-                        {
-                            ConnectItems.Remove(target);
-                        }
-                        await ConnectionStorageService.SaveAsync(ConnectItems);
-                        UpdateViewVisibility();
-                    }
-                },
-                editConnectionCallback: async target =>
-                {
-                    var result = await _dialogService.ShowConnectionEditingDialogAsync(target);
-                    if (result != null)
-                    {
-                        target.Name = result.Name;
-                        target.Host = result.Host;
-                        target.Port = result.Port;
-                        target.User = result.User;
-                        target.Password = result.Password;
-                        await ConnectionStorageService.SaveAsync(ConnectItems);
-                    }
-                },
-                startConnectionCallback: target =>
-                {
-                    OnOpenConnection?.Invoke(target);
-                }
+                addConnectionCallback: async folder => await AddConnectionToFolderAsync(folder),
+                removeConnectionCallback: async target => await DeleteConnectionAsync(target),
+                editConnectionCallback: async target => await EditConnectionAsync(target),
+                startConnectionCallback: target => OpenConnection(target)
             );
 
             model.PropertyChanged -= OnConnectionPropertyChanged;
@@ -169,8 +137,103 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
         }
 
         /// <summary>
+        /// Command to open a database connection session in a workspace tab.
+        /// </summary>
+        /// <param name="connection">The target connection node.</param>
+        [RelayCommand]
+        public void OpenConnection(ConnectionModel? connection)
+        {
+            if (connection != null && connection.Type?.Value != DatabaseType.Folder)
+            {
+                OnOpenConnection?.Invoke(connection);
+            }
+        }
+
+        /// <summary>
+        /// Command to launch the connection editing dialog and update the connection configuration.
+        /// </summary>
+        /// <param name="connection">The target connection node to edit.</param>
+        [RelayCommand]
+        public async Task EditConnectionAsync(ConnectionModel? connection)
+        {
+            if (connection == null) return;
+
+            var result = await _dialogService.ShowConnectionEditingDialogAsync(connection);
+            if (result != null)
+            {
+                connection.Name = result.Name;
+                connection.Host = result.Host;
+                connection.Port = result.Port;
+                connection.User = result.User;
+                connection.Password = result.Password;
+                await ConnectionStorageService.SaveAsync(ConnectItems);
+            }
+        }
+
+        /// <summary>
+        /// Command to delete a connection or folder node after user confirmation.
+        /// </summary>
+        /// <param name="connection">The target connection or folder node to remove.</param>
+        [RelayCommand]
+        public async Task DeleteConnectionAsync(ConnectionModel? connection)
+        {
+            if (connection == null) return;
+
+            bool confirmed = await _dialogService.ShowConfirmationDialogAsync(
+                "dialog_delete_connection_title",
+                "dialog_delete_connection_message",
+                new object[] { connection.Name });
+
+            if (confirmed)
+            {
+                if (connection.Parent != null)
+                {
+                    connection.Parent.Children.Remove(connection);
+                }
+                else
+                {
+                    ConnectItems.Remove(connection);
+                }
+                await ConnectionStorageService.SaveAsync(ConnectItems);
+                UpdateViewVisibility();
+            }
+        }
+
+        /// <summary>
+        /// Command to create and add a new database connection inside a specified folder node.
+        /// </summary>
+        /// <param name="folder">The target folder node.</param>
+        [RelayCommand]
+        public async Task AddConnectionToFolderAsync(ConnectionModel? folder)
+        {
+            if (folder == null) return;
+
+            var result = await _dialogService.ShowConnectionEditingDialogAsync();
+            if (result != null)
+            {
+                ModelInitialize(result, folder);
+                folder.Children.Add(result);
+                await ConnectionStorageService.SaveAsync(ConnectItems);
+            }
+        }
+
+        /// <summary>
+        /// Command to initiate inline renaming for a connection or folder node.
+        /// </summary>
+        /// <param name="connection">The connection or folder node to rename.</param>
+        [RelayCommand]
+        public void StartRename(ConnectionModel? connection)
+        {
+            if (connection != null)
+            {
+                connection.IsEditing = true;
+            }
+        }
+
+        /// <summary>
         /// Command to add a new grouping folder to the connection explorer tree.
         /// </summary>
+        /// <param name="folder">The target folder node.</param>
         [RelayCommand]
         public async Task AddFolderAsync()
         {

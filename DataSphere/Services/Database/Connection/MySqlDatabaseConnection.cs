@@ -1,4 +1,4 @@
-﻿using DataSphere.Models;
+using DataSphere.Models;
 using DataSphere.Services.Database.Dialect;
 using DataSphere.Models.Database;
 using DataSphere.Services.Database.Interface;
@@ -486,13 +486,23 @@ namespace DataSphere.Services.Database.Connection
                 PageSize = Math.Max(1, pageSize)
             };
 
-            int offset = (resultPage.CurrentPage - 1) * resultPage.PageSize;
+            int offset = resultPage.PageSize == int.MaxValue
+                ? 0
+                : (int)Math.Min((long)int.MaxValue, (long)(resultPage.CurrentPage - 1) * resultPage.PageSize);
+
             string dataQuery = MySqlDialect.Instance.BuildSelectPageQuery(databaseName, tableName, offset, resultPage.PageSize, sort);
 
             using (var dataCmd = new MySqlCommand(dataQuery, _connection))
             {
-                dataCmd.Parameters.AddWithValue("@Limit", resultPage.PageSize);
-                dataCmd.Parameters.AddWithValue("@Offset", offset);
+                if (resultPage.PageSize != int.MaxValue)
+                {
+                    dataCmd.Parameters.AddWithValue("@Limit", resultPage.PageSize);
+                }
+
+                if (resultPage.PageSize != int.MaxValue || offset > 0)
+                {
+                    dataCmd.Parameters.AddWithValue("@Offset", offset);
+                }
 
                 using var reader = await dataCmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
 
@@ -506,7 +516,8 @@ namespace DataSphere.Services.Database.Connection
                 }
 
                 int rowIndex = offset + 1;
-                var rowBatch = new List<TableRowData>(resultPage.PageSize);
+                int initialCapacity = resultPage.PageSize == int.MaxValue ? 1000 : Math.Min(resultPage.PageSize, 10000);
+                var rowBatch = new List<TableRowData>(initialCapacity);
                 while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
                 {
                     var cells = new List<string>(reader.FieldCount);
@@ -531,8 +542,8 @@ namespace DataSphere.Services.Database.Connection
                 }
             }
 
-            // Determine total records: if page 1 has fewer rows than PageSize, total is known exactly without querying
-            if (resultPage.CurrentPage == 1 && resultPage.Rows.Count < resultPage.PageSize)
+            // Determine total records: if page 1 has fewer rows than PageSize or infinity is selected, total is known exactly without querying
+            if (resultPage.CurrentPage == 1 && (resultPage.PageSize == int.MaxValue || resultPage.Rows.Count < resultPage.PageSize))
             {
                 resultPage.TotalRecords = resultPage.Rows.Count;
                 resultPage.IsEstimatedTotal = false;

@@ -16,8 +16,8 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
     {
         private bool _disposed;
         private readonly IDatabaseConnection _connection;
-        private readonly DatabaseInfo _database;
-        private readonly Table _table;
+        private DatabaseInfo _database;
+        private Table _table;
         private CancellationTokenSource? _queryCts;
 
         /// <summary>
@@ -41,13 +41,25 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
         /// <summary>
         /// Gets the available page size options for selection.
         /// </summary>
-        public ObservableCollection<int> PageSizes { get; } = new() { 100, 500, 1000 };
+        public ObservableCollection<PageSizeOption> PageSizes { get; } = new()
+        {
+            new PageSizeOption(1000, "1000"),
+            new PageSizeOption(5000, "5000"),
+            new PageSizeOption(10000, "10000"),
+            new PageSizeOption(int.MaxValue, "pagination_infinity", "Infinity")
+        };
+
+        /// <summary>
+        /// Gets or sets the currently selected page size option.
+        /// </summary>
+        [ObservableProperty]
+        public partial PageSizeOption SelectedPageSizeOption { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum row count per page.
         /// </summary>
         [ObservableProperty]
-        public partial int PageSize { get; set; } = 100;
+        public partial int PageSize { get; set; } = 1000;
 
         /// <summary>
         /// Gets or sets a value indicating whether records are currently being fetched.
@@ -110,11 +122,30 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _table = table ?? throw new ArgumentNullException(nameof(table));
 
+            SelectedPageSizeOption = PageSizes[0];
+
             _ = LoadPageAsync(1);
+        }
+
+        partial void OnSelectedPageSizeOptionChanged(PageSizeOption value)
+        {
+            if (value != null && PageSize != value.Value)
+            {
+                PageSize = value.Value;
+            }
         }
 
         partial void OnPageSizeChanged(int value)
         {
+            if (SelectedPageSizeOption?.Value != value)
+            {
+                var match = PageSizes.FirstOrDefault(p => p.Value == value);
+                if (match != null)
+                {
+                    SelectedPageSizeOption = match;
+                }
+            }
+
             CurrentPage = 1;
             _ = LoadPageAsync(1);
         }
@@ -173,6 +204,42 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
             {
                 _queryCts.Cancel();
             }
+        }
+
+        /// <summary>
+        /// Switches the active exploration viewport to a different database schema and table.
+        /// Resets pagination and sorting state, stages, and asynchronously loads page 1.
+        /// </summary>
+        /// <param name="database">The new parent database schema.</param>
+        /// <param name="table">The new table definition.</param>
+        public void SwitchTable(DatabaseInfo database, Table table)
+        {
+            _database = database ?? throw new ArgumentNullException(nameof(database));
+            _table = table ?? throw new ArgumentNullException(nameof(table));
+
+            CancelActiveQuery();
+
+            if (DataPage != null)
+            {
+                DataPage.Rows.Clear();
+                DataPage.Columns.Clear();
+                DataPage = null;
+            }
+            TableDataProvider = null;
+
+            ActiveSort = null;
+            CurrentPage = 1;
+            PageSummaryText = string.Empty;
+            EditingNoticeText = string.Empty;
+            IsLoading = true;
+
+            OnPropertyChanged(nameof(HasPrimaryKeys));
+            OnPropertyChanged(nameof(CanCommit));
+            OnPropertyChanged(nameof(CanDiscard));
+            OnPropertyChanged(nameof(CanGoPrevious));
+            OnPropertyChanged(nameof(CanGoNext));
+
+            _ = LoadPageAsync(1);
         }
 
         /// <summary>
@@ -432,9 +499,19 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
             _queryCts?.Dispose();
             _queryCts = null;
 
-            DataPage?.Rows.Clear();
-            DataPage?.Columns.Clear();
-            DataPage = null;
+            TableDataProvider = null;
+
+            if (DataPage != null)
+            {
+                DataPage.Rows.Clear();
+                DataPage.Columns.Clear();
+                DataPage = null;
+            }
+
+            foreach (var opt in PageSizes)
+            {
+                opt.Dispose();
+            }
 
             GC.SuppressFinalize(this);
         }

@@ -24,8 +24,9 @@ namespace DataSphere.Controls.VirtualTable
     /// Custom high-performance WinUI 3 tabular data control recreating the Delphi TVirtualStringTree architecture.
     /// Utilizes fixed-pool visual row recycling and direct text callbacks to achieve zero-allocation 60+ FPS scrolling.
     /// </summary>
-    public sealed partial class VirtualTable : UserControl
+    public sealed partial class VirtualTable : UserControl, IDisposable
     {
+        private bool _disposed;
         private bool _isCompositorSyncConfigured;
         private double? _accumulatedTargetScrollX;
         private DateTime _lastHorizontalWheelTime;
@@ -112,7 +113,6 @@ namespace DataSphere.Controls.VirtualTable
 
         private readonly VirtualTableRowPool _rowPool = new();
         private readonly List<Border> _headerBorders = new();
-        private readonly List<TextBlock> _headerTextBlocks = new();
         private readonly List<TextBlock> _headerSortGlyphs = new();
         private readonly List<SplitterHandle> _headerSplitters = new();
 
@@ -144,6 +144,8 @@ namespace DataSphere.Controls.VirtualTable
             Columns.CollectionChanged += OnColumnsCollectionChanged;
 
             Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
+            ActualThemeChanged += OnActualThemeChanged;
             SizeChanged += OnSizeChanged;
 
             TableScrollViewer.ViewChanged += OnScrollViewerViewChanged;
@@ -284,8 +286,46 @@ namespace DataSphere.Controls.VirtualTable
         {
             if (d is VirtualTable table)
             {
+                table.ResetViewportState();
                 table.Refresh();
             }
+        }
+
+        /// <summary>
+        /// Immediately clears all visual rows, headers, and scroll state from the viewport.
+        /// Ensures no stale table data remains rendered while switching datasets.
+        /// </summary>
+        public void Clear()
+        {
+            ResetViewportState();
+            _rowPool.Clear(VirtualCanvas);
+            Columns.CollectionChanged -= OnColumnsCollectionChanged;
+            try
+            {
+                Columns.Clear();
+            }
+            finally
+            {
+                Columns.CollectionChanged += OnColumnsCollectionChanged;
+            }
+            BuildHeaderElements();
+            UpdateScrollExtent();
+        }
+
+        /// <summary>
+        /// Resets the internal scroll and selection coordinates when switching datasets.
+        /// </summary>
+        private void ResetViewportState()
+        {
+            CancelCellEdit();
+            SelectedRowIndex = -1;
+            SelectedColumnIndex = -1;
+            _hoveredRowIndex = -1;
+            _scrollOffsetX = 0.0;
+            _scrollOffsetY = 0.0;
+            _accumulatedTargetScrollX = null;
+            TableScrollViewer?.ChangeView(0.0, 0.0, null, disableAnimation: true);
+            _rowPool.CollapseAll();
         }
 
         private static void OnRowHeightChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -308,6 +348,16 @@ namespace DataSphere.Controls.VirtualTable
         {
             SetupHeaderCompositorSync();
             Refresh();
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            Dispose();
+        }
+
+        private void OnActualThemeChanged(FrameworkElement sender, object args)
+        {
+            Recycle();
         }
 
         /// <summary>
@@ -340,6 +390,93 @@ namespace DataSphere.Controls.VirtualTable
             }
         }
 
+        /// <summary>
+        /// Stops the DirectComposition expression animation linking the header canvas to the scroll viewer.
+        /// </summary>
+        private void TeardownHeaderCompositorSync()
+        {
+            if (!_isCompositorSyncConfigured) return;
+
+            try
+            {
+                if (HeaderCanvas != null)
+                {
+                    var headerVisual = ElementCompositionPreview.GetElementVisual(HeaderCanvas);
+                    headerVisual?.StopAnimation("Offset.X");
+                }
+            }
+            catch
+            {
+                // Ignored during visual tree teardown
+            }
+            finally
+            {
+                _isCompositorSyncConfigured = false;
+            }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+
+            CancelCellEdit();
+            TeardownHeaderCompositorSync();
+
+            Loaded -= OnLoaded;
+            Unloaded -= OnUnloaded;
+            ActualThemeChanged -= OnActualThemeChanged;
+            SizeChanged -= OnSizeChanged;
+
+            Columns.CollectionChanged -= OnColumnsCollectionChanged;
+
+            if (TableScrollViewer != null)
+            {
+                TableScrollViewer.ViewChanged -= OnScrollViewerViewChanged;
+            }
+
+            if (VirtualCanvas != null)
+            {
+                VirtualCanvas.PointerPressed -= OnViewportPointerPressed;
+                VirtualCanvas.PointerMoved -= OnViewportPointerMoved;
+                VirtualCanvas.PointerExited -= OnViewportPointerExited;
+                _rowPool.Clear(VirtualCanvas);
+            }
+
+            if (VirtualScrollHost != null)
+            {
+                VirtualScrollHost.PointerWheelChanged -= OnViewportPointerWheelChanged;
+            }
+
+            if (HeaderBorder != null)
+            {
+                HeaderBorder.PointerWheelChanged -= OnViewportPointerWheelChanged;
+                HeaderBorder.PointerMoved -= OnHeaderPointerMoved;
+                HeaderBorder.PointerReleased -= OnHeaderPointerReleased;
+                HeaderBorder.PointerCaptureLost -= OnHeaderPointerCaptureLost;
+            }
+
+            PointerMoved -= OnHeaderPointerMoved;
+            PointerReleased -= OnHeaderPointerReleased;
+            PointerCaptureLost -= OnHeaderPointerCaptureLost;
+
+            KeyDown -= OnTableKeyDown;
+            if (CellEditorOverlay != null)
+            {
+                CellEditorOverlay.KeyDown -= OnCellEditorKeyDown;
+                CellEditorOverlay.LostFocus -= OnCellEditorLostFocus;
+            }
+
+            _headerBorders.Clear();
+            _headerSortGlyphs.Clear();
+            _headerSplitters.Clear();
+            HeaderCanvas?.Children.Clear();
+
+            Columns.Clear();
+            DataProvider = null;
+        }
+
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (HeaderBorder.ActualWidth > 0 && HeaderBorder.ActualHeight > 0)
@@ -369,7 +506,22 @@ namespace DataSphere.Controls.VirtualTable
 
         private void SyncColumnsFromDataProvider()
         {
-            if (DataProvider == null) return;
+            if (DataProvider == null)
+            {
+                if (Columns.Count > 0)
+                {
+                    Columns.CollectionChanged -= OnColumnsCollectionChanged;
+                    try
+                    {
+                        Columns.Clear();
+                    }
+                    finally
+                    {
+                        Columns.CollectionChanged += OnColumnsCollectionChanged;
+                    }
+                }
+                return;
+            }
 
             var providerCols = DataProvider.Columns;
             if (providerCols == null) return;
@@ -412,12 +564,10 @@ namespace DataSphere.Controls.VirtualTable
         {
             HeaderCanvas.Children.Clear();
             _headerBorders.Clear();
-            _headerTextBlocks.Clear();
             _headerSortGlyphs.Clear();
             _headerSplitters.Clear();
             UpdateHeaderScrollTransform();
 
-            var headerTextBrush = ResolveThemeBrush("TextFillColorPrimaryBrush", new SolidColorBrush(Colors.White));
             var accentBrush = ResolveThemeBrush("AccentFillColorDefaultBrush", new SolidColorBrush(Color.FromArgb(255, 0, 120, 215)));
             var splitterCursor = InputSystemCursor.Create(InputSystemCursorShape.SizeWestEast);
 
@@ -441,8 +591,7 @@ namespace DataSphere.Controls.VirtualTable
                     FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                     FontSize = 13,
                     VerticalAlignment = VerticalAlignment.Center,
-                    TextTrimming = TextTrimming.CharacterEllipsis,
-                    Foreground = headerTextBrush
+                    TextTrimming = TextTrimming.CharacterEllipsis
                 };
                 Grid.SetColumn(titleBlock, 0);
                 headerGrid.Children.Add(titleBlock);
@@ -519,7 +668,6 @@ namespace DataSphere.Controls.VirtualTable
                 splitter.PointerCanceled += OnHeaderPointerCaptureLost;
 
                 _headerBorders.Add(headerBorder);
-                _headerTextBlocks.Add(titleBlock);
                 _headerSortGlyphs.Add(sortGlyph);
                 _headerSplitters.Add(splitter);
 

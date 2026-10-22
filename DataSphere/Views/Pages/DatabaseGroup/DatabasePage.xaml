@@ -1,43 +1,66 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Page 
-    x:Class="DataSphere.Views.Pages.DatabaseGroup.DatabasePage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:models="using:DataSphere.Models"
-    xmlns:vm="using:DataSphere.ViewModels.Pages.DatabaseGroup"
-    Background="Transparent"
-    mc:Ignorable="d">
+<Page x:Class="DataSphere.Views.Pages.DatabaseGroup.DatabasePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:models="using:DataSphere.Models"
+      xmlns:vm="using:DataSphere.ViewModels.Pages.DatabaseGroup"
+      Background="Transparent"
+      mc:Ignorable="d">
 
     <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <!-- Inner Tab Workspace -->
-        <Grid Grid.Row="1">
+
+        <!-- Inner Tab Workspace with unified background matching tab surface -->
+        <Grid Grid.Row="1"
+              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TabView
-                Grid.Row="0"
-                x:Name="InnerTabView"
-                TabItemsSource="{x:Bind ViewModel.InnerTabs, Mode=OneWay}"
-                SelectedItem="{x:Bind ViewModel.SelectedInnerTab, Mode=TwoWay}"
-                SelectionChanged="InnerTabView_SelectionChanged"
-                TabCloseRequested="InnerTabView_TabCloseRequested"
-                IsAddTabButtonVisible="False"
-                CanReorderTabs="False"
-                HorizontalAlignment="Stretch">
+            <TabView Grid.Row="0"
+                     x:Name="InnerTabView"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     TabItemsSource="{x:Bind ViewModel.InnerTabs, Mode=OneWay}"
+                     SelectedItem="{x:Bind ViewModel.SelectedInnerTab, Mode=TwoWay}"
+                     TabWidthMode="Compact"
+                     SelectionChanged="InnerTabView_SelectionChanged"
+                     TabCloseRequested="InnerTabView_TabCloseRequested"
+                     IsAddTabButtonVisible="False"
+                     CanReorderTabs="True"
+                     CanDragTabs="False"
+                     HorizontalAlignment="Stretch">
+
+                <!-- Anchored Connection Tab in TabStripHeader -->
+                <TabView.TabStripHeader>
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Top"
+                                Margin="3,3,-6,3">
+                        <TabViewItem x:Name="ConnectionTabItem"
+                                     Style="{StaticResource PillTabViewItemStyle}"
+                                     Header="{x:Bind ViewModel.ConnectionTab.Header, Mode=OneWay}"
+                                     IsClosable="{x:Bind ViewModel.ConnectionTab.IsClosable, Mode=OneWay}"
+                                     IsSelected="{x:Bind ViewModel.IsConnectionSelected, Mode=TwoWay}"
+                                     Tapped="OnConnectionTabTapped">
+                            <TabViewItem.IconSource>
+                                <FontIconSource Glyph="{x:Bind ViewModel.ConnectionTab.IconGlyph, Mode=OneWay}" />
+                            </TabViewItem.IconSource>
+                        </TabViewItem>
+                    </StackPanel>
+                </TabView.TabStripHeader>
+
+                <!-- Dynamic Workspace Tabs Template -->
                 <TabView.TabItemTemplate>
                     <DataTemplate x:DataType="models:InnerTabItemModel">
-                        <TabViewItem
-                            Header="{x:Bind Header, Mode=OneWay}"
-                            IsClosable="{x:Bind IsClosable, Mode=OneWay}">
+                        <TabViewItem Style="{StaticResource PillTabViewItemStyle}"
+                                     Header="{x:Bind Header, Mode=OneWay}"
+                                     IsClosable="{x:Bind IsClosable, Mode=OneWay}">
                             <TabViewItem.IconSource>
                                 <FontIconSource Glyph="{x:Bind IconGlyph, Mode=OneWay}" />
                             </TabViewItem.IconSource>
@@ -46,12 +69,12 @@
                 </TabView.TabItemTemplate>
             </TabView>
 
-            <!-- Active Tab Content Area -->
-            <ContentControl
-                Grid.Row="1"
-                Content="{x:Bind ViewModel.SelectedInnerTab.Content, Mode=OneWay}"
-                HorizontalContentAlignment="Stretch"
-                VerticalContentAlignment="Stretch" />
+            <!-- Active Tab Content Area (Unified Viewport) -->
+            <ContentControl Grid.Row="1"
+                            Background="Transparent"
+                            Content="{x:Bind ViewModel.ActiveInnerContent, Mode=OneWay}"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch" />
         </Grid>
     </Grid>
 </Page>

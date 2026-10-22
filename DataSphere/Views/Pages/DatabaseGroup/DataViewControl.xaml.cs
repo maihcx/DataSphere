@@ -32,12 +32,26 @@ namespace DataSphere.Views.Pages.DatabaseGroup
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Loads records for a different database table into the existing viewport without recreating the visual tree.
+        /// Immediately clears all previous table visuals before initiating asynchronous data fetching.
+        /// </summary>
+        /// <param name="database">The owning database schema.</param>
+        /// <param name="table">The table definition to display.</param>
+        public void LoadTable(DatabaseInfo database, Table table)
+        {
+            TableControl?.Clear();
+            ViewModel.SwitchTable(database, table);
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
             if (_disposed) return;
             _disposed = true;
 
+            TableControl?.Dispose();
+            Bindings?.StopTracking();
             ViewModel.Dispose();
         }
     }

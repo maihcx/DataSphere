@@ -46,7 +46,22 @@ namespace DataSphere.Services.Database.Dialect
                 sb.Append(dir);
             }
 
-            sb.Append(" LIMIT @Limit OFFSET @Offset;");
+            if (limit == int.MaxValue)
+            {
+                if (offset > 0)
+                {
+                    sb.Append(" LIMIT 18446744073709551615 OFFSET @Offset;");
+                }
+                else
+                {
+                    sb.Append(';');
+                }
+            }
+            else
+            {
+                sb.Append(" LIMIT @Limit OFFSET @Offset;");
+            }
+
             return sb.ToString();
         }
 

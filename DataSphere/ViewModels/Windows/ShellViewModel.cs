@@ -8,7 +8,7 @@ using DataSphere.Views.Pages;
 namespace DataSphere.ViewModels.Windows
 {
     /// <summary>
-    /// ViewModel for the main window shell, coordinating the browser-style tab strip and tab lifecycle.
+    /// ViewModel for the main window shell, coordinating the anchored Home tab in TabStripHeader, dynamic workspace tabs, and unified viewport content.
     /// </summary>
     public partial class ShellViewModel : ObservableObject
     {
@@ -22,17 +22,29 @@ namespace DataSphere.ViewModels.Windows
         public event EventHandler? RequestCloseWindow;
 
         /// <summary>
-        /// Gets the tab service managing tab collections and selection for this window.
+        /// Gets the tab service managing dynamic tab collections and selection for this window.
         /// </summary>
         public ITabService TabService => _tabService;
 
         /// <summary>
-        /// Gets the observable collection of tabs hosted in this window shell.
+        /// Gets the dedicated TabItemModel representing the permanently anchored Home tab.
+        /// </summary>
+        public TabItemModel HomeTab { get; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the Home tab is currently selected and active.
+        /// </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ActiveViewportContent))]
+        public partial bool IsHomeSelected { get; set; } = true;
+
+        /// <summary>
+        /// Gets the observable collection of dynamic workspace tabs hosted in this window shell.
         /// </summary>
         public ObservableCollection<TabItemModel> Tabs => _tabService.Tabs;
 
         /// <summary>
-        /// Gets or sets the currently selected and active tab.
+        /// Gets or sets the currently selected dynamic tab. Null when the Home tab is active.
         /// </summary>
         public TabItemModel? SelectedTab
         {
@@ -42,10 +54,20 @@ namespace DataSphere.ViewModels.Windows
                 if (!Equals(_tabService.SelectedTab, value))
                 {
                     _tabService.SelectedTab = value;
+                    if (value != null)
+                    {
+                        IsHomeSelected = false;
+                    }
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(ActiveViewportContent));
                 }
             }
         }
+
+        /// <summary>
+        /// Gets the active content to display in the main viewport, dynamically resolving between Home and the selected dynamic tab.
+        /// </summary>
+        public object? ActiveViewportContent => IsHomeSelected ? HomeTab.Content : SelectedTab?.Content;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ShellViewModel"/> class.
@@ -62,77 +84,105 @@ namespace DataSphere.ViewModels.Windows
             _windowManager = windowManager ?? throw new ArgumentNullException(nameof(windowManager));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
+            HomeTab = CreateHomeTab();
+
             // Synchronize selection changes originating from TabService
             _tabService.PropertyChanged += (sender, e) =>
             {
                 if (e.PropertyName == nameof(ITabService.SelectedTab))
                 {
+                    if (_tabService.SelectedTab != null)
+                    {
+                        IsHomeSelected = false;
+                    }
                     OnPropertyChanged(nameof(SelectedTab));
+                    OnPropertyChanged(nameof(ActiveViewportContent));
                 }
             };
 
-            // Dynamically manage close button visibility on the Home tab
+            // Dynamically manage close button visibility and fallback selection on collection change
             _tabService.Tabs.CollectionChanged += (sender, e) =>
             {
-                UpdateHomeClosableState();
+                UpdateHomeState();
             };
 
-            InitializeHomeTab();
+            UpdateHomeState();
         }
 
         /// <summary>
-        /// Updates the closability state of the Home tab based on whether it is the sole remaining tab.
+        /// Instantiates and configures the singleton Home tab model.
         /// </summary>
-        private void UpdateHomeClosableState()
+        /// <returns>A configured <see cref="TabItemModel"/> instance for the Home tab.</returns>
+        private TabItemModel CreateHomeTab()
         {
-            var homeTab = _tabService.Tabs.FirstOrDefault(t => t.PageType == typeof(HomePage));
-            if (homeTab != null)
+            var homeVm = new DataSphere.ViewModels.Pages.HomeViewModel(_tabService);
+            object? homePageInstance = null;
+            try
             {
-                // When 2 or more tabs are open, Home's close button is hidden (IsClosable = false).
-                // Only when Home is the single tab remaining, Home's close button is shown (IsClosable = true).
-                homeTab.IsClosable = _tabService.Tabs.Count == 1;
+                homePageInstance = new HomePage(homeVm);
             }
+            catch
+            {
+                // Fallback for headless environments or unit testing where WinUI Xaml core is not active
+                homePageInstance = homeVm;
+            }
+
+            return new TabItemModel
+            {
+                TitleKey = "page_home_title",
+                Title = DataSphere.Utils.LanguageBase.GetLangValue("page_home_title"),
+                IconGlyph = "\uE80F",
+                PageType = typeof(HomePage),
+                Content = homePageInstance,
+                IsClosable = true,
+                IsSelected = true,
+                State = TabLifecycleState.Active
+            };
         }
 
         /// <summary>
-        /// Anchors the Home tab at index 0 of the tab strip.
+        /// Updates the closability state of the Home tab and handles fallback selection when all dynamic tabs are closed.
         /// </summary>
-        private void InitializeHomeTab()
+        private void UpdateHomeState()
         {
+            // When 1 or more dynamic tabs are open (total tabs >= 2), Home's close button is hidden (IsClosable = false).
+            // Only when dynamic tabs count is 0 (Home is the sole tab remaining), Home's close button is shown (IsClosable = true).
+            HomeTab.IsClosable = _tabService.Tabs.Count == 0;
+
             if (_tabService.Tabs.Count == 0)
             {
-                var homeVm = new DataSphere.ViewModels.Pages.HomeViewModel(_tabService);
-                object? homePageInstance = null;
-                try
-                {
-                    homePageInstance = new HomePage(homeVm);
-                }
-                catch
-                {
-                    // Fallback for headless environments or unit testing where WinUI Xaml core is not active
-                    homePageInstance = homeVm;
-                }
+                IsHomeSelected = true;
+                _tabService.SelectedTab = null;
+            }
 
-                var homeTab = new TabItemModel
-                {
-                    TitleKey = "page_home_title",
-                    Title = DataSphere.Utils.LanguageBase.GetLangValue("page_home_title"),
-                    IconGlyph = "\uE80F",
-                    PageType = typeof(HomePage),
-                    Content = homePageInstance,
-                    IsClosable = true,
-                    IsSelected = true,
-                    State = TabLifecycleState.Active
-                };
+            OnPropertyChanged(nameof(ActiveViewportContent));
+        }
 
-                _tabService.Tabs.Add(homeTab);
-                _tabService.SelectedTab = homeTab;
-                UpdateHomeClosableState();
+        /// <summary>
+        /// Selects the Home tab, switching the active viewport and clearing dynamic tab selection.
+        /// </summary>
+        [RelayCommand]
+        public void SelectHome()
+        {
+            IsHomeSelected = true;
+            SelectedTab = null;
+            OnPropertyChanged(nameof(ActiveViewportContent));
+        }
+
+        /// <summary>
+        /// Closes the Home tab. Only permitted when no dynamic tabs are open; triggers application session shutdown.
+        /// </summary>
+        [RelayCommand]
+        public void CloseHome()
+        {
+            if (HomeTab.IsClosable && _tabService.Tabs.Count == 0)
+            {
+                RequestCloseWindow?.Invoke(this, EventArgs.Empty);
             }
         }
 
         /// <summary>
-        /// Closes the specified tab, triggering window closure if Home is closed as the sole remaining tab.
+        /// Closes the specified dynamic tab, falling back to Home if it was the last dynamic tab.
         /// </summary>
         /// <param name="tab">The tab to close.</param>
         [RelayCommand]
@@ -140,26 +190,30 @@ namespace DataSphere.ViewModels.Windows
         {
             if (tab != null && tab.IsClosable)
             {
-                if (tab.PageType == typeof(HomePage) && _tabService.Tabs.Count == 1)
-                {
-                    RequestCloseWindow?.Invoke(this, EventArgs.Empty);
-                    return;
-                }
-
                 _tabService.CloseTab(tab);
+                if (_tabService.Tabs.Count == 0)
+                {
+                    SelectHome();
+                }
                 OnPropertyChanged(nameof(SelectedTab));
+                OnPropertyChanged(nameof(ActiveViewportContent));
             }
         }
 
         /// <summary>
-        /// Selects the tab at the specified index.
+        /// Selects the tab at the specified index within dynamic tabs.
         /// </summary>
         /// <param name="index">The zero-based index to select.</param>
         [RelayCommand]
         public void SelectTab(int index)
         {
             _tabService.SelectTab(index);
+            if (index >= 0 && index < _tabService.Tabs.Count)
+            {
+                IsHomeSelected = false;
+            }
             OnPropertyChanged(nameof(SelectedTab));
+            OnPropertyChanged(nameof(ActiveViewportContent));
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using DataSphere.Utils;
 
@@ -13,6 +14,14 @@ namespace DataSphere.Models
     /// </summary>
     public class ConnectionModel : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConnectionModel"/> class.
+        /// </summary>
+        public ConnectionModel()
+        {
+            RenameCommand = new RelayCommand(() => IsEditing = true);
+        }
+
         /// <summary>
         /// Occurs when a property value changes.
         /// </summary>
@@ -74,6 +83,9 @@ namespace DataSphere.Models
             {
                 field = value;
                 OnPropertyChanged(nameof(Type));
+                OnPropertyChanged(nameof(IconGlyph));
+                OnPropertyChanged(nameof(IsFolder));
+                OnPropertyChanged(nameof(IsConnection));
             }
         }
 
@@ -203,6 +215,48 @@ namespace DataSphere.Models
         public ObservableCollection<ContextAction>? ContextMenuItems { get; set; }
 
         /// <summary>
+        /// Gets or sets the command to open a database connection session.
+        /// </summary>
+        [JsonIgnore]
+        public ICommand? OpenCommand { get; set; }
+
+        /// <summary>
+        /// Gets or sets the command to edit the connection configuration.
+        /// </summary>
+        [JsonIgnore]
+        public ICommand? EditCommand { get; set; }
+
+        /// <summary>
+        /// Gets or sets the command to delete this connection node.
+        /// </summary>
+        [JsonIgnore]
+        public ICommand? DeleteCommand { get; set; }
+
+        /// <summary>
+        /// Gets or sets the command to add a new connection inside this folder node.
+        /// </summary>
+        [JsonIgnore]
+        public ICommand? AddConnectionCommand { get; set; }
+
+        /// <summary>
+        /// Gets or sets the command to initiate inline renaming for this node.
+        /// </summary>
+        [JsonIgnore]
+        public ICommand? RenameCommand { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this connection node represents a folder.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsFolder => Type?.Value == DatabaseType.Folder;
+
+        /// <summary>
+        /// Gets a value indicating whether this connection node represents an active database connection.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsConnection => Type?.Value != DatabaseType.Folder;
+
+        /// <summary>
         /// Raises the PropertyChanged event for the specified property name and notifies children.
         /// </summary>
         /// <param name="propertyName">The name of the changed property.</param>
@@ -249,6 +303,12 @@ namespace DataSphere.Models
             Action<ConnectionModel>? editConnectionCallback,
             Action<ConnectionModel>? startConnectionCallback)
         {
+            OpenCommand = new RelayCommand(() => startConnectionCallback?.Invoke(this));
+            EditCommand = new RelayCommand(() => editConnectionCallback?.Invoke(this));
+            DeleteCommand = new RelayCommand(() => removeConnectionCallback?.Invoke(this));
+            AddConnectionCommand = new RelayCommand(() => addConnectionCallback?.Invoke(this));
+            RenameCommand = new RelayCommand(() => IsEditing = true);
+
             switch (Type?.Value)
             {
                 case DatabaseType.Folder:

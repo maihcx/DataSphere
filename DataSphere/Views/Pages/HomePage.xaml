@@ -1,53 +1,69 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Page
-    x:Class="DataSphere.Views.Pages.HomePage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="using:DataSphere.ViewModels.Pages"
-    Background="Transparent"
-    mc:Ignorable="d">
+<Page x:Class="DataSphere.Views.Pages.HomePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:DataSphere.ViewModels.Pages"
+      Background="Transparent"
+      mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="Transparent">
-        <StackPanel Spacing="24" Padding="32,24,32,32" MaxWidth="1000" HorizontalAlignment="Stretch" Background="Transparent">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  Background="Transparent">
+        <StackPanel Spacing="24"
+                    Padding="32,24,32,32"
+                    MaxWidth="1000"
+                    HorizontalAlignment="Stretch"
+                    Background="Transparent">
 
             <!-- Banner / Header Card -->
-            <Border
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="24">
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="24">
                 <StackPanel Spacing="8">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE80F;" FontSize="28" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                        <TextBlock Text="{x:Bind ViewModel.AppName, Mode=OneWay}" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="12">
+                        <FontIcon Glyph="&#xE80F;"
+                                  FontSize="28"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock Text="{x:Bind ViewModel.AppName, Mode=OneWay}"
+                                   Style="{StaticResource TitleTextBlockStyle}"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
-                    <TextBlock Text="{Binding [page_home_banner_desc], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                    <TextBlock Text="{x:Bind ViewModel.AuthorCreated, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Margin="0,4,0,0" />
+                    <TextBlock Text="{Binding [page_home_banner_desc], Source={StaticResource Localization}, Mode=OneWay}"
+                               Style="{StaticResource BodyTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextWrapping="Wrap" />
+                    <TextBlock Text="{x:Bind ViewModel.AuthorCreated, Mode=OneWay}"
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               Margin="0,4,0,0" />
                 </StackPanel>
             </Border>
 
             <!-- Navigation Cards Section Title -->
-            <TextBlock Text="{Binding [page_home_sections_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" />
+            <TextBlock Text="{Binding [page_home_sections_title], Source={StaticResource Localization}, Mode=OneWay}"
+                       Style="{StaticResource SubtitleTextBlockStyle}" />
 
             <!-- Action Navigation Cards Grid -->
-            <Grid ColumnSpacing="16" RowSpacing="16">
+            <Grid ColumnSpacing="16"
+                  RowSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Database Card -->
-                <Button
-                    Grid.Column="0"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    Padding="20"
-                    CornerRadius="8"
-                    Command="{x:Bind ViewModel.OpenDatabaseCommand}">
+                <Button Grid.Column="0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        Padding="20"
+                        CornerRadius="8"
+                        Command="{x:Bind ViewModel.OpenDatabaseCommand}">
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -55,26 +71,39 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <FontIcon Grid.Column="0" Glyph="&#xE774;" FontSize="32" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        <FontIcon Grid.Column="0"
+                                  Glyph="&#xE774;"
+                                  FontSize="32"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                  VerticalAlignment="Center" />
 
-                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding [page_db_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                            <TextBlock Text="{Binding [page_home_card_database_desc], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        <StackPanel Grid.Column="1"
+                                    Spacing="4"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding [page_db_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                       Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="{Binding [page_home_card_database_desc], Source={StaticResource Localization}, Mode=OneWay}"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       TextWrapping="Wrap" />
                         </StackPanel>
 
-                        <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="16" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                        <FontIcon Grid.Column="2"
+                                  Glyph="&#xE76C;"
+                                  FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                  VerticalAlignment="Center" />
                     </Grid>
                 </Button>
 
                 <!-- Settings Card -->
-                <Button
-                    Grid.Column="1"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    Padding="20"
-                    CornerRadius="8"
-                    Command="{x:Bind ViewModel.OpenSettingsCommand}">
+                <Button Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        Padding="20"
+                        CornerRadius="8"
+                        Command="{x:Bind ViewModel.OpenSettingsCommand}">
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -82,14 +111,28 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <FontIcon Grid.Column="0" Glyph="&#xE713;" FontSize="32" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        <FontIcon Grid.Column="0"
+                                  Glyph="&#xE713;"
+                                  FontSize="32"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                  VerticalAlignment="Center" />
 
-                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding [page_settings_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                            <TextBlock Text="{Binding [page_home_card_settings_desc], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        <StackPanel Grid.Column="1"
+                                    Spacing="4"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding [page_settings_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                       Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="{Binding [page_home_card_settings_desc], Source={StaticResource Localization}, Mode=OneWay}"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       TextWrapping="Wrap" />
                         </StackPanel>
 
-                        <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="16" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                        <FontIcon Grid.Column="2"
+                                  Glyph="&#xE76C;"
+                                  FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                  VerticalAlignment="Center" />
                     </Grid>
                 </Button>
             </Grid>

@@ -369,6 +369,9 @@
   <data name="pagination_rows_per_page" xml:space="preserve">
     <value>Rows per page:</value>
   </data>
+  <data name="pagination_infinity" xml:space="preserve">
+    <value>Infinity</value>
+  </data>
   <data name="pagination_page_info" xml:space="preserve">
     <value>Page {0} of {1} ({2} records)</value>
   </data>
@@ -377,6 +380,9 @@
   </data>
   <data name="lbl_total_records" xml:space="preserve">
     <value>Total records: {0}</value>
+  </data>
+  <data name="lbl_loading_data" xml:space="preserve">
+    <value>Loading table data...</value>
   </data>
   <data name="dialog_delete_connection_title" xml:space="preserve">
     <value>Delete Connection</value>

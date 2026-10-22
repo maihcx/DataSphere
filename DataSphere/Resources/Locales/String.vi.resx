@@ -366,6 +366,9 @@
   <data name="pagination_rows_per_page" xml:space="preserve">
     <value>Số dòng mỗi trang:</value>
   </data>
+  <data name="pagination_infinity" xml:space="preserve">
+    <value>Infinity</value>
+  </data>
   <data name="pagination_page_info" xml:space="preserve">
     <value>Trang {0} trên {1} ({2} bản ghi)</value>
   </data>
@@ -374,6 +377,9 @@
   </data>
   <data name="lbl_total_records" xml:space="preserve">
     <value>Tổng số bản ghi: {0}</value>
+  </data>
+  <data name="lbl_loading_data" xml:space="preserve">
+    <value>Đang tải dữ liệu bảng...</value>
   </data>
   <data name="dialog_delete_connection_title" xml:space="preserve">
     <value>Xóa kết nối</value>
