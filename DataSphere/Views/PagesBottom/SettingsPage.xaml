@@ -144,6 +144,91 @@
                 </Grid>
             </Border>
 
+            <!-- Section: Performance & Memory -->
+            <TextBlock Text="{Binding [page_settings_performance_title], Source={StaticResource Localization}, Mode=OneWay}"
+                       Style="{StaticResource SubtitleTextBlockStyle}"
+                       Margin="0,12,0,0" />
+
+            <!-- Tab Memory Saver Toggle Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <FontIcon Grid.Column="0"
+                              Glyph="&#xEC46;"
+                              FontSize="20"
+                              Margin="0,0,16,0"
+                              VerticalAlignment="Center"
+                              Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Spacing="2">
+                        <TextBlock Text="{Binding [page_settings_tab_memory_saver_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                   Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock Text="{Binding [page_settings_tab_memory_saver_summary], Source={StaticResource Localization}, Mode=OneWay}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <ToggleSwitch Grid.Column="2"
+                                  HorizontalAlignment="Right"
+                                  VerticalAlignment="Center"
+                                  IsOn="{x:Bind ViewModel.EnableTabMemorySaver, Mode=TwoWay}" />
+                </Grid>
+            </Border>
+
+            <!-- Tab Inactive Timeout Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <FontIcon Grid.Column="0"
+                              Glyph="&#xED5A;"
+                              FontSize="20"
+                              Margin="0,0,16,0"
+                              VerticalAlignment="Center"
+                              Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Spacing="2">
+                        <TextBlock Text="{Binding [page_settings_tab_sleep_timeout_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                   Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock Text="{Binding [page_settings_tab_sleep_timeout_summary], Source={StaticResource Localization}, Mode=OneWay}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <ComboBox Grid.Column="2"
+                              MinWidth="200"
+                              HorizontalAlignment="Right"
+                              VerticalAlignment="Center"
+                              ItemsSource="{x:Bind ViewModel.SleepTimeoutOptions, Mode=OneWay}"
+                              SelectedItem="{x:Bind ViewModel.SelectedSleepTimeoutOption, Mode=TwoWay}"
+                              IsEnabled="{x:Bind ViewModel.EnableTabMemorySaver, Mode=OneWay}"
+                              DisplayMemberPath="DisplayName" />
+                </Grid>
+            </Border>
+
             <!-- Section: About -->
                 <TextBlock Text="{Binding [page_settings_about_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,12,0,0" />
 

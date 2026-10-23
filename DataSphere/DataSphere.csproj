@@ -21,6 +21,23 @@
     <NoWarn>$(NoWarn);CS0618</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <GCConserveMemory>9</GCConserveMemory>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <TieredCompilation>true</TieredCompilation>
+    <TieredPGO>true</TieredPGO>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <EventSourceSupport>false</EventSourceSupport>
+    <CsWinRTAotOptimizerEnabled>true</CsWinRTAotOptimizerEnabled>
+
+	<EnabledXamlOptionalChanges>
+	  DefaultStyleOptimizations,
+	  DeferContextFlyoutInit,
+	  IconNoGridOptimization,
+	  OptimizeApplyStyles
+	</EnabledXamlOptionalChanges>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="wpfui-icon.ico" />
   </ItemGroup>

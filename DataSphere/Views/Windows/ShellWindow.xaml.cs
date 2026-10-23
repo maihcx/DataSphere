@@ -289,8 +289,40 @@ namespace DataSphere.Views.Windows
         }
 
         /// <summary>
+        /// Calculates the insertion index within dynamic tabs based on the drag pointer location.
+        /// </summary>
+        /// <param name="e">The drag event arguments containing drop coordinates.</param>
+        /// <returns>The zero-based insertion index.</returns>
+        private int CalculateTabDropIndex(DragEventArgs e)
+        {
+            if (ViewModel.Tabs.Count == 0)
+            {
+                return 0;
+            }
+
+            Point dropPoint = e.GetPosition(ShellTabView);
+
+            for (int i = 0; i < ViewModel.Tabs.Count; i++)
+            {
+                if (ShellTabView.ContainerFromIndex(i) is TabViewItem tabItem)
+                {
+                    var transform = tabItem.TransformToVisual(ShellTabView);
+                    var itemBounds = transform.TransformBounds(new Rect(0, 0, tabItem.ActualWidth, tabItem.ActualHeight));
+                    double midpointX = itemBounds.X + (itemBounds.Width / 2.0);
+
+                    if (dropPoint.X < midpointX)
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return ViewModel.Tabs.Count;
+        }
+
+        /// <summary>
         /// Handles drop events across the tab bar area to accept transferred tabs from another window,
-        /// inserting at index 0 when dropped on the anchored Home tab, or appending to the end of dynamic tabs.
+        /// inserting at index 0 when dropped on the anchored Home tab, or at the calculated drop index along the dynamic tab strip.
         /// </summary>
         /// <param name="sender">The drag event source.</param>
         /// <param name="e">The drag event arguments.</param>
@@ -306,9 +338,7 @@ namespace DataSphere.Views.Windows
             {
                 if (_session != null && payload.SourceWindowId != _session.WindowId)
                 {
-                    // If dropped directly onto the anchored Home tab, insert at index 0;
-                    // otherwise append to the end of the dynamic tab collection.
-                    int targetIndex = ReferenceEquals(sender, HomeTabItem) ? 0 : ViewModel.Tabs.Count;
+                    int targetIndex = ReferenceEquals(sender, HomeTabItem) ? 0 : CalculateTabDropIndex(e);
                     _windowManager.TransferTab(payload.SourceWindowId, _session.WindowId, payload.Tab, targetIndex);
                     e.Handled = true;
                 }
@@ -350,8 +380,7 @@ namespace DataSphere.Views.Windows
             {
                 if (_session != null && payload.SourceWindowId != _session.WindowId)
                 {
-                    // Calculate drop index or append
-                    int targetIndex = ViewModel.Tabs.Count;
+                    int targetIndex = CalculateTabDropIndex(e);
                     _windowManager.TransferTab(payload.SourceWindowId, _session.WindowId, payload.Tab, targetIndex);
                     e.Handled = true;
                 }

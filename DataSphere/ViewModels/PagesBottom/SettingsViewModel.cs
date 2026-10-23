@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DataSphere.Models;
+using DataSphere.Models.Settings;
 using DataSphere.Services.Contracts;
 using DataSphere.Utils;
 
@@ -15,6 +16,25 @@ namespace DataSphere.ViewModels.PagesBottom
     public partial class SettingsViewModel : ObservableObject
     {
         private readonly IThemeService? _themeService;
+        private readonly ITabMemorySaverService? _tabMemorySaverService;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether tab memory saver is enabled.
+        /// </summary>
+        [ObservableProperty]
+        public partial bool EnableTabMemorySaver { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the selectable timeout duration options for background tab sleeping.
+        /// </summary>
+        [ObservableProperty]
+        public partial ObservableCollection<TabSleepTimeoutOption> SleepTimeoutOptions { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the currently selected timeout duration option.
+        /// </summary>
+        [ObservableProperty]
+        public partial TabSleepTimeoutOption? SelectedSleepTimeoutOption { get; set; }
 
         /// <summary>
         /// Gets or sets the copyright notice text.
@@ -67,23 +87,74 @@ namespace DataSphere.ViewModels.PagesBottom
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsViewModel"/> class resolving dependencies from the service provider.
         /// </summary>
-        public SettingsViewModel() : this(App.GetService<IThemeService>())
+        public SettingsViewModel() : this(App.GetService<IThemeService>(), App.GetService<ITabMemorySaverService>())
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SettingsViewModel"/> class with the specified theme service.
+        /// Initializes a new instance of the <see cref="SettingsViewModel"/> class with the specified theme service and tab memory saver service.
         /// </summary>
         /// <param name="themeService">The application theme service.</param>
-        public SettingsViewModel(IThemeService? themeService)
+        /// <param name="tabMemorySaverService">The tab memory saver service.</param>
+        public SettingsViewModel(IThemeService? themeService, ITabMemorySaverService? tabMemorySaverService = null)
         {
             _themeService = themeService;
+            _tabMemorySaverService = tabMemorySaverService ?? App.GetService<ITabMemorySaverService>();
             AppVersion = $"{AppInfoHelper.AppName} - {GetAssemblyVersion()}";
             InitializeThemes();
             InitializeBackdrops();
             InitializeLanguages();
+            InitializeTabMemorySaver();
             UpdateLocalizedStrings();
             TranslationSource.Instance.PropertyChanged += (s, e) => UpdateLocalizedStrings();
+        }
+
+        private void InitializeTabMemorySaver()
+        {
+            EnableTabMemorySaver = _tabMemorySaverService?.IsEnabled ?? (UserDataStore.GetValue<bool?>("EnableTabMemorySaver") ?? true);
+            int currentMinutes = _tabMemorySaverService?.IdleTimeoutMinutes ?? (UserDataStore.GetValue<int?>("TabSleepTimeoutMinutes") ?? 15);
+            BuildSleepTimeoutOptions(currentMinutes);
+        }
+
+        private void BuildSleepTimeoutOptions(int selectedMinutes)
+        {
+            SleepTimeoutOptions = new ObservableCollection<TabSleepTimeoutOption>
+            {
+                new TabSleepTimeoutOption(1, LanguageBase.GetLangValue("tab_sleep_timeout_1m") ?? "1 minute"),
+                new TabSleepTimeoutOption(5, LanguageBase.GetLangValue("tab_sleep_timeout_5m") ?? "5 minutes"),
+                new TabSleepTimeoutOption(15, LanguageBase.GetLangValue("tab_sleep_timeout_15m") ?? "15 minutes"),
+                new TabSleepTimeoutOption(30, LanguageBase.GetLangValue("tab_sleep_timeout_30m") ?? "30 minutes"),
+                new TabSleepTimeoutOption(60, LanguageBase.GetLangValue("tab_sleep_timeout_60m") ?? "1 hour")
+            };
+
+            SelectedSleepTimeoutOption = SleepTimeoutOptions.FirstOrDefault(o => o.Minutes == selectedMinutes) ?? SleepTimeoutOptions.FirstOrDefault(o => o.Minutes == 15);
+        }
+
+        partial void OnEnableTabMemorySaverChanged(bool value)
+        {
+            if (_tabMemorySaverService != null)
+            {
+                _tabMemorySaverService.IsEnabled = value;
+            }
+            else
+            {
+                UserDataStore.SetValue("EnableTabMemorySaver", value);
+            }
+        }
+
+        partial void OnSelectedSleepTimeoutOptionChanged(TabSleepTimeoutOption? value)
+        {
+            if (value != null)
+            {
+                if (_tabMemorySaverService != null)
+                {
+                    _tabMemorySaverService.IdleTimeoutMinutes = value.Minutes;
+                }
+                else
+                {
+                    UserDataStore.SetValue("TabSleepTimeoutMinutes", value.Minutes);
+                }
+            }
         }
 
         private void InitializeThemes()
@@ -144,6 +215,9 @@ namespace DataSphere.ViewModels.PagesBottom
                 };
                 backdrop.Summary = LanguageBase.GetLangValue("page_settings_backdrop_summary");
             }
+
+            int currentMinutes = SelectedSleepTimeoutOption?.Minutes ?? 15;
+            BuildSleepTimeoutOptions(currentMinutes);
         }
 
         private static AppThemeMode ResolvePersistedThemeMode()

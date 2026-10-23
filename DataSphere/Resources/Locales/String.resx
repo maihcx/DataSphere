@@ -471,4 +471,37 @@
   <data name="backdrop_solid" xml:space="preserve">
     <value>Solid</value>
   </data>
+  <data name="page_settings_performance_title" xml:space="preserve">
+    <value>Performance &amp; Memory</value>
+  </data>
+  <data name="page_settings_tab_memory_saver_title" xml:space="preserve">
+    <value>Tab Memory Saver</value>
+  </data>
+  <data name="page_settings_tab_memory_saver_summary" xml:space="preserve">
+    <value>Automatically suspend idle background tabs to free memory, restoring them seamlessly when selected</value>
+  </data>
+  <data name="page_settings_tab_sleep_timeout_title" xml:space="preserve">
+    <value>Inactive Tab Timeout</value>
+  </data>
+  <data name="page_settings_tab_sleep_timeout_summary" xml:space="preserve">
+    <value>Put background tabs to sleep after being idle for this duration</value>
+  </data>
+  <data name="tab_sleep_timeout_5m" xml:space="preserve">
+    <value>5 minutes</value>
+  </data>
+  <data name="tab_sleep_timeout_15m" xml:space="preserve">
+    <value>15 minutes (Default)</value>
+  </data>
+  <data name="tab_sleep_timeout_30m" xml:space="preserve">
+    <value>30 minutes</value>
+  </data>
+  <data name="tab_sleep_timeout_60m" xml:space="preserve">
+    <value>1 hour</value>
+  </data>
+  <data name="tab_sleeping_badge_tooltip" xml:space="preserve">
+    <value>Sleeping (memory freed) — click to wake up</value>
+  </data>
+  <data name="tab_sleep_timeout_1m" xml:space="preserve">
+    <value>1 minutes</value>
+  </data>
 </root>

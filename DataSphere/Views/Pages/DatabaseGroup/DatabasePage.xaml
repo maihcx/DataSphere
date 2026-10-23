@@ -6,6 +6,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:models="using:DataSphere.Models"
       xmlns:vm="using:DataSphere.ViewModels.Pages.DatabaseGroup"
+      xmlns:controls="using:DataSphere.Controls"
       Background="Transparent"
       mc:Ignorable="d">
 
@@ -23,12 +24,27 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+            <!-- Sliding Tab Selection Background Layer (Behind InnerTabView) -->
+            <Canvas x:Name="InnerTabBackgroundCanvas"
+                    Grid.Row="0"
+                    IsHitTestVisible="False">
+                <Border x:Name="InnerTabCapsule"
+                        CornerRadius="6"
+                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        Opacity="0"
+                        IsHitTestVisible="False" />
+            </Canvas>
+
             <TabView Grid.Row="0"
                      x:Name="InnerTabView"
                      Background="Transparent"
                      BorderThickness="0"
                      TabItemsSource="{x:Bind ViewModel.InnerTabs, Mode=OneWay}"
                      SelectedItem="{x:Bind ViewModel.SelectedInnerTab, Mode=TwoWay}"
+                     controls:SlidingTabIndicatorBehavior.IsEnabled="True"
+                     controls:SlidingTabIndicatorBehavior.BackgroundCapsule="{x:Bind InnerTabCapsule}"
                      TabWidthMode="Compact"
                      SelectionChanged="InnerTabView_SelectionChanged"
                      TabCloseRequested="InnerTabView_TabCloseRequested"
@@ -40,8 +56,8 @@
                 <!-- Anchored Connection Tab in TabStripHeader -->
                 <TabView.TabStripHeader>
                     <StackPanel Orientation="Horizontal"
-                                VerticalAlignment="Top"
-                                Margin="3,3,-6,3">
+                                 VerticalAlignment="Top"
+                                 Margin="3,3,-6,3">
                         <TabViewItem x:Name="ConnectionTabItem"
                                      Style="{StaticResource PillTabViewItemStyle}"
                                      Header="{x:Bind ViewModel.ConnectionTab.Header, Mode=OneWay}"
@@ -70,11 +86,12 @@
             </TabView>
 
             <!-- Active Tab Content Area (Unified Viewport) -->
-            <ContentControl Grid.Row="1"
+            <controls:CachedContentControl Grid.Row="1"
                             Background="Transparent"
+                            SelectedIndex="{x:Bind ViewModel.EffectiveTabIndex, Mode=OneWay}"
                             Content="{x:Bind ViewModel.ActiveInnerContent, Mode=OneWay}"
-                            HorizontalContentAlignment="Stretch"
-                            VerticalContentAlignment="Stretch" />
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch" />
         </Grid>
     </Grid>
 </Page>

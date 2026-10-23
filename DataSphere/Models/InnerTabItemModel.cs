@@ -5,7 +5,7 @@ namespace DataSphere.Models
     /// <summary>
     /// Represents an individual inner sub-tab hosted inside the Database workspace TabView.
     /// </summary>
-    public partial class InnerTabItemModel : ObservableObject
+    public partial class InnerTabItemModel : ObservableObject, IDisposable
     {
         /// <summary>
         /// Gets or sets the display header title of the tab.
@@ -44,5 +44,19 @@ namespace DataSphere.Models
         /// that must be cleaned up when this tab is closed.
         /// </summary>
         public IDisposable? DisposableContext { get; set; }
+
+        /// <summary>
+        /// Releases resources and disposes hosted content or context.
+        /// </summary>
+        public void Dispose()
+        {
+            DisposableContext?.Dispose();
+            DisposableContext = null;
+
+            if (Content is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
     }
 }

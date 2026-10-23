@@ -148,16 +148,25 @@ namespace DataSphere.Helpers
         }
     }
 
+    /// <summary>
+    /// Converts a string or object reference to a <see cref="Visibility"/> enumeration value.
+    /// Returns <see cref="Visibility.Collapsed"/> if the string is null/whitespace or the object is null;
+    /// otherwise returns <see cref="Visibility.Visible"/>.
+    /// </summary>
     public class StringToVisibilityConverter : IValueConverter
     {
         /// <inheritdoc/>
-        public object Convert(object value, Type targetType, object parameter, string language)
+        public object Convert(object? value, Type targetType, object? parameter, string language)
         {
-            return string.IsNullOrEmpty(value as string) ? Visibility.Collapsed : Visibility.Visible;
+            if (value is string s)
+            {
+                return string.IsNullOrWhiteSpace(s) ? Visibility.Collapsed : Visibility.Visible;
+            }
+            return value != null ? Visibility.Visible : Visibility.Collapsed;
         }
 
         /// <inheritdoc/>
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        public object ConvertBack(object? value, Type targetType, object? parameter, string language)
             => throw new NotSupportedException();
     }
 }

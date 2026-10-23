@@ -35,8 +35,15 @@ namespace DataSphere.ViewModels.Windows
         /// Gets or sets a value indicating whether the Home tab is currently selected and active.
         /// </summary>
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(EffectiveTabIndex))]
         [NotifyPropertyChangedFor(nameof(ActiveViewportContent))]
         public partial bool IsHomeSelected { get; set; } = true;
+
+        /// <summary>
+        /// Gets the zero-based effective index of the currently active tab (0 for Home tab, 1+ for dynamic workspace tabs).
+        /// Used by the viewport host to calculate directional horizontal transition animations.
+        /// </summary>
+        public int EffectiveTabIndex => IsHomeSelected ? 0 : (_tabService.SelectedTab != null ? _tabService.Tabs.IndexOf(_tabService.SelectedTab) + 1 : 0);
 
         /// <summary>
         /// Gets the observable collection of dynamic workspace tabs hosted in this window shell.
@@ -59,6 +66,7 @@ namespace DataSphere.ViewModels.Windows
                         IsHomeSelected = false;
                     }
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(EffectiveTabIndex));
                     OnPropertyChanged(nameof(ActiveViewportContent));
                 }
             }
@@ -78,11 +86,17 @@ namespace DataSphere.ViewModels.Windows
         public ShellViewModel(
             ITabService tabService,
             IWindowManager windowManager,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            ITabMemorySaverService tabMemorySaverService)
         {
             _tabService = tabService ?? throw new ArgumentNullException(nameof(tabService));
             _windowManager = windowManager ?? throw new ArgumentNullException(nameof(windowManager));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
+            if (tabMemorySaverService.IsEnabled)
+            {
+                Debug.WriteLine("Tab Memory Optimization is Stated");
+            }
 
             HomeTab = CreateHomeTab();
 
@@ -96,6 +110,7 @@ namespace DataSphere.ViewModels.Windows
                         IsHomeSelected = false;
                     }
                     OnPropertyChanged(nameof(SelectedTab));
+                    OnPropertyChanged(nameof(EffectiveTabIndex));
                     OnPropertyChanged(nameof(ActiveViewportContent));
                 }
             };
@@ -155,6 +170,7 @@ namespace DataSphere.ViewModels.Windows
                 _tabService.SelectedTab = null;
             }
 
+            OnPropertyChanged(nameof(EffectiveTabIndex));
             OnPropertyChanged(nameof(ActiveViewportContent));
         }
 
@@ -166,6 +182,7 @@ namespace DataSphere.ViewModels.Windows
         {
             IsHomeSelected = true;
             SelectedTab = null;
+            OnPropertyChanged(nameof(EffectiveTabIndex));
             OnPropertyChanged(nameof(ActiveViewportContent));
         }
 
@@ -196,6 +213,7 @@ namespace DataSphere.ViewModels.Windows
                     SelectHome();
                 }
                 OnPropertyChanged(nameof(SelectedTab));
+                OnPropertyChanged(nameof(EffectiveTabIndex));
                 OnPropertyChanged(nameof(ActiveViewportContent));
             }
         }
@@ -213,6 +231,7 @@ namespace DataSphere.ViewModels.Windows
                 IsHomeSelected = false;
             }
             OnPropertyChanged(nameof(SelectedTab));
+            OnPropertyChanged(nameof(EffectiveTabIndex));
             OnPropertyChanged(nameof(ActiveViewportContent));
         }
     }

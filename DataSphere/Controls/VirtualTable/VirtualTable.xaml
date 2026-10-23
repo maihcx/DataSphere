@@ -41,7 +41,7 @@
             VerticalScrollMode="Enabled"
             ZoomMode="Disabled">
             <Canvas x:Name="VirtualScrollHost" Background="Transparent">
-                <Canvas x:Name="VirtualCanvas" Background="Transparent" />
+                <Canvas x:Name="VirtualCanvas" />
                 <Canvas x:Name="EditorCanvas" IsHitTestVisible="True">
                     <TextBox
                         x:Name="CellEditorOverlay"

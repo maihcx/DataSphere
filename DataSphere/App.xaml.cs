@@ -52,6 +52,7 @@ namespace DataSphere
                     // Window & Tab management infrastructure
                     services.AddSingleton<IWindowManager, DataSphere.Services.WindowManager>();
                     services.AddTransient<ITabService, TabService>();
+                    services.AddSingleton<ITabMemorySaverService, TabMemorySaverService>();
 
                     // Core Application Services
                     services.AddSingleton<MessengerService>();

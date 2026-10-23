@@ -106,9 +106,9 @@
                                 <VisualState x:Name="Selected">
                                     <VisualState.Setters>
                                         <Setter Target="PillBorder.Background"
-                                                Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                                                Value="Transparent" />
                                         <Setter Target="PillBorder.BorderBrush"
-                                                Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                                Value="Transparent" />
                                         <Setter Target="ContentPresenter.Foreground"
                                                 Value="{ThemeResource TextFillColorPrimaryBrush}" />
                                         <Setter Target="IconControl.Foreground"
@@ -120,9 +120,9 @@
                                 <VisualState x:Name="PointerOverSelected">
                                     <VisualState.Setters>
                                         <Setter Target="PillBorder.Background"
-                                                Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                                                Value="Transparent" />
                                         <Setter Target="PillBorder.BorderBrush"
-                                                Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                                Value="Transparent" />
                                         <Setter Target="ContentPresenter.Foreground"
                                                 Value="{ThemeResource TextFillColorPrimaryBrush}" />
                                         <Setter Target="IconControl.Foreground"
@@ -134,9 +134,9 @@
                                 <VisualState x:Name="PressedSelected">
                                     <VisualState.Setters>
                                         <Setter Target="PillBorder.Background"
-                                                Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                                                Value="Transparent" />
                                         <Setter Target="PillBorder.BorderBrush"
-                                                Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                                Value="Transparent" />
                                         <Setter Target="ContentPresenter.Foreground"
                                                 Value="{ThemeResource TextFillColorPrimaryBrush}" />
                                         <Setter Target="IconControl.Foreground"

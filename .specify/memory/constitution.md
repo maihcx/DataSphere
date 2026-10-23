@@ -1,12 +1,12 @@
 <!--
 Sync Impact Report:
-- Version change: 1.4.0 → 1.5.0 (Minor version bump introducing the Zero-Speculation / Mandatory Live UI Verification Gate, strictly prohibiting assumption-based handoff or speculative completion claims, and mandating end-to-end live UI testing on WinSta0\default with verified visual and interaction evidence prior to any delivery)
+- Version change: 1.5.0 → 1.6.0 (Minor version bump introducing strict Zero Code-Behind Visual Tree Manipulation rules and the Clean MVVM Compliance Gate)
 - Modified principles:
-  - Principle VIII: Visual UI Reproduction, Diagnostic Inspection & Verification Gate (Expanded with strict Zero-Speculation / Zero-Guesswork Invariant, absolute ban on phrases like 'I guess it works' or 'theoretically resolved', mandatory live UI automation execution covering end-to-end user workflows, physical mouse interaction verification, and verified visual evidence as an uncompromising blocker for delivery)
+  - Principle I: Clean MVVM & Type Safety (Reinforced with explicit prohibition on imperative visual tree / container manipulation in code-behind such as Children.Add/Remove or manual visibility toggling, mandating 100% declarative XAML data binding for dynamic view presentation and child viewports)
 - Added quality gates:
-  - Zero-Speculation Live UI Verification Gate: Explicit gate prohibiting handoff or marking tasks complete without concrete live UI execution logs, physical interaction proofs, and DirectComposition screenshots.
+  - Clean MVVM Compliance Gate: Mandatory evaluation gate ensuring all new changes, features, and bug fixes strictly adhere to standard Clean MVVM without code-behind DOM-style visual tree hacking.
 - Removed sections: None
-- Follow-up TODOs: None (all requirements strictly specified, declarative, and non-negotiable)
+- Follow-up TODOs: None (all rules strictly specified, declarative, and non-negotiable)
 -->
 
 # DataSphere Constitution
@@ -18,6 +18,8 @@ The application MUST strictly adhere to the Clean Model-View-ViewModel (MVVM) ar
 - **Strict View / ViewModel Decoupling**: ViewModels MUST be completely UI-agnostic and MUST NOT import or reference UI visual types (such as `FrameworkElement`, `Window`, `Page`, or `ContentPresenter`).
 - **Declarative Source Generators**: ViewModels MUST utilize `[ObservableProperty]`, `[RelayCommand]`, and `[NotifyPropertyChangedFor]` source generators on partial properties to maintain compile-time safety and eliminate boilerplate.
 - **Zero Business Logic in Code-Behind**: Views (`*.xaml.cs`) MUST NOT contain business, database, or domain orchestration logic. Code-behind is strictly restricted to view-only lifecycle plumbing (such as setting titlebar drag regions or hooking native non-bindable events).
+- **Declarative XAML Data Binding & Zero Code-Behind UI Manipulation**: Views (`*.xaml.cs`) MUST NOT perform imperative visual tree manipulation or container child management (such as manually adding, removing, or swapping elements via `Children.Add`, `Children.Remove`, or imperatively mutating child `Visibility` in code-behind). All dynamic view presentation, child view swapping, and viewport navigation MUST be handled declaratively in XAML via data binding (e.g., `<ContentControl Content="{x:Bind ViewModel.ActiveContent}" />`, `<ContentPresenter />`, or `<ItemsControl />`). Code-behind is strictly restricted to non-bindable platform interop (e.g., title bar drag regions, Win32 window handles, or pure routed event bubbling).
+- **MVVM Compliance Verification**: Every code modification, architectural refactoring, and defect remediation MUST be evaluated against standard Clean MVVM architecture. Attempting to resolve layout, performance, or navigation issues via imperative DOM-style visual tree manipulation in code-behind is STRICTLY FORBIDDEN.
 - **UI Thread Dispatching**: Any background thread seeking to update UI-bound state MUST marshal operations through the UI thread dispatcher (`DispatcherQueue`).
 
 ### Principle II: Modern Fluent UI / UX Standards
@@ -92,6 +94,7 @@ To eliminate guesswork, prevent misdiagnosed root causes, and standardize automa
 ## Development Workflow & Quality Gates
 
 - **Zero-Error Compilation Gate**: Every pull request and committed change MUST compile cleanly (`dotnet build DataSphere\DataSphere.csproj -c Debug`) with 0 errors and 0 warnings.
+- **Clean MVVM Compliance Gate**: Every change, new feature, and bug remediation MUST pass a Clean MVVM compliance review. Code-behind files (`*.xaml.cs`) MUST NOT contain visual tree mutations, manual child container manipulation (`Children.Add`/`Children.Remove`), or state logic that bypasses declarative XAML data binding. All dynamic view switching MUST be handled declaratively.
 - **Documentation Verification Gate**: All modified or introduced methods, properties, and types MUST meet 100% English XML documentation requirements.
 - **Internationalization (i18n) Gate**: All newly introduced or modified UI elements, commands, and viewmodels MUST NOT contain hardcoded user-facing strings; all user text MUST use `TranslationSource` / `.resx` keys with verified UTF-8 encoding.
 - **Diagnostic Reproduction Gate**: Every bug assessment involving UI behavior, window interaction, or visual anomalies MUST produce live reproduction evidence (UI element inspection trace or screenshot) captured via automated UI tooling on `WinSta0\default` during the assessment phase and documented in `assess.md`.
@@ -113,4 +116,4 @@ To eliminate guesswork, prevent misdiagnosed root causes, and standardize automa
      - **PATCH**: Non-semantic clarifications, typo fixes, or wording refinements.
 - **Compliance Enforcement**: All code reviews and agent orchestrations MUST actively verify adherence to these constitutional principles.
 
-**Version**: 1.5.0 | **Ratified**: 2026-10-19 | **Last Amended**: 2026-10-20
+**Version**: 1.6.0 | **Ratified**: 2026-10-19 | **Last Amended**: 2026-10-23

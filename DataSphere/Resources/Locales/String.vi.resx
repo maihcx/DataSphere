@@ -468,4 +468,37 @@
   <data name="backdrop_solid" xml:space="preserve">
     <value>Đơn sắc (Solid)</value>
   </data>
+  <data name="page_settings_performance_title" xml:space="preserve">
+    <value>Hiệu năng &amp; Bộ nhớ</value>
+  </data>
+  <data name="page_settings_tab_memory_saver_title" xml:space="preserve">
+    <value>Tiết kiệm bộ nhớ cho Tab</value>
+  </data>
+  <data name="page_settings_tab_memory_saver_summary" xml:space="preserve">
+    <value>Tự động đưa các tab không hoạt động vào trạng thái ngủ để giải phóng bộ nhớ, phục hồi liền mạch khi chọn lại</value>
+  </data>
+  <data name="page_settings_tab_sleep_timeout_title" xml:space="preserve">
+    <value>Thời gian chờ chuyển tab sang trạng thái ngủ</value>
+  </data>
+  <data name="page_settings_tab_sleep_timeout_summary" xml:space="preserve">
+    <value>Tự động đưa tab nền vào trạng thái ngủ sau khoảng thời gian không tương tác này</value>
+  </data>
+  <data name="tab_sleep_timeout_5m" xml:space="preserve">
+    <value>5 phút</value>
+  </data>
+  <data name="tab_sleep_timeout_15m" xml:space="preserve">
+    <value>15 phút (Mặc định)</value>
+  </data>
+  <data name="tab_sleep_timeout_30m" xml:space="preserve">
+    <value>30 phút</value>
+  </data>
+  <data name="tab_sleep_timeout_60m" xml:space="preserve">
+    <value>1 giờ</value>
+  </data>
+  <data name="tab_sleeping_badge_tooltip" xml:space="preserve">
+    <value>Đang ngủ (đã giải phóng bộ nhớ) — bấm để đánh thức</value>
+  </data>
+  <data name="tab_sleep_timeout_1m" xml:space="preserve">
+    <value>1 phút</value>
+  </data>
 </root>

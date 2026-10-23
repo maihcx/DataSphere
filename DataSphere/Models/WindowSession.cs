@@ -74,6 +74,7 @@ namespace DataSphere.Models
             tab.State = TabLifecycleState.Closing;
 
             bool wasSelected = Equals(SelectedTab, tab);
+            tab.Dispose();
             Tabs.RemoveAt(index);
             tab.State = TabLifecycleState.Disposed;
 

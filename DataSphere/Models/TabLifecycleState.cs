@@ -21,6 +21,11 @@ namespace DataSphere.Models
         Background,
 
         /// <summary>
+        /// The tab has released heavy visual element allocations and is suspended in low-power idle mode.
+        /// </summary>
+        Sleeping,
+
+        /// <summary>
         /// Closure has been requested for the tab; pending asynchronous operations are being cancelled.
         /// </summary>
         Closing,

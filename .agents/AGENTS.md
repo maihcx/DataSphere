@@ -34,13 +34,14 @@ DataSphere là ứng dụng quản lý và truy vấn cơ sở dữ liệu (MySQ
 
 ## 2. Bất Biến Ranh Giới & Hiến Chương Dự Án (`CONSTITUTION.md`)
 
-Mọi đề xuất mã nguồn hoặc thay đổi kiến trúc **bắt buộc tuân thủ 100%** Hiến chương dự án v1.5.0 ([`.specify/memory/constitution.md`](file:///d:/DEV/C%23DOTNET/DataSphere/.specify/memory/constitution.md)):
+Mọi đề xuất mã nguồn hoặc thay đổi kiến trúc **bắt buộc tuân thủ 100%** Hiến chương dự án v1.6.0 ([`.specify/memory/constitution.md`](file:///d:/DEV/C%23DOTNET/DataSphere/.specify/memory/constitution.md)):
 
 1. **Principle I: Clean MVVM & Type Safety**:
    - Sử dụng triệt để `CommunityToolkit.Mvvm` (`[ObservableProperty]`, `[RelayCommand]`).
    - ViewModels hoàn toàn UI-agnostic; cấm phụ thuộc trực tiếp vào visual tree (`FrameworkElement`, `Window`).
-   - UI thread synchronization bắt buộc đi qua `Application.Current.Dispatcher`.
-   - Cấm code-behind chứa logic nghiệp vụ.
+   - UI thread synchronization bắt buộc đi qua `DispatcherQueue` / `Application.Current.Dispatcher`.
+   - **Nghiêm cấm Code-Behind thao tác cây trực quan (Zero Code-Behind UI Manipulation)**: Cấm code-behind chứa logic nghiệp vụ hoặc thực hiện các thao tác DOM thủ công (như `Children.Add`, `Children.Remove`, hay gán `Visibility` thủ công để hoán đổi view). Toàn bộ chuyển đổi màn hình, view con và viewport bắt buộc sử dụng cơ chế Data Binding khai báo thuần túy trong XAML (`<ContentControl Content="{x:Bind ...}" />`, `<ContentPresenter />`).
+   - **Cổng thẩm định Clean MVVM (Clean MVVM Compliance Gate)**: Mọi thay đổi mã nguồn, tính năng mới và bản vá lỗi bắt buộc phải được đánh giá tuân thủ cấu trúc mô hình Clean MVVM tiêu chuẩn. Tuyệt đối cấm giải quyết vấn đề hiệu năng hay bố cục bằng cách viết code-behind can thiệp trực tiếp vào visual tree.
 2. **Principle II: Modern Fluent UI / UX Standards**:
    - Giao diện Fluent Design 2 qua `Wpf.Ui`, hỗ trợ Dark/Light Theme hoàn hảo.
    - Sử dụng `IContentDialogService` và `ISnackbarService` thay vì MessageBox Win32 chặn tiến trình.
@@ -212,3 +213,9 @@ Mọi báo cáo lỗi hoặc tính năng giao diện người dùng bắt buộc
 - **Khi tiếp nhận lỗi (Bug Assessment Phase — `/speckit-bug-assess`)**: Bắt buộc khởi chạy ứng dụng thực tế để tái hiện lỗi, trích xuất cấu trúc element tree và chụp ảnh lỗi làm bằng chứng chẩn đoán trực tiếp vào tài liệu thẩm định lỗi (`assess.md`).
 - **Khi nghiệm thu hoàn thành (Verification Gate — `/speckit-bug-test`, `/speckit-converge`)**: Bắt buộc khởi chạy ứng dụng sau khi sửa mã nguồn, chụp ảnh màn hình giao diện đã khắc phục, lưu vào thư mục artifacts và nhúng vào báo cáo nghiệm thu (`test.md`).
 *(Yêu cầu: Không suy đoán lỗi trên lý thuyết, không làm bẩn XAML với AutomationId, giao diện hiển thị đúng layout, không bị trống nội dung, không vỡ font/Mojibake)*
+
+### 5. Kiểm Định Tuân Thủ Clean MVVM (Clean MVVM Compliance Gate):
+Mọi thay đổi mã nguồn XAML và C# bắt buộc phải được rà soát tính tuân thủ mô hình MVVM tiêu chuẩn:
+- Nghiêm cấm viết code-behind thao tác trực quan (cấm `Children.Add`, `Children.Remove`, hoặc can thiệp `Visibility` thủ công trong code-behind để hoán đổi view).
+- Toàn bộ chuyển đổi view, tab hoặc màn hình con bắt buộc bind khai báo thuần túy qua XAML Data Binding (`<ContentControl Content="{x:Bind ...}" />`, `<ContentPresenter />`).
+*(Yêu cầu: Zero Code-Behind UI Manipulation)*

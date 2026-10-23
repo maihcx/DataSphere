@@ -1,18 +1,22 @@
-using System.Collections.Specialized;
+using DataSphere.Models.Database;
+using DataSphere.Services.Contracts;
+using DataSphere.Utils;
+using DataSphere.ViewModels.Pages.DatabaseGroup;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using DataSphere.Models.Database;
-using DataSphere.Utils;
-using DataSphere.ViewModels.Pages.DatabaseGroup;
+using System.Collections.Specialized;
+using System.Runtime;
 
 namespace DataSphere.Views.Pages.DatabaseGroup
 {
     /// <summary>
     /// UserControl presenting the active database session schema explorer tree and right-hand tabular view.
     /// </summary>
-    public sealed partial class DatabaseViewControl : UserControl, IDisposable
+    public sealed partial class DatabaseViewControl : UserControl, IDisposable, ISleepableTabContent
     {
+        private bool _disposed;
+
         /// <summary>
         /// Gets the ViewModel governing the active database explorer session.
         /// </summary>
@@ -379,11 +383,51 @@ namespace DataSphere.Views.Pages.DatabaseGroup
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the hosted tabular viewport is currently eligible to enter low-power sleeping state.
+        /// </summary>
+        public bool CanSleep => ViewModel.RightPanelContent is not ISleepableTabContent sleepable || sleepable.CanSleep;
+
+        /// <summary>
+        /// Suspends heavy visual presentation in the hosted tabular viewport when entering background sleep.
+        /// </summary>
+        public void Sleep()
+        {
+            if (ViewModel.RightPanelContent is ISleepableTabContent sleepable)
+            {
+                sleepable.Sleep();
+            }
+
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Rehydrates and refreshes the tabular viewport when the tab is awakened by user focus.
+        /// </summary>
+        public void WakeUp()
+        {
+            if (ViewModel.RightPanelContent is ISleepableTabContent sleepable)
+            {
+                sleepable.WakeUp();
+            }
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
+            if (_disposed) return;
+            _disposed = true;
+
             ViewModel.RootConnections.CollectionChanged -= OnRootConnectionsChanged;
+            Bindings?.StopTracking();
+            if (RightPanelHost != null)
+            {
+                RightPanelHost.Content = null;
+            }
+            SchemaTree?.RootNodes.Clear();
             ViewModel.Dispose();
+
+            GC.SuppressFinalize(this);
         }
 
         private record TableCategoryContext(DatabaseInfo Database);

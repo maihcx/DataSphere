@@ -106,6 +106,7 @@
         <!-- Right Column: Detail / Tabular Viewport Content -->
         <Grid Grid.Column="2">
             <ContentControl
+                x:Name="RightPanelHost"
                 Content="{x:Bind ViewModel.RightPanelContent, Mode=OneWay}"
                 HorizontalContentAlignment="Stretch"
                 VerticalContentAlignment="Stretch" />

@@ -53,7 +53,16 @@ namespace DataSphere.Services
             if (!forceNewTab && existingTab != null && (existingTab.PageType?.Name == "HomePage" || !existingTab.IsClosable))
             {
                 SelectedTab = existingTab;
-                existingTab.State = TabLifecycleState.Active;
+                existingTab.LastActiveTime = DateTime.UtcNow;
+                if (existingTab.IsSleeping)
+                {
+                    var saver = _serviceProvider.GetService(typeof(ITabMemorySaverService)) as ITabMemorySaverService;
+                    saver?.WakeUpTab(existingTab);
+                }
+                else
+                {
+                    existingTab.State = TabLifecycleState.Active;
+                }
                 return existingTab;
             }
 
@@ -61,7 +70,16 @@ namespace DataSphere.Services
             if (!forceNewTab && existingTab != null && existingTab.PageType?.Name == "SettingsPage")
             {
                 SelectedTab = existingTab;
-                existingTab.State = TabLifecycleState.Active;
+                existingTab.LastActiveTime = DateTime.UtcNow;
+                if (existingTab.IsSleeping)
+                {
+                    var saver = _serviceProvider.GetService(typeof(ITabMemorySaverService)) as ITabMemorySaverService;
+                    saver?.WakeUpTab(existingTab);
+                }
+                else
+                {
+                    existingTab.State = TabLifecycleState.Active;
+                }
                 return existingTab;
             }
 
@@ -149,7 +167,6 @@ namespace DataSphere.Services
             if (index >= 0 && index < Tabs.Count)
             {
                 SelectedTab = Tabs[index];
-                SelectedTab.State = TabLifecycleState.Active;
             }
         }
 
@@ -157,14 +174,24 @@ namespace DataSphere.Services
         {
             if (oldValue != null && oldValue.State == TabLifecycleState.Active)
             {
-                oldValue.State = TabLifecycleState.Background;
+                oldValue.State = oldValue.IsSleeping ? TabLifecycleState.Sleeping : TabLifecycleState.Background;
                 oldValue.IsSelected = false;
             }
 
             if (newValue != null)
             {
-                newValue.State = TabLifecycleState.Active;
                 newValue.IsSelected = true;
+                newValue.LastActiveTime = DateTime.UtcNow;
+
+                if (newValue.IsSleeping)
+                {
+                    var saver = _serviceProvider.GetService(typeof(ITabMemorySaverService)) as ITabMemorySaverService;
+                    saver?.WakeUpTab(newValue);
+                }
+                else
+                {
+                    newValue.State = TabLifecycleState.Active;
+                }
             }
         }
     }

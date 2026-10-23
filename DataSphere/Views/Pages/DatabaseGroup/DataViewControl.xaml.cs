@@ -2,6 +2,7 @@ using System;
 using Microsoft.UI.Xaml.Controls;
 using DataSphere.Models;
 using DataSphere.Models.Database;
+using DataSphere.Services.Contracts;
 using DataSphere.Services.Database.Interface;
 using DataSphere.ViewModels.Pages.DatabaseGroup;
 
@@ -11,7 +12,7 @@ namespace DataSphere.Views.Pages.DatabaseGroup
     /// UserControl presenting a modern, high-performance database table data viewport
     /// driven declaratively by <see cref="DataControlViewModel"/>.
     /// </summary>
-    public sealed partial class DataViewControl : UserControl, IDisposable
+    public sealed partial class DataViewControl : UserControl, IDisposable, ISleepableTabContent
     {
         private bool _disposed;
 
@@ -41,7 +42,28 @@ namespace DataSphere.Views.Pages.DatabaseGroup
         public void LoadTable(DatabaseInfo database, Table table)
         {
             TableControl?.Clear();
+            if (TableControl != null)
+            {
+                GC.SuppressFinalize(TableControl);
+            }
             ViewModel.SwitchTable(database, table);
+        }
+
+        /// <inheritdoc/>
+        public bool CanSleep => !ViewModel.IsLoading && !(ViewModel.DataPage?.HasDirtyRows ?? false);
+
+        /// <inheritdoc/>
+        public void Sleep()
+        {
+            TableControl?.SuspendVisuals();
+
+            GC.SuppressFinalize(this);
+        }
+
+        /// <inheritdoc/>
+        public void WakeUp()
+        {
+            TableControl?.Refresh();
         }
 
         /// <inheritdoc/>
@@ -53,6 +75,8 @@ namespace DataSphere.Views.Pages.DatabaseGroup
             TableControl?.Dispose();
             Bindings?.StopTracking();
             ViewModel.Dispose();
+
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -150,9 +150,9 @@ namespace DataSphere.Controls.VirtualTable
 
             TableScrollViewer.ViewChanged += OnScrollViewerViewChanged;
 
-            VirtualCanvas.PointerPressed += OnViewportPointerPressed;
-            VirtualCanvas.PointerMoved += OnViewportPointerMoved;
-            VirtualCanvas.PointerExited += OnViewportPointerExited;
+            VirtualScrollHost.PointerPressed += OnViewportPointerPressed;
+            VirtualScrollHost.PointerMoved += OnViewportPointerMoved;
+            VirtualScrollHost.PointerExited += OnViewportPointerExited;
             VirtualScrollHost.PointerWheelChanged += OnViewportPointerWheelChanged;
             HeaderBorder.PointerWheelChanged += OnViewportPointerWheelChanged;
 
@@ -262,6 +262,7 @@ namespace DataSphere.Controls.VirtualTable
         /// </summary>
         public void Refresh()
         {
+            if (_disposed) return;
             SyncColumnsFromDataProvider();
             BuildHeaderElements();
             UpdateScrollExtent();
@@ -297,6 +298,7 @@ namespace DataSphere.Controls.VirtualTable
         /// </summary>
         public void Clear()
         {
+            if (_disposed) return;
             ResetViewportState();
             _rowPool.Clear(VirtualCanvas);
             Columns.CollectionChanged -= OnColumnsCollectionChanged;
@@ -310,6 +312,17 @@ namespace DataSphere.Controls.VirtualTable
             }
             BuildHeaderElements();
             UpdateScrollExtent();
+        }
+
+        /// <summary>
+        /// Suspends active row rendering and releases pooled visual elements to conserve memory while in a low-power sleeping state.
+        /// </summary>
+        public void SuspendVisuals()
+        {
+            if (_disposed) return;
+            CancelCellEdit();
+            TeardownHeaderCompositorSync();
+            _rowPool.Clear(VirtualCanvas);
         }
 
         /// <summary>
@@ -344,15 +357,45 @@ namespace DataSphere.Controls.VirtualTable
             }
         }
 
+        /// <summary>
+        /// Handles the <see cref="FrameworkElement.Loaded"/> event, restoring compositor scroll synchronization
+        /// and refreshing visual rows when the table re-enters the active visual tree.
+        /// </summary>
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
+            if (_disposed) return;
+            if (TableScrollViewer != null)
+            {
+                if (TableScrollViewer.VerticalOffset > 0 || TableScrollViewer.HorizontalOffset > 0)
+                {
+                    _scrollOffsetY = TableScrollViewer.VerticalOffset;
+                    _scrollOffsetX = TableScrollViewer.HorizontalOffset;
+                }
+            }
             SetupHeaderCompositorSync();
-            Refresh();
+            if (Columns.Count == 0)
+            {
+                Refresh();
+            }
+            else
+            {
+                double vpWidth = TableScrollViewer != null && TableScrollViewer.ViewportWidth > 0 ? TableScrollViewer.ViewportWidth : (TableScrollViewer?.ActualWidth ?? 0);
+                double vpHeight = TableScrollViewer != null && TableScrollViewer.ViewportHeight > 0 ? TableScrollViewer.ViewportHeight : (TableScrollViewer?.ActualHeight ?? 0);
+                if (vpWidth > 0 && vpHeight > 0)
+                {
+                    Recycle();
+                }
+            }
         }
 
+        /// <summary>
+        /// Handles the <see cref="FrameworkElement.Unloaded"/> event, pausing active cell editing and compositor animations
+        /// without permanently disposing resources while the table is detached from the visual tree (e.g. during tab switching).
+        /// </summary>
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
-            Dispose();
+            CancelCellEdit();
+            TeardownHeaderCompositorSync();
         }
 
         private void OnActualThemeChanged(FrameworkElement sender, object args)
@@ -438,14 +481,14 @@ namespace DataSphere.Controls.VirtualTable
 
             if (VirtualCanvas != null)
             {
-                VirtualCanvas.PointerPressed -= OnViewportPointerPressed;
-                VirtualCanvas.PointerMoved -= OnViewportPointerMoved;
-                VirtualCanvas.PointerExited -= OnViewportPointerExited;
                 _rowPool.Clear(VirtualCanvas);
             }
 
             if (VirtualScrollHost != null)
             {
+                VirtualScrollHost.PointerPressed -= OnViewportPointerPressed;
+                VirtualScrollHost.PointerMoved -= OnViewportPointerMoved;
+                VirtualScrollHost.PointerExited -= OnViewportPointerExited;
                 VirtualScrollHost.PointerWheelChanged -= OnViewportPointerWheelChanged;
             }
 
@@ -488,9 +531,6 @@ namespace DataSphere.Controls.VirtualTable
             }
 
             UpdateScrollExtent();
-            double vpWidth = TableScrollViewer.ViewportWidth > 0 ? TableScrollViewer.ViewportWidth : TableScrollViewer.ActualWidth;
-            double vpHeight = TableScrollViewer.ViewportHeight > 0 ? TableScrollViewer.ViewportHeight : TableScrollViewer.ActualHeight;
-            _rowPool.EnsurePoolSize(VirtualCanvas, vpWidth, vpHeight, RowHeight, Columns.Count);
             Recycle();
         }
 
@@ -498,9 +538,6 @@ namespace DataSphere.Controls.VirtualTable
         {
             BuildHeaderElements();
             UpdateScrollExtent();
-            double vpWidth = TableScrollViewer.ViewportWidth > 0 ? TableScrollViewer.ViewportWidth : TableScrollViewer.ActualWidth;
-            double vpHeight = TableScrollViewer.ViewportHeight > 0 ? TableScrollViewer.ViewportHeight : TableScrollViewer.ActualHeight;
-            _rowPool.EnsurePoolSize(VirtualCanvas, vpWidth, vpHeight, RowHeight, Columns.Count);
             Recycle();
         }
 
@@ -842,9 +879,9 @@ namespace DataSphere.Controls.VirtualTable
             VirtualScrollHost.Width = hostWidth;
             VirtualScrollHost.Height = hostHeight;
             VirtualCanvas.Width = hostWidth;
-            VirtualCanvas.Height = hostHeight;
+            VirtualCanvas.Height = vpHeight;
             EditorCanvas.Width = hostWidth;
-            EditorCanvas.Height = hostHeight;
+            EditorCanvas.Height = vpHeight;
 
             _rowPool.EnsurePoolSize(VirtualCanvas, vpWidth, vpHeight, RowHeight, Columns.Count);
         }
@@ -948,6 +985,7 @@ namespace DataSphere.Controls.VirtualTable
         /// </summary>
         private void Recycle()
         {
+            if (_disposed || TableScrollViewer == null) return;
             int totalRows = DataProvider?.RowCount ?? 0;
             int firstVisibleRow = RowHeight > 0 ? Math.Max(0, (int)(_scrollOffsetY / RowHeight) - 2) : 0;
             double vpWidth = TableScrollViewer.ViewportWidth > 0 ? TableScrollViewer.ViewportWidth : TableScrollViewer.ActualWidth;
@@ -1005,7 +1043,7 @@ namespace DataSphere.Controls.VirtualTable
         /// </summary>
         private void OnViewportPointerPressed(object sender, PointerRoutedEventArgs e)
         {
-            var point = e.GetCurrentPoint(VirtualCanvas).Position;
+            var point = e.GetCurrentPoint(VirtualScrollHost).Position;
             int totalRows = DataProvider?.RowCount ?? 0;
             int hitRow = RowHeight > 0 ? (int)(point.Y / RowHeight) : -1;
 
@@ -1044,7 +1082,7 @@ namespace DataSphere.Controls.VirtualTable
         /// </summary>
         private void OnViewportPointerMoved(object sender, PointerRoutedEventArgs e)
         {
-            var point = e.GetCurrentPoint(VirtualCanvas).Position;
+            var point = e.GetCurrentPoint(VirtualScrollHost).Position;
             int totalRows = DataProvider?.RowCount ?? 0;
             int hitRow = RowHeight > 0 ? (int)(point.Y / RowHeight) : -1;
 

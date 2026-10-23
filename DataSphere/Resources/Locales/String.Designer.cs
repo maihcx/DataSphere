@@ -61,6 +61,87 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Acrylic (Frosted Glass).
+        /// </summary>
+        internal static string backdrop_acrylic {
+            get {
+                return ResourceManager.GetString("backdrop_acrylic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mica (Standard).
+        /// </summary>
+        internal static string backdrop_mica {
+            get {
+                return ResourceManager.GetString("backdrop_mica", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Solid.
+        /// </summary>
+        internal static string backdrop_solid {
+            get {
+                return ResourceManager.GetString("backdrop_solid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tabbed (Mica Alt).
+        /// </summary>
+        internal static string backdrop_tabbed {
+            get {
+                return ResourceManager.GetString("backdrop_tabbed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Commit.
+        /// </summary>
+        internal static string btn_commit_changes {
+            get {
+                return ResourceManager.GetString("btn_commit_changes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discard.
+        /// </summary>
+        internal static string btn_discard_changes {
+            get {
+                return ResourceManager.GetString("btn_discard_changes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New Connection.
+        /// </summary>
+        internal static string btn_new_connection {
+            get {
+                return ResourceManager.GetString("btn_new_connection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Refresh.
+        /// </summary>
+        internal static string btn_refresh_table {
+            get {
+                return ResourceManager.GetString("btn_refresh_table", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test Connection.
+        /// </summary>
+        internal static string btn_test_connection {
+            get {
+                return ResourceManager.GetString("btn_test_connection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to close_title.
         /// </summary>
         internal static string close_title {
@@ -394,11 +475,182 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to delete &apos;{0}&apos;?.
+        /// </summary>
+        internal static string dialog_delete_connection_message {
+            get {
+                return ResourceManager.GetString("dialog_delete_connection_message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Connection.
+        /// </summary>
+        internal static string dialog_delete_connection_title {
+            get {
+                return ResourceManager.GetString("dialog_delete_connection_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have uncommitted modifications. Do you want to commit or discard them before proceeding?.
+        /// </summary>
+        internal static string dialog_uncommitted_changes_message {
+            get {
+                return ResourceManager.GetString("dialog_uncommitted_changes_message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uncommitted Changes.
+        /// </summary>
+        internal static string dialog_uncommitted_changes_title {
+            get {
+                return ResourceManager.GetString("dialog_uncommitted_changes_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host is required.
+        /// </summary>
+        internal static string err_host_required {
+            get {
+                return ResourceManager.GetString("err_host_required", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connection name is required.
+        /// </summary>
+        internal static string err_name_required {
+            get {
+                return ResourceManager.GetString("err_name_required", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to err_table_exist_params.
         /// </summary>
         internal static string err_table_exist_params {
             get {
                 return ResourceManager.GetString("err_table_exist_params", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username is required.
+        /// </summary>
+        internal static string err_user_required {
+            get {
+                return ResourceManager.GetString("err_user_required", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Character Set.
+        /// </summary>
+        internal static string lbl_charset {
+            get {
+                return ResourceManager.GetString("lbl_charset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Collation.
+        /// </summary>
+        internal static string lbl_collation {
+            get {
+                return ResourceManager.GetString("lbl_collation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default Database.
+        /// </summary>
+        internal static string lbl_connection_database {
+            get {
+                return ResourceManager.GetString("lbl_connection_database", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Database Type.
+        /// </summary>
+        internal static string lbl_database_type {
+            get {
+                return ResourceManager.GetString("lbl_database_type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading table data....
+        /// </summary>
+        internal static string lbl_loading_data {
+            get {
+                return ResourceManager.GetString("lbl_loading_data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Optional.
+        /// </summary>
+        internal static string lbl_optional {
+            get {
+                return ResourceManager.GetString("lbl_optional", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Total records: {0}.
+        /// </summary>
+        internal static string lbl_total_records {
+            get {
+                return ResourceManager.GetString("lbl_total_records", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Changes committed successfully.
+        /// </summary>
+        internal static string msg_commit_success {
+            get {
+                return ResourceManager.GetString("msg_commit_success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In-place editing is disabled because this table has no primary key.
+        /// </summary>
+        internal static string msg_no_primary_key_edit_disabled {
+            get {
+                return ResourceManager.GetString("msg_no_primary_key_edit_disabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connection failed: {0}.
+        /// </summary>
+        internal static string msg_test_connection_failed {
+            get {
+                return ResourceManager.GetString("msg_test_connection_failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connection successful!.
+        /// </summary>
+        internal static string msg_test_connection_success {
+            get {
+                return ResourceManager.GetString("msg_test_connection_success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PostgreSQL server reachable on port {0}. Full query engine integration in progress..
+        /// </summary>
+        internal static string msg_test_pg_socket {
+            get {
+                return ResourceManager.GetString("msg_test_pg_socket", resourceCulture);
             }
         }
         
@@ -457,6 +709,60 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select a connection or configure database server access settings..
+        /// </summary>
+        internal static string page_db_conn_list_desc {
+            get {
+                return ResourceManager.GetString("page_db_conn_list_desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connection Sessions.
+        /// </summary>
+        internal static string page_db_conn_list_title {
+            get {
+                return ResourceManager.GetString("page_db_conn_list_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use high-performance MySqlConnector to securely connect to MySQL/MariaDB servers.
+        /// </summary>
+        internal static string page_db_ready_desc {
+            get {
+                return ResourceManager.GetString("page_db_ready_desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ready for Database Connections.
+        /// </summary>
+        internal static string page_db_ready_title {
+            get {
+                return ResourceManager.GetString("page_db_ready_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select a table in the explorer to browse its records.
+        /// </summary>
+        internal static string page_db_select_table_hint {
+            get {
+                return ResourceManager.GetString("page_db_select_table_hint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manage MySQL and MariaDB server connections.
+        /// </summary>
+        internal static string page_db_subtitle {
+            get {
+                return ResourceManager.GetString("page_db_subtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to page_db_summary.
         /// </summary>
         internal static string page_db_summary {
@@ -471,6 +777,42 @@ namespace DataSphere.Resources.Locales {
         internal static string page_db_title {
             get {
                 return ResourceManager.GetString("page_db_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Modern database management system featuring high-performance multi-tab and multi-window navigation.
+        /// </summary>
+        internal static string page_home_banner_desc {
+            get {
+                return ResourceManager.GetString("page_home_banner_desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manage connection sessions, table schemas, and SQL queries.
+        /// </summary>
+        internal static string page_home_card_database_desc {
+            get {
+                return ResourceManager.GetString("page_home_card_database_desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customize display themes, UI language, and application information.
+        /// </summary>
+        internal static string page_home_card_settings_desc {
+            get {
+                return ResourceManager.GetString("page_home_card_settings_desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Main Modules.
+        /// </summary>
+        internal static string page_home_sections_title {
+            get {
+                return ResourceManager.GetString("page_home_sections_title", resourceCulture);
             }
         }
         
@@ -534,6 +876,24 @@ namespace DataSphere.Resources.Locales {
         internal static string page_settings_auto_hide_nav_title {
             get {
                 return ResourceManager.GetString("page_settings_auto_hide_nav_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select Windows system backdrop material (Mica, Tabbed, Acrylic, Solid).
+        /// </summary>
+        internal static string page_settings_backdrop_summary {
+            get {
+                return ResourceManager.GetString("page_settings_backdrop_summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backdrop Material.
+        /// </summary>
+        internal static string page_settings_backdrop_title {
+            get {
+                return ResourceManager.GetString("page_settings_backdrop_title", resourceCulture);
             }
         }
         
@@ -610,6 +970,15 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Performance &amp; Memory.
+        /// </summary>
+        internal static string page_settings_performance_title {
+            get {
+                return ResourceManager.GetString("page_settings_performance_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to page_settings_personalization_title.
         /// </summary>
         internal static string page_settings_personalization_title {
@@ -628,11 +997,74 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Automatically suspend idle background tabs to free memory, restoring them seamlessly when selected.
+        /// </summary>
+        internal static string page_settings_tab_memory_saver_summary {
+            get {
+                return ResourceManager.GetString("page_settings_tab_memory_saver_summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tab Memory Saver.
+        /// </summary>
+        internal static string page_settings_tab_memory_saver_title {
+            get {
+                return ResourceManager.GetString("page_settings_tab_memory_saver_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Put background tabs to sleep after being idle for this duration.
+        /// </summary>
+        internal static string page_settings_tab_sleep_timeout_summary {
+            get {
+                return ResourceManager.GetString("page_settings_tab_sleep_timeout_summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Inactive Tab Timeout.
+        /// </summary>
+        internal static string page_settings_tab_sleep_timeout_title {
+            get {
+                return ResourceManager.GetString("page_settings_tab_sleep_timeout_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to page_settings_title.
         /// </summary>
         internal static string page_settings_title {
             get {
                 return ResourceManager.GetString("page_settings_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Infinity.
+        /// </summary>
+        internal static string pagination_infinity {
+            get {
+                return ResourceManager.GetString("pagination_infinity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Page {0} of {1} ({2} records).
+        /// </summary>
+        internal static string pagination_page_info {
+            get {
+                return ResourceManager.GetString("pagination_page_info", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rows per page:.
+        /// </summary>
+        internal static string pagination_rows_per_page {
+            get {
+                return ResourceManager.GetString("pagination_rows_per_page", resourceCulture);
             }
         }
         
@@ -646,11 +1078,137 @@ namespace DataSphere.Resources.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connecting....
+        /// </summary>
+        internal static string status_connecting {
+            get {
+                return ResourceManager.GetString("status_connecting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Testing connection....
+        /// </summary>
+        internal static string status_testing {
+            get {
+                return ResourceManager.GetString("status_testing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to sys_need_restart_app_summary.
         /// </summary>
         internal static string sys_need_restart_app_summary {
             get {
                 return ResourceManager.GetString("sys_need_restart_app_summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connections.
+        /// </summary>
+        internal static string tab_connections_header {
+            get {
+                return ResourceManager.GetString("tab_connections_header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 15 minutes (Default).
+        /// </summary>
+        internal static string tab_sleep_timeout_15m {
+            get {
+                return ResourceManager.GetString("tab_sleep_timeout_15m", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1 minutes.
+        /// </summary>
+        internal static string tab_sleep_timeout_1m {
+            get {
+                return ResourceManager.GetString("tab_sleep_timeout_1m", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 30 minutes.
+        /// </summary>
+        internal static string tab_sleep_timeout_30m {
+            get {
+                return ResourceManager.GetString("tab_sleep_timeout_30m", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 5 minutes.
+        /// </summary>
+        internal static string tab_sleep_timeout_5m {
+            get {
+                return ResourceManager.GetString("tab_sleep_timeout_5m", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1 hour.
+        /// </summary>
+        internal static string tab_sleep_timeout_60m {
+            get {
+                return ResourceManager.GetString("tab_sleep_timeout_60m", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sleeping (memory freed) — click to wake up.
+        /// </summary>
+        internal static string tab_sleeping_badge_tooltip {
+            get {
+                return ResourceManager.GetString("tab_sleeping_badge_tooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dark.
+        /// </summary>
+        internal static string theme_dark {
+            get {
+                return ResourceManager.GetString("theme_dark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to System Default.
+        /// </summary>
+        internal static string theme_default {
+            get {
+                return ResourceManager.GetString("theme_default", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Light.
+        /// </summary>
+        internal static string theme_light {
+            get {
+                return ResourceManager.GetString("theme_light", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Commit pending cell modifications to database.
+        /// </summary>
+        internal static string tooltip_commit_changes {
+            get {
+                return ResourceManager.GetString("tooltip_commit_changes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discard pending modifications and restore original values.
+        /// </summary>
+        internal static string tooltip_discard_changes {
+            get {
+                return ResourceManager.GetString("tooltip_discard_changes", resourceCulture);
             }
         }
         

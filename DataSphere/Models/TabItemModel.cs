@@ -54,13 +54,50 @@ namespace DataSphere.Models
         /// Gets or sets a value indicating whether the tab close button is enabled and interactive.
         /// </summary>
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanSleep))]
         public partial bool IsClosable { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether this tab is currently selected in the host window.
         /// </summary>
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanSleep))]
         public partial bool IsSelected { get; set; }
+
+        /// <summary>
+        /// Gets or sets the UTC timestamp when this tab was last activated or interacted with.
+        /// </summary>
+        [ObservableProperty]
+        public partial DateTime LastActiveTime { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this tab is in the sleeping state to conserve memory.
+        /// </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanSleep))]
+        [NotifyPropertyChangedFor(nameof(SleepingOpacity))]
+        public partial bool IsSleeping { get; set; }
+
+        /// <summary>
+        /// Gets the visual opacity for this tab header, slightly muted when sleeping to visually indicate low-power state.
+        /// </summary>
+        public double SleepingOpacity => IsSleeping ? 0.65 : 1.0;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this tab contains uncommitted or unsaved modifications.
+        /// </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanSleep))]
+        public partial bool HasUnsavedChanges { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this tab is eligible to enter the sleeping state.
+        /// </summary>
+        public bool CanSleep => IsClosable &&
+                                PageType?.Name != "HomePage" &&
+                                !HasUnsavedChanges &&
+                                !IsSelected &&
+                                (Content is not Services.Contracts.ISleepableTabContent sleepable || sleepable.CanSleep);
 
         /// <summary>
         /// Gets or sets the current lifecycle state of this tab.
@@ -96,6 +133,37 @@ namespace DataSphere.Models
             UpdateFormattedTitle();
         }
 
+        partial void OnIsSelectedChanged(bool value)
+        {
+            if (value)
+            {
+                LastActiveTime = DateTime.UtcNow;
+                if (State != TabLifecycleState.Closing && State != TabLifecycleState.Disposed)
+                {
+                    State = TabLifecycleState.Active;
+                }
+            }
+            else
+            {
+                if (State == TabLifecycleState.Active)
+                {
+                    State = IsSleeping ? TabLifecycleState.Sleeping : TabLifecycleState.Background;
+                }
+            }
+        }
+
+        partial void OnIsSleepingChanged(bool value)
+        {
+            if (value && State != TabLifecycleState.Closing && State != TabLifecycleState.Disposed)
+            {
+                State = TabLifecycleState.Sleeping;
+            }
+            else if (!value && State == TabLifecycleState.Sleeping)
+            {
+                State = IsSelected ? TabLifecycleState.Active : TabLifecycleState.Background;
+            }
+        }
+
         private void UpdateFormattedTitle()
         {
             if (!string.IsNullOrEmpty(TitleKey))
@@ -104,6 +172,12 @@ namespace DataSphere.Models
                 Title = InstanceIndex > 1 ? $"{baseText} ({InstanceIndex})" : baseText;
             }
         }
+
+        /// <summary>
+        /// Returns the display title for this tab instance.
+        /// </summary>
+        /// <returns>The tab header title string.</returns>
+        public override string ToString() => Title;
 
         /// <summary>
         /// Releases managed event handlers and associated content resources.

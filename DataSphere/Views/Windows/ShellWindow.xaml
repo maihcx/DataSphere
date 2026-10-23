@@ -5,6 +5,7 @@
                 xmlns:winex="using:WinUIEx"
                 xmlns:models="using:DataSphere.Models"
                 xmlns:vm="using:DataSphere.ViewModels.Windows"
+                xmlns:controls="using:DataSphere.Controls"
                 Title="DataSphere"
                 Width="1280"
                 Height="800"
@@ -18,9 +19,24 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <!-- Sliding Tab Selection Background Layer (Behind TabView) -->
+        <Canvas x:Name="ShellTabBackgroundCanvas"
+                Grid.Row="0"
+                IsHitTestVisible="False">
+            <Border x:Name="ShellTabCapsule"
+                    CornerRadius="6"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    Opacity="0"
+                    IsHitTestVisible="False" />
+        </Canvas>
+
         <!-- Chrome Browser-style TabView Strip in TitleBar -->
         <TabView x:Name="ShellTabView"
                  Grid.Row="0"
+                 controls:SlidingTabIndicatorBehavior.IsEnabled="True"
+                 controls:SlidingTabIndicatorBehavior.BackgroundCapsule="{x:Bind ShellTabCapsule}"
                  Background="Transparent"
                  BorderThickness="0"
                  BorderBrush="Transparent"
@@ -92,8 +108,10 @@
         </TabView>
 
         <!-- Main Viewport Content Presenter -->
-        <ContentPresenter Grid.Row="1"
+        <controls:CachedContentControl Grid.Row="1"
+                          IsTransitionEnabled="True"
                           Background="Transparent"
+                          SelectedIndex="{x:Bind ViewModel.EffectiveTabIndex, Mode=OneWay}"
                           Content="{x:Bind ViewModel.ActiveViewportContent, Mode=OneWay}"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"

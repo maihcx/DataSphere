@@ -12,9 +12,11 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
     /// ViewModel for the Database management workspace page, governing the inner TabView strip.
     /// Anchors the permanent Connection catalog explorer in TabStripHeader and hosts open database sessions as dynamic tabs.
     /// </summary>
-    public partial class DatabaseViewModel : ObservableObject
+    public partial class DatabaseViewModel : ObservableObject, IDisposable
     {
         private readonly IDialogService _dialogService;
+        private readonly System.ComponentModel.PropertyChangedEventHandler _translationHandler;
+        private bool _disposed;
 
         /// <summary>
         /// Gets the ViewModel driving the connection explorer tree.
@@ -37,6 +39,7 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
         /// Mutual exclusion: setting this to true deselects <see cref="SelectedInnerTab"/>.
         /// </summary>
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(EffectiveTabIndex))]
         [NotifyPropertyChangedFor(nameof(ActiveInnerContent))]
         public partial bool IsConnectionSelected { get; set; } = true;
 
@@ -45,8 +48,15 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
         /// Mutual exclusion: setting this to a non-null tab sets <see cref="IsConnectionSelected"/> to false.
         /// </summary>
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(EffectiveTabIndex))]
         [NotifyPropertyChangedFor(nameof(ActiveInnerContent))]
         public partial InnerTabItemModel? SelectedInnerTab { get; set; }
+
+        /// <summary>
+        /// Gets the zero-based effective index of the currently active tab (0 for Connection tab, 1+ for dynamic workspace tabs).
+        /// Used by the viewport host to calculate directional horizontal transition animations.
+        /// </summary>
+        public int EffectiveTabIndex => IsConnectionSelected ? 0 : (SelectedInnerTab != null ? InnerTabs.IndexOf(SelectedInnerTab) + 1 : 0);
 
         /// <summary>
         /// Gets the active content for the viewport ContentControl.
@@ -70,7 +80,8 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
 
             ConnectionTab = CreateConnectionTab();
 
-            TranslationSource.Instance.PropertyChanged += (s, e) => UpdateLocalizedStrings();
+            _translationHandler = (s, e) => UpdateLocalizedStrings();
+            TranslationSource.Instance.PropertyChanged += _translationHandler;
         }
 
         private InnerTabItemModel CreateConnectionTab()
@@ -120,6 +131,7 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
         {
             IsConnectionSelected = true;
             SelectedInnerTab = null;
+            OnPropertyChanged(nameof(EffectiveTabIndex));
             OnPropertyChanged(nameof(ActiveInnerContent));
         }
 
@@ -188,7 +200,7 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
 
             bool wasSelected = Equals(SelectedInnerTab, tab);
 
-            tab.DisposableContext?.Dispose();
+            tab.Dispose();
             InnerTabs.RemoveAt(index);
 
             if (wasSelected)
@@ -203,6 +215,27 @@ namespace DataSphere.ViewModels.Pages.DatabaseGroup
                     SelectConnection();
                 }
             }
+        }
+
+        /// <summary>
+        /// Disposes all open inner database sessions, the anchored connection explorer tab, and unhooks global event listeners.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+
+            TranslationSource.Instance.PropertyChanged -= _translationHandler;
+
+            foreach (var tab in InnerTabs)
+            {
+                tab.Dispose();
+            }
+            InnerTabs.Clear();
+            ConnectionTab?.Dispose();
+            SelectedInnerTab = null;
+
+            GC.SuppressFinalize(this);
         }
     }
 }

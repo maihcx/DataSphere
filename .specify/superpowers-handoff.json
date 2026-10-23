@@ -1,12 +1,12 @@
 ﻿{
     "schema_version":  1,
-    "updated_at":  "2026-10-22T04:49:51.7933001Z",
-    "feature_directory":  "specs/015-surface-brush-contrast",
+    "updated_at":  "2026-10-23T08:09:05.5499764Z",
+    "feature_directory":  "specs/018-tab-motion-and-indicator",
     "source_of_truth":  {
                             "constitution":  ".specify/memory/constitution.md",
-                            "spec":  "specs/015-surface-brush-contrast/spec.md",
-                            "plan":  "specs/015-surface-brush-contrast/plan.md",
-                            "tasks":  "specs/015-surface-brush-contrast/tasks.md"
+                            "spec":  "specs/018-tab-motion-and-indicator/spec.md",
+                            "plan":  "specs/018-tab-motion-and-indicator/plan.md",
+                            "tasks":  "specs/018-tab-motion-and-indicator/tasks.md"
                         },
     "supersedes":  [
                        "speckit.implement"
@@ -26,11 +26,11 @@
 
                            ],
     "notes":  null,
-    "last_snapshot_id":  "20261022T0449517852996Z-complete",
+    "last_snapshot_id":  "20261023T0809055410488Z-complete",
     "instructions":  "Use /speckit-superpowers-bridge (Claude Code) or $speckit-superpowers-bridge (Codex). The bridge orchestrates native Superpowers skills against tasks.md; do not run speckit.implement and do not invoke superpowers:writing-plans / :brainstorming for an active Spec Kit feature.",
     "artifacts_sha256":  {
-                             "spec.md":  "8d28698238d25edb38b224920cdff56073b507da234cbc303b099d23e9ac5940",
-                             "plan.md":  "9f91822afa774d5080b95093f5602bb73ecc1f75bab28184e3e684de87c20ac9",
-                             "tasks.md":  "bf53e51f155af5acc5a15b0c264493cf7eb37f6d7b7805b8b019271460d19674"
+                             "spec.md":  "b65c0a34abde28a5e4f34aeec5147fdc28d8a2e8651e91e0c92d3719b790ed04",
+                             "plan.md":  "2bc969c8a5a84b4e62164f617fc86bbcf7ff90de5ee6b4b257ca450d87f5a19b",
+                             "tasks.md":  "baaeddf59a73d2c573a0d7a93b45998b39fedeffd673f0035a4ea6d8c2d7502b"
                          }
 }
