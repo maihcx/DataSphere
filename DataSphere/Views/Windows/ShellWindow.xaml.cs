@@ -1,4 +1,4 @@
-﻿using Windows.ApplicationModel.DataTransfer;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using System.Runtime.InteropServices;
 using Microsoft.UI;
@@ -6,6 +6,8 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Media.Imaging;
 using WinUIEx;
 using DataSphere.Controls;
 using DataSphere.Models;
@@ -24,6 +26,7 @@ namespace DataSphere.Views.Windows
         private readonly IWindowManager _windowManager;
         private readonly IThemeService _themeService;
         private WindowSession? _session;
+        private Storyboard? _activeTransitionStoryboard;
 
         /// <summary>
         /// Gets the Presentation ViewModel coordinating this shell window.
@@ -128,6 +131,7 @@ namespace DataSphere.Views.Windows
 
             Closed += (sender, args) =>
             {
+                CancelActiveTransition();
                 _themeService.ThemeChanged -= OnThemeChanged;
                 _themeService.BackdropChanged -= OnBackdropChanged;
                 if (_session != null && _session.IsPrimary)
@@ -139,21 +143,157 @@ namespace DataSphere.Views.Windows
             _windowManager.RegisterWindow(_session);
         }
 
-        private void OnThemeChanged(object? sender, string theme)
+        /// <summary>
+        /// Cancels and cleans up any currently active theme or backdrop transition storyboard and overlay state.
+        /// </summary>
+        private void CancelActiveTransition()
         {
-            DispatcherQueue?.TryEnqueue(() =>
+            if (_activeTransitionStoryboard != null)
             {
-                _themeService.ApplyThemeAndBackdrop(this);
-            });
+                _activeTransitionStoryboard.Stop();
+                _activeTransitionStoryboard = null;
+            }
+
+            if (ThemeTransitionOverlay != null)
+            {
+                ThemeTransitionOverlay.Visibility = Visibility.Collapsed;
+            }
+
+            if (ThemeTransitionImage != null)
+            {
+                ThemeTransitionImage.Source = null;
+            }
         }
 
-        private void OnBackdropChanged(object? sender, string backdrop)
+        /// <summary>
+        /// Performs a smooth Fluent cross-fade transition between the current visual appearance and the updated theme.
+        /// </summary>
+        /// <returns>A task representing the asynchronous transition operation.</returns>
+        private async Task TransitionThemeAsync()
         {
-            DispatcherQueue?.TryEnqueue(() =>
+            if (WindowRoot == null || WindowRoot.ActualWidth <= 0 || WindowRoot.ActualHeight <= 0)
             {
                 _themeService.ApplyThemeAndBackdrop(this);
-            });
+                return;
+            }
+
+            try
+            {
+                CancelActiveTransition();
+
+                // 1. Capture snapshot of the current window visual tree before theme change
+                var renderBitmap = new RenderTargetBitmap();
+                await renderBitmap.RenderAsync(WindowRoot);
+
+                ThemeTransitionImage.Source = renderBitmap;
+                ThemeTransitionOverlay.Opacity = 1.0;
+                ThemeTransitionOverlay.Visibility = Visibility.Visible;
+
+                // 2. Apply the new theme (swaps all ThemeResources behind the snapshot overlay)
+                _themeService.ApplyThemeAndBackdrop(this);
+
+                // 3. Smoothly fade out the snapshot overlay over 250ms with Fluent CubicEase
+                var storyboard = new Storyboard();
+                var fadeAnimation = new DoubleAnimation
+                {
+                    From = 1.0,
+                    To = 0.0,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(250)),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+                };
+
+                Storyboard.SetTarget(fadeAnimation, ThemeTransitionOverlay);
+                Storyboard.SetTargetProperty(fadeAnimation, "Opacity");
+                storyboard.Children.Add(fadeAnimation);
+
+                storyboard.Completed += (s, e) =>
+                {
+                    ThemeTransitionOverlay.Visibility = Visibility.Collapsed;
+                    ThemeTransitionImage.Source = null;
+                    _activeTransitionStoryboard = null;
+                };
+
+                _activeTransitionStoryboard = storyboard;
+                storyboard.Begin();
+            }
+            catch (Exception)
+            {
+                CancelActiveTransition();
+                _themeService.ApplyThemeAndBackdrop(this);
+            }
         }
+
+        /// <summary>
+        /// Performs a smooth Fluent cross-fade transition when updating the active system backdrop material.
+        /// </summary>
+        /// <returns>A task representing the asynchronous transition operation.</returns>
+        private async Task TransitionBackdropAsync()
+        {
+            if (WindowRoot == null || WindowRoot.ActualWidth <= 0 || WindowRoot.ActualHeight <= 0)
+            {
+                _themeService.ApplyThemeAndBackdrop(this);
+                return;
+            }
+
+            try
+            {
+                CancelActiveTransition();
+
+                // 1. Capture snapshot of current visual tree
+                var renderBitmap = new RenderTargetBitmap();
+                await renderBitmap.RenderAsync(WindowRoot);
+
+                ThemeTransitionImage.Source = renderBitmap;
+                ThemeTransitionOverlay.Opacity = 1.0;
+                ThemeTransitionOverlay.Visibility = Visibility.Visible;
+
+                // 2. Apply the updated backdrop material
+                _themeService.ApplyThemeAndBackdrop(this);
+
+                // 3. Smoothly fade out the snapshot overlay over 300ms with Fluent CubicEase
+                var storyboard = new Storyboard();
+                var fadeAnimation = new DoubleAnimation
+                {
+                    From = 1.0,
+                    To = 0.0,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(300)),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+                };
+
+                Storyboard.SetTarget(fadeAnimation, ThemeTransitionOverlay);
+                Storyboard.SetTargetProperty(fadeAnimation, "Opacity");
+                storyboard.Children.Add(fadeAnimation);
+
+                storyboard.Completed += (s, e) =>
+                {
+                    ThemeTransitionOverlay.Visibility = Visibility.Collapsed;
+                    ThemeTransitionImage.Source = null;
+                    _activeTransitionStoryboard = null;
+                };
+
+                _activeTransitionStoryboard = storyboard;
+                storyboard.Begin();
+            }
+            catch (Exception)
+            {
+                CancelActiveTransition();
+                _themeService.ApplyThemeAndBackdrop(this);
+            }
+        }
+
+        /// <summary>
+        /// Handles the ThemeChanged event by initiating a smooth snapshot cross-fade transition.
+        /// </summary>
+        /// <param name="sender">The event source.</param>
+        /// <param name="theme">The new theme string.</param>
+        private void OnThemeChanged(object? sender, string theme) => DispatcherQueue?.TryEnqueue(async () => await TransitionThemeAsync());
+
+        /// <summary>
+        /// Handles the BackdropChanged event by initiating a smooth snapshot cross-fade transition.
+        /// </summary>
+        /// <param name="sender">The event source.</param>
+        /// <param name="backdrop">The new backdrop material string.</param>
+        private void OnBackdropChanged(object? sender, string backdrop) => DispatcherQueue?.TryEnqueue(async () => await TransitionBackdropAsync());
 
         /// <summary>
         /// Handles the Tapped event on the anchored Home TabViewItem to select Home.

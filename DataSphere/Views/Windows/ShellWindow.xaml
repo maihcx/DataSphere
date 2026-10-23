@@ -117,5 +117,20 @@
                           VerticalAlignment="Stretch"
                           Margin="5 0 5 5"
                           CornerRadius="6"/>
+
+        <!-- Fluent Theme & Backdrop Transition Snapshot Overlay -->
+        <Border x:Name="ThemeTransitionOverlay"
+                Grid.Row="0"
+                Grid.RowSpan="2"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                IsHitTestVisible="False"
+                Visibility="Collapsed"
+                Opacity="1.0">
+            <Image x:Name="ThemeTransitionImage"
+                   Stretch="Fill"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch" />
+        </Border>
     </Grid>
 </winex:WindowEx>

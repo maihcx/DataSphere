@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Media;
 using DataSphere.Models;
 using DataSphere.Services.Contracts;
 using DataSphere.Utils;
+using DataSphere.Views.Windows;
 
 namespace DataSphere.Services
 {
@@ -125,7 +126,8 @@ namespace DataSphere.Services
             {
                 foreach (var session in windowManager.Windows)
                 {
-                    if (session.WindowInstance != null)
+                    // ShellWindow handles its own theme transition with snapshot cross-fade on ThemeChanged
+                    if (session.WindowInstance != null && session.WindowInstance is not ShellWindow)
                     {
                         ApplyThemeAndBackdrop(session.WindowInstance);
                     }
@@ -173,7 +175,8 @@ namespace DataSphere.Services
             {
                 foreach (var session in windowManager.Windows)
                 {
-                    if (session.WindowInstance != null)
+                    // ShellWindow handles its own backdrop transition with snapshot cross-fade on BackdropChanged
+                    if (session.WindowInstance != null && session.WindowInstance is not ShellWindow)
                     {
                         ApplyThemeAndBackdrop(session.WindowInstance);
                     }
@@ -236,21 +239,24 @@ namespace DataSphere.Services
                     }
                 }
 
-                switch (_currentBackdrop)
+                if (!IsBackdropMatching(win.SystemBackdrop, _currentBackdrop))
                 {
-                    case "Mica":
-                        win.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.Base };
-                        break;
-                    case "Tabbed":
-                        win.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
-                        break;
-                    case "Acrylic":
-                        win.SystemBackdrop = new DesktopAcrylicBackdrop();
-                        break;
-                    case "Solid":
-                    default:
-                        win.SystemBackdrop = null;
-                        break;
+                    switch (_currentBackdrop)
+                    {
+                        case "Mica":
+                            win.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.Base };
+                            break;
+                        case "Tabbed":
+                            win.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
+                            break;
+                        case "Acrylic":
+                            win.SystemBackdrop = new DesktopAcrylicBackdrop();
+                            break;
+                        case "Solid":
+                        default:
+                            win.SystemBackdrop = null;
+                            break;
+                    }
                 }
 
                 if (win.Content is Panel rootPanel)
@@ -275,9 +281,43 @@ namespace DataSphere.Services
         }
 
         /// <summary>
+        /// Determines whether the active system backdrop on a window matches the target backdrop configuration.
+        /// </summary>
+        /// <param name="currentBackdrop">The current backdrop instance on the window.</param>
+        /// <param name="targetBackdropType">The target backdrop configuration name.</param>
+        /// <returns><c>true</c> if the backdrop already matches the target type; otherwise, <c>false</c>.</returns>
+        private static bool IsBackdropMatching(Microsoft.UI.Xaml.Media.SystemBackdrop? currentBackdrop, string targetBackdropType)
+        {
+            if (currentBackdrop == null)
+            {
+                return string.Equals(targetBackdropType, "Solid", StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (currentBackdrop is MicaBackdrop mica)
+            {
+                if (string.Equals(targetBackdropType, "Mica", StringComparison.OrdinalIgnoreCase))
+                {
+                    return mica.Kind == MicaKind.Base;
+                }
+                if (string.Equals(targetBackdropType, "Tabbed", StringComparison.OrdinalIgnoreCase))
+                {
+                    return mica.Kind == MicaKind.BaseAlt;
+                }
+                return false;
+            }
+
+            if (currentBackdrop is DesktopAcrylicBackdrop)
+            {
+                return string.Equals(targetBackdropType, "Acrylic", StringComparison.OrdinalIgnoreCase);
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Applies the current theme to a ContentDialog.
         /// </summary>
-        /// <param name="dialog"></param>
+        /// <param name="dialog">The ContentDialog to theme.</param>
         public void ApplyThemeToDialog(ContentDialog dialog)
         {
             if (dialog == null) return;
