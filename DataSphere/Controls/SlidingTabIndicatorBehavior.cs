@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="SlidingTabIndicatorBehavior.cs" company="DataSphere">
 //   Copyright (c) DataSphere. All rights reserved.
 // </copyright>
@@ -438,30 +438,183 @@ namespace DataSphere.Controls
             }
         }
 
+        /// <summary>
+        /// Locates the active and visible <see cref="TabViewItem"/> container corresponding to the currently selected tab.
+        /// </summary>
+        /// <param name="tabView">The host <see cref="TabView"/> control.</param>
+        /// <returns>The active and measured <see cref="TabViewItem"/>, or <c>null</c> if the container has not been realized yet.</returns>
         private static TabViewItem? FindActiveTabViewItem(TabView tabView)
         {
-            if (tabView.SelectedItem != null)
+            object? selectedItem = tabView.SelectedItem;
+
+            if (selectedItem != null)
             {
-                if (tabView.SelectedItem is TabViewItem directItem)
+                // 1. Direct TabViewItem element
+                if (selectedItem is TabViewItem directItem && IsValidOnScreenTabItem(tabView, directItem, selectedItem))
                 {
                     return directItem;
                 }
 
-                if (tabView.ContainerFromItem(tabView.SelectedItem) is TabViewItem container)
+                // 2. WinUI ContainerFromItem lookup
+                if (tabView.ContainerFromItem(selectedItem) is TabViewItem container && IsValidOnScreenTabItem(tabView, container, selectedItem))
                 {
                     return container;
                 }
+
+                // 3. WinUI ContainerFromIndex lookup (only when container corresponds to selectedItem)
+                if (tabView.SelectedIndex >= 0 && tabView.ContainerFromIndex(tabView.SelectedIndex) is TabViewItem indexContainer)
+                {
+                    if (IsValidOnScreenTabItem(tabView, indexContainer, selectedItem))
+                    {
+                        return indexContainer;
+                    }
+                }
+
+                // 4. Search visual tree specifically for the container matching selectedItem
+                TabViewItem? treeItem = FindMatchingTabViewItemInTree(tabView, selectedItem);
+                if (treeItem != null && IsValidOnScreenTabItem(tabView, treeItem, selectedItem))
+                {
+                    return treeItem;
+                }
+
+                // The container for the selected item has not finished realizing or measuring yet.
+                return null;
             }
 
-            if (tabView.SelectedIndex >= 0 && tabView.ContainerFromIndex(tabView.SelectedIndex) is TabViewItem indexContainer)
+            // Fallback when SelectedItem is null: search TabStripHeader for anchored header tab (Home or Connection)
+            if (tabView.TabStripHeader is DependencyObject headerRoot)
             {
-                return indexContainer;
+                TabViewItem? headerTab = FindSelectedTabViewItemInTree(headerRoot);
+                if (headerTab != null && IsValidOnScreenTabItem(tabView, headerTab, null))
+                {
+                    return headerTab;
+                }
             }
 
-            // Fallback: search entire TabView visual tree (handles TabStripHeader items and deferred containers)
-            return FindSelectedTabViewItemInTree(tabView);
+            // General search in visual tree (discarding recycled/off-screen elements)
+            TabViewItem? candidate = FindSelectedTabViewItemInTree(tabView);
+            if (candidate != null && IsValidOnScreenTabItem(tabView, candidate, null))
+            {
+                return candidate;
+            }
+
+            return null;
         }
 
+        /// <summary>
+        /// Validates that a <see cref="TabViewItem"/> container is loaded, visible, measured, within visible bounds, and matches the expected item.
+        /// </summary>
+        /// <param name="tabView">The parent <see cref="TabView"/> control.</param>
+        /// <param name="item">The container item to validate.</param>
+        /// <param name="expectedItem">The expected data model or element, or <c>null</c> if validating anchored header tabs.</param>
+        /// <returns><c>true</c> if the container is an on-screen, valid visual target; otherwise <c>false</c>.</returns>
+        private static bool IsValidOnScreenTabItem(TabView tabView, TabViewItem item, object? expectedItem)
+        {
+            if (!item.IsLoaded || item.Visibility != Visibility.Visible || item.ActualWidth <= 4.0f)
+            {
+                return false;
+            }
+
+            try
+            {
+                GeneralTransform transform = item.TransformToVisual(tabView);
+                Point pt = transform.TransformPoint(new Point(0, 0));
+
+                // Discard off-screen or recycled items that WinUI virtualizes far away (e.g. at X = -14952)
+                if (pt.X < -50 || pt.X > tabView.ActualWidth + 500 || pt.Y < -50 || pt.Y > tabView.ActualHeight + 500)
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            if (expectedItem != null)
+            {
+                if (Equals(item, expectedItem) ||
+                    Equals(item.DataContext, expectedItem) ||
+                    Equals(item.Content, expectedItem))
+                {
+                    return true;
+                }
+
+                if (expectedItem is TabItemModel model)
+                {
+                    if (item.DataContext is TabItemModel itemModel && Equals(itemModel, model))
+                    {
+                        return true;
+                    }
+
+                    if (item.Header is string headerStr && !string.IsNullOrEmpty(headerStr))
+                    {
+                        if (headerStr == model.Title || (!string.IsNullOrEmpty(model.TitleKey) && headerStr == model.TitleKey))
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+            return item.IsSelected;
+        }
+
+        /// <summary>
+        /// Recursively searches the visual tree for a <see cref="TabViewItem"/> container that matches the specified item model.
+        /// </summary>
+        /// <param name="root">The root visual element to start searching from.</param>
+        /// <param name="expectedItem">The target item to find.</param>
+        /// <returns>The matching <see cref="TabViewItem"/>, or <c>null</c> if not found.</returns>
+        private static TabViewItem? FindMatchingTabViewItemInTree(DependencyObject root, object expectedItem)
+        {
+            if (root is TabViewItem item)
+            {
+                if (Equals(item, expectedItem) ||
+                    Equals(item.DataContext, expectedItem) ||
+                    Equals(item.Content, expectedItem))
+                {
+                    return item;
+                }
+
+                if (expectedItem is TabItemModel model)
+                {
+                    if (item.DataContext is TabItemModel itemModel && Equals(itemModel, model))
+                    {
+                        return item;
+                    }
+
+                    if (item.Header is string headerStr && !string.IsNullOrEmpty(headerStr))
+                    {
+                        if (headerStr == model.Title || (!string.IsNullOrEmpty(model.TitleKey) && headerStr == model.TitleKey))
+                        {
+                            return item;
+                        }
+                    }
+                }
+            }
+
+            int count = VisualTreeHelper.GetChildrenCount(root);
+            for (int i = 0; i < count; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(root, i);
+                TabViewItem? result = FindMatchingTabViewItemInTree(child, expectedItem);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Recursively searches the visual tree for any <see cref="TabViewItem"/> with <see cref="TabViewItem.IsSelected"/> set to <c>true</c>.
+        /// </summary>
+        /// <param name="root">The root visual element to start searching from.</param>
+        /// <returns>The selected <see cref="TabViewItem"/>, or <c>null</c> if not found.</returns>
         private static TabViewItem? FindSelectedTabViewItemInTree(DependencyObject root)
         {
             if (root is TabViewItem item && item.IsSelected)
@@ -483,6 +636,12 @@ namespace DataSphere.Controls
             return null;
         }
 
+        /// <summary>
+        /// Updates the position and dimensions of the accent pill indicator visual and background capsule.
+        /// </summary>
+        /// <param name="tabView">The host <see cref="TabView"/> control.</param>
+        /// <param name="animate"><c>true</c> to animate transition; otherwise <c>false</c>.</param>
+        /// <param name="retryCount">The current retry attempt count for deferred container generation.</param>
         private static void UpdateVisualsPosition(TabView tabView, bool animate, int retryCount = 0)
         {
             ShapeVisual? indicator = GetIndicatorVisual(tabView);
@@ -493,15 +652,16 @@ namespace DataSphere.Controls
             }
 
             TabViewItem? selectedTab = FindActiveTabViewItem(tabView);
-            if (selectedTab == null || !selectedTab.IsLoaded || selectedTab.ActualWidth <= 0)
+            if (selectedTab == null || !selectedTab.IsLoaded || selectedTab.ActualWidth <= 4.0f)
             {
                 indicator.IsVisible = false;
 
                 // Defer position calculation to next frame when container is generated and measured (capped to prevent infinite loop)
-                bool hasSelection = tabView.SelectedItem != null || tabView.SelectedIndex >= 0 || selectedTab != null;
-                if (hasSelection && retryCount < 4)
+                bool hasSelection = tabView.SelectedItem != null || tabView.SelectedIndex >= 0;
+                if (hasSelection && retryCount < 10)
                 {
-                    tabView.DispatcherQueue?.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                    DispatcherQueuePriority priority = retryCount < 2 ? DispatcherQueuePriority.Normal : DispatcherQueuePriority.Low;
+                    tabView.DispatcherQueue?.TryEnqueue(priority, () =>
                     {
                         if (tabView.IsLoaded)
                         {
