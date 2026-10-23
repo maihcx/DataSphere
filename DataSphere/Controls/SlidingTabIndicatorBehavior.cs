@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="SlidingTabIndicatorBehavior.cs" company="DataSphere">
 //   Copyright (c) DataSphere. All rights reserved.
 // </copyright>
@@ -8,7 +8,9 @@ namespace DataSphere.Controls
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.Specialized;
     using System.Numerics;
+    using System.Threading.Tasks;
     using Microsoft.UI.Composition;
     using Microsoft.UI.Dispatching;
     using Microsoft.UI.Xaml;
@@ -124,6 +126,24 @@ namespace DataSphere.Controls
             obj.SetValue(IsIndicatorVisibleProperty, value);
         }
 
+        /// <summary>
+        /// Explicitly triggers a position update and layout recalculation for the sliding tab indicator.
+        /// Useful when anchored header tabs (such as Home or Connection) change selection outside of TabItemsSource.
+        /// </summary>
+        /// <param name="tabView">The host <see cref="TabView"/> control.</param>
+        /// <param name="animate"><c>true</c> to animate transition; otherwise <c>false</c>.</param>
+        public static void UpdatePosition(TabView tabView, bool animate = true)
+        {
+            if (tabView != null && tabView.IsLoaded)
+            {
+                if (GetIndicatorVisual(tabView) == null)
+                {
+                    InitializeVisuals(tabView);
+                }
+                ScheduleTransitionSettleUpdates(tabView);
+            }
+        }
+
         private static void OnIsIndicatorVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TabView tabView)
@@ -135,6 +155,43 @@ namespace DataSphere.Controls
                 }
             }
         }
+
+        private static readonly DependencyProperty TabItemsSourceTokenProperty =
+            DependencyProperty.RegisterAttached(
+                "TabItemsSourceToken",
+                typeof(long),
+                typeof(SlidingTabIndicatorBehavior),
+                new PropertyMetadata(0L));
+
+        private static readonly DependencyProperty ObservedCollectionProperty =
+            DependencyProperty.RegisterAttached(
+                "ObservedCollection",
+                typeof(INotifyCollectionChanged),
+                typeof(SlidingTabIndicatorBehavior),
+                new PropertyMetadata(null));
+
+        private static readonly DependencyProperty ObservedCollectionHandlerProperty =
+            DependencyProperty.RegisterAttached(
+                "ObservedCollectionHandler",
+                typeof(NotifyCollectionChangedEventHandler),
+                typeof(SlidingTabIndicatorBehavior),
+                new PropertyMetadata(null));
+
+        private static readonly DependencyProperty LastTargetPositionProperty =
+            DependencyProperty.RegisterAttached(
+                "LastTargetPosition",
+                typeof(Point),
+                typeof(SlidingTabIndicatorBehavior),
+                new PropertyMetadata(new Point(-1, -1)));
+
+        private static readonly DependencyProperty LastTargetWidthProperty =
+            DependencyProperty.RegisterAttached(
+                "LastTargetWidth",
+                typeof(double),
+                typeof(SlidingTabIndicatorBehavior),
+                new PropertyMetadata(-1.0));
+
+        private static readonly int[] TransitionMilestonesMs = { 40, 90, 160, 260, 380, 520 };
 
         private static readonly DependencyProperty IndicatorVisualProperty =
             DependencyProperty.RegisterAttached(
@@ -212,7 +269,12 @@ namespace DataSphere.Controls
             tabView.SizeChanged += OnTabViewSizeChanged;
             tabView.TabItemsChanged += OnTabItemsChanged;
             tabView.ActualThemeChanged += OnTabViewActualThemeChanged;
+            tabView.TabCloseRequested += OnTabViewTabCloseRequested;
+            tabView.TabDragCompleted += OnTabViewTabDragCompleted;
+            tabView.TabDroppedOutside += OnTabViewTabDroppedOutside;
             tabView.AddHandler(UIElement.TappedEvent, _tappedHandler, true);
+
+            ObserveTabItemsSource(tabView);
 
             lock (_activeTabViews)
             {
@@ -237,7 +299,12 @@ namespace DataSphere.Controls
             tabView.SizeChanged -= OnTabViewSizeChanged;
             tabView.TabItemsChanged -= OnTabItemsChanged;
             tabView.ActualThemeChanged -= OnTabViewActualThemeChanged;
+            tabView.TabCloseRequested -= OnTabViewTabCloseRequested;
+            tabView.TabDragCompleted -= OnTabViewTabDragCompleted;
+            tabView.TabDroppedOutside -= OnTabViewTabDroppedOutside;
             tabView.RemoveHandler(UIElement.TappedEvent, _tappedHandler);
+
+            UnobserveTabItemsSource(tabView);
 
             lock (_activeTabViews)
             {
@@ -256,6 +323,161 @@ namespace DataSphere.Controls
             }
 
             RemoveVisuals(tabView);
+        }
+
+        /// <summary>
+        /// Registers a property change callback on <see cref="TabView.TabItemsSourceProperty"/> and hooks into
+        /// the underlying collection's <see cref="INotifyCollectionChanged.CollectionChanged"/> notifications.
+        /// </summary>
+        /// <param name="tabView">The host <see cref="TabView"/> control.</param>
+        private static void ObserveTabItemsSource(TabView tabView)
+        {
+            UnobserveTabItemsSource(tabView);
+
+            long token = tabView.RegisterPropertyChangedCallback(
+                TabView.TabItemsSourceProperty,
+                OnTabItemsSourcePropertyChanged);
+            tabView.SetValue(TabItemsSourceTokenProperty, token);
+
+            HookCollectionChanged(tabView, tabView.TabItemsSource);
+        }
+
+        /// <summary>
+        /// Unregisters the property change callback on <see cref="TabView.TabItemsSourceProperty"/> and unhooks
+        /// <see cref="INotifyCollectionChanged.CollectionChanged"/> listeners.
+        /// </summary>
+        /// <param name="tabView">The host <see cref="TabView"/> control.</param>
+        private static void UnobserveTabItemsSource(TabView tabView)
+        {
+            long token = (long)tabView.GetValue(TabItemsSourceTokenProperty);
+            if (token != 0)
+            {
+                tabView.UnregisterPropertyChangedCallback(TabView.TabItemsSourceProperty, token);
+                tabView.SetValue(TabItemsSourceTokenProperty, 0L);
+            }
+
+            UnhookCollectionChanged(tabView);
+        }
+
+        /// <summary>
+        /// Handles changes to the <see cref="TabView.TabItemsSourceProperty"/> property by rebinding collection change listeners.
+        /// </summary>
+        /// <param name="sender">The host dependency object.</param>
+        /// <param name="dp">The dependency property that changed.</param>
+        private static void OnTabItemsSourcePropertyChanged(DependencyObject sender, DependencyProperty dp)
+        {
+            if (sender is TabView tabView)
+            {
+                HookCollectionChanged(tabView, tabView.TabItemsSource);
+                ScheduleTransitionSettleUpdates(tabView);
+            }
+        }
+
+        /// <summary>
+        /// Subscribes to <see cref="INotifyCollectionChanged.CollectionChanged"/> on the provided collection instance.
+        /// </summary>
+        /// <param name="tabView">The host <see cref="TabView"/> control.</param>
+        /// <param name="itemsSource">The collection instance assigned to <see cref="TabView.TabItemsSource"/>.</param>
+        private static void HookCollectionChanged(TabView tabView, object? itemsSource)
+        {
+            UnhookCollectionChanged(tabView);
+
+            if (itemsSource is INotifyCollectionChanged notifyCollection)
+            {
+                NotifyCollectionChangedEventHandler handler = (s, e) =>
+                {
+                    OnTabItemsSourceCollectionChanged(tabView, e);
+                };
+
+                notifyCollection.CollectionChanged += handler;
+                tabView.SetValue(ObservedCollectionProperty, notifyCollection);
+                tabView.SetValue(ObservedCollectionHandlerProperty, handler);
+            }
+        }
+
+        /// <summary>
+        /// Unsubscribes previously registered <see cref="INotifyCollectionChanged.CollectionChanged"/> listeners.
+        /// </summary>
+        /// <param name="tabView">The host <see cref="TabView"/> control.</param>
+        private static void UnhookCollectionChanged(TabView tabView)
+        {
+            if (tabView.GetValue(ObservedCollectionProperty) is INotifyCollectionChanged oldCollection &&
+                tabView.GetValue(ObservedCollectionHandlerProperty) is NotifyCollectionChangedEventHandler oldHandler)
+            {
+                oldCollection.CollectionChanged -= oldHandler;
+                tabView.SetValue(ObservedCollectionProperty, null);
+                tabView.SetValue(ObservedCollectionHandlerProperty, null);
+            }
+        }
+
+        /// <summary>
+        /// Handles mutations within <see cref="TabView.TabItemsSource"/> (add, remove, move, reset) by scheduling indicator updates.
+        /// </summary>
+        /// <param name="tabView">The host <see cref="TabView"/> control.</param>
+        /// <param name="e">The collection change event arguments.</param>
+        private static void OnTabItemsSourceCollectionChanged(TabView tabView, NotifyCollectionChangedEventArgs e)
+        {
+            ScheduleTransitionSettleUpdates(tabView);
+        }
+
+        /// <summary>
+        /// Handles the <see cref="TabView.TabCloseRequested"/> event to trigger indicator layout tracking.
+        /// </summary>
+        /// <param name="sender">The host <see cref="TabView"/> control.</param>
+        /// <param name="args">The tab close event arguments.</param>
+        private static void OnTabViewTabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
+        {
+            ScheduleTransitionSettleUpdates(sender);
+        }
+
+        /// <summary>
+        /// Handles the <see cref="TabView.TabDragCompleted"/> event to ensure the indicator glides to the final reordered tab slot.
+        /// </summary>
+        /// <param name="sender">The host <see cref="TabView"/> control.</param>
+        /// <param name="args">The tab drag completed event arguments.</param>
+        private static void OnTabViewTabDragCompleted(TabView sender, TabViewTabDragCompletedEventArgs args)
+        {
+            ScheduleTransitionSettleUpdates(sender);
+        }
+
+        /// <summary>
+        /// Handles the <see cref="TabView.TabDroppedOutside"/> event to update indicator visuals if a tab was detached.
+        /// </summary>
+        /// <param name="sender">The host <see cref="TabView"/> control.</param>
+        /// <param name="args">The tab dropped outside event arguments.</param>
+        private static void OnTabViewTabDroppedOutside(TabView sender, TabViewTabDroppedOutsideEventArgs args)
+        {
+            ScheduleTransitionSettleUpdates(sender);
+        }
+
+        /// <summary>
+        /// Schedules a sequence of staggered layout and visual updates across the WinUI 3 layout and reposition transition window.
+        /// </summary>
+        /// <param name="tabView">The host <see cref="TabView"/> control.</param>
+        private static void ScheduleTransitionSettleUpdates(TabView tabView)
+        {
+            if (!tabView.IsLoaded)
+            {
+                return;
+            }
+
+            // Immediate pass
+            UpdateVisualsPosition(tabView, animate: true);
+
+            // Staggered milestone passes across the WinUI 3 RepositionThemeTransition duration (~350ms)
+            foreach (int delayMs in TransitionMilestonesMs)
+            {
+                Task.Delay(delayMs).ContinueWith(_ =>
+                {
+                    tabView.DispatcherQueue?.TryEnqueue(DispatcherQueuePriority.Normal, () =>
+                    {
+                        if (tabView.IsLoaded)
+                        {
+                            UpdateVisualsPosition(tabView, animate: true);
+                        }
+                    });
+                });
+            }
         }
 
         private static void OnTabViewLoaded(object sender, RoutedEventArgs e)
@@ -300,7 +522,7 @@ namespace DataSphere.Controls
 
         private static void OnTabItemsChanged(TabView sender, IVectorChangedEventArgs args)
         {
-            UpdateVisualsPosition(sender, animate: true);
+            ScheduleTransitionSettleUpdates(sender);
         }
 
         private static void OnTabViewActualThemeChanged(FrameworkElement sender, object args)
@@ -331,16 +553,24 @@ namespace DataSphere.Controls
 
         private static void InitializeVisuals(TabView tabView)
         {
-            if (GetIndicatorVisual(tabView) != null)
-            {
-                UpdateVisualsPosition(tabView, animate: false);
-                return;
-            }
-
             try
             {
                 ContainerVisual containerVisual = (ContainerVisual)ElementCompositionPreview.GetElementVisual(tabView);
                 Compositor compositor = containerVisual.Compositor;
+
+                ShapeVisual? existingIndicator = GetIndicatorVisual(tabView);
+                if (existingIndicator != null)
+                {
+                    // Check if existing indicator belongs to the same compositor (same window)
+                    if (existingIndicator.Compositor == compositor)
+                    {
+                        UpdateVisualsPosition(tabView, animate: false);
+                        return;
+                    }
+
+                    // Stale indicator from a previous window/compositor; clean it up
+                    RemoveVisuals(tabView);
+                }
 
                 // Sliding Accent Pill Indicator Visual (Dynamic width with rounded ends)
                 CompositionRoundedRectangleGeometry pillGeometry = compositor.CreateRoundedRectangleGeometry();
@@ -378,27 +608,36 @@ namespace DataSphere.Controls
         {
             try
             {
-                ContainerVisual containerVisual = (ContainerVisual)ElementCompositionPreview.GetElementVisual(tabView);
-
                 ShapeVisual? indicator = GetIndicatorVisual(tabView);
                 if (indicator != null)
                 {
-                    containerVisual.Children.Remove(indicator);
+                    try
+                    {
+                        ContainerVisual containerVisual = (ContainerVisual)ElementCompositionPreview.GetElementVisual(tabView);
+                        containerVisual.Children.Remove(indicator);
+                    }
+                    catch
+                    {
+                    }
+
                     indicator.Dispose();
                 }
 
                 GetIndicatorShape(tabView)?.Dispose();
                 GetIndicatorGeometry(tabView)?.Dispose();
-
-                SetIndicatorVisual(tabView, null);
-                SetIndicatorShape(tabView, null);
-                SetIndicatorGeometry(tabView, null);
             }
             catch
             {
             }
+            finally
+            {
+                SetIndicatorVisual(tabView, null);
+                SetIndicatorShape(tabView, null);
+                SetIndicatorGeometry(tabView, null);
+                tabView.SetValue(LastTargetPositionProperty, new Point(-1, -1));
+                tabView.SetValue(LastTargetWidthProperty, -1.0);
+            }
         }
-
         private static void UpdateVisualsBrush(TabView tabView)
         {
             CompositionSpriteShape? pillShape = GetIndicatorShape(tabView);
@@ -488,6 +727,12 @@ namespace DataSphere.Controls
                 if (headerTab != null && IsValidOnScreenTabItem(tabView, headerTab, null))
                 {
                     return headerTab;
+                }
+                TabViewItem? firstHeaderTab = FindFirstTabViewItemInTree(headerRoot);
+                if (firstHeaderTab != null && IsValidOnScreenTabItem(tabView, firstHeaderTab, null))
+                {
+                    firstHeaderTab.IsSelected = true;
+                    return firstHeaderTab;
                 }
             }
 
@@ -615,6 +860,31 @@ namespace DataSphere.Controls
         /// </summary>
         /// <param name="root">The root visual element to start searching from.</param>
         /// <returns>The selected <see cref="TabViewItem"/>, or <c>null</c> if not found.</returns>
+        /// <summary>
+        /// Recursively searches the visual tree for the first <see cref="TabViewItem"/> container.
+        /// </summary>
+        /// <param name="root">The root visual element to start searching from.</param>
+        /// <returns>The first <see cref="TabViewItem"/> encountered, or <c>null</c> if none found.</returns>
+        private static TabViewItem? FindFirstTabViewItemInTree(DependencyObject root)
+        {
+            if (root is TabViewItem item)
+            {
+                return item;
+            }
+
+            int count = VisualTreeHelper.GetChildrenCount(root);
+            for (int i = 0; i < count; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(root, i);
+                TabViewItem? result = FindFirstTabViewItemInTree(child);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
         private static TabViewItem? FindSelectedTabViewItemInTree(DependencyObject root)
         {
             if (root is TabViewItem item && item.IsSelected)
@@ -648,7 +918,14 @@ namespace DataSphere.Controls
             CompositionRoundedRectangleGeometry? pillGeometry = GetIndicatorGeometry(tabView);
             if (indicator == null || pillGeometry == null)
             {
-                return;
+                InitializeVisuals(tabView);
+                indicator = GetIndicatorVisual(tabView);
+                pillGeometry = GetIndicatorGeometry(tabView);
+
+                if (indicator == null || pillGeometry == null)
+                {
+                    return;
+                }
             }
 
             TabViewItem? selectedTab = FindActiveTabViewItem(tabView);
@@ -657,7 +934,8 @@ namespace DataSphere.Controls
                 indicator.IsVisible = false;
 
                 // Defer position calculation to next frame when container is generated and measured (capped to prevent infinite loop)
-                bool hasSelection = tabView.SelectedItem != null || tabView.SelectedIndex >= 0;
+                bool hasHeaderTab = tabView.TabStripHeader is DependencyObject;
+                bool hasSelection = tabView.SelectedItem != null || tabView.SelectedIndex >= 0 || hasHeaderTab;
                 if (hasSelection && retryCount < 10)
                 {
                     DispatcherQueuePriority priority = retryCount < 2 ? DispatcherQueuePriority.Normal : DispatcherQueuePriority.Low;
@@ -668,6 +946,17 @@ namespace DataSphere.Controls
                             UpdateVisualsPosition(tabView, animate, retryCount + 1);
                         }
                     });
+                }
+                else if (!hasSelection)
+                {
+                    FrameworkElement? bgCapsule = GetBackgroundCapsule(tabView);
+                    if (bgCapsule != null)
+                    {
+                        bgCapsule.Opacity = 0.0;
+                    }
+
+                    tabView.SetValue(LastTargetPositionProperty, new Point(-1, -1));
+                    tabView.SetValue(LastTargetWidthProperty, -1.0);
                 }
 
                 return;
@@ -690,60 +979,79 @@ namespace DataSphere.Controls
 
                 // Dimensions and target coordinates for optional background capsule
                 FrameworkElement? bgCapsule = GetBackgroundCapsule(tabView);
-                float targetBgX = (float)position.X + 2.0f;
-                float targetBgY = (float)position.Y + 2.0f;
-                float targetBgWidth = Math.Max(0, (float)selectedTab.ActualWidth - 4.0f);
-                float targetBgHeight = Math.Max(0, (float)selectedTab.ActualHeight - 4.0f);
+                float targetBgX = (float)position.X;
+                float targetBgY = (float)position.Y;
+                float targetBgWidth = Math.Max(0, (float)selectedTab.ActualWidth + 1.0f);
+                float targetBgHeight = Math.Max(0, (float)selectedTab.ActualHeight);
+
+                Point lastTargetPos = (Point)tabView.GetValue(LastTargetPositionProperty);
+                double lastTargetWidth = (double)tabView.GetValue(LastTargetWidthProperty);
+
+                bool positionChanged = Math.Abs(lastTargetPos.X - targetBgX) >= 1.0 ||
+                                       Math.Abs(lastTargetPos.Y - targetBgY) >= 1.0 ||
+                                       Math.Abs(lastTargetWidth - targetBgWidth) >= 1.0;
 
                 bool isIndicatorVisible = GetIsIndicatorVisible(tabView);
                 indicator.IsVisible = isIndicatorVisible;
 
                 if (animate && TabMotionConfiguration.AreAnimationsEnabled)
                 {
-                    Compositor compositor = indicator.Compositor;
-                    CompositionEasingFunction easing = compositor.CreateCubicBezierEasingFunction(
-                        TabMotionConfiguration.DecelerateControlPoint1,
-                        TabMotionConfiguration.DecelerateControlPoint2);
-
-                    // 1. Animate Accent Pill Position & Width (only if enabled via flag)
-                    if (isIndicatorVisible)
+                    if (positionChanged || (bgCapsule != null && bgCapsule.Opacity < 0.5))
                     {
-                        Vector3KeyFrameAnimation pillOffsetAnimation = compositor.CreateVector3KeyFrameAnimation();
-                        pillOffsetAnimation.InsertKeyFrame(1.0f, new Vector3(targetPillX, targetPillY, 0), easing);
-                        pillOffsetAnimation.Duration = TabMotionConfiguration.TabIndicatorDuration;
-                        indicator.StartAnimation("Offset", pillOffsetAnimation);
+                        tabView.SetValue(LastTargetPositionProperty, new Point(targetBgX, targetBgY));
+                        tabView.SetValue(LastTargetWidthProperty, (double)targetBgWidth);
 
-                        Vector2KeyFrameAnimation pillSizeAnimation = compositor.CreateVector2KeyFrameAnimation();
-                        pillSizeAnimation.InsertKeyFrame(1.0f, new Vector2(targetPillWidth, targetPillHeight), easing);
-                        pillSizeAnimation.Duration = TabMotionConfiguration.TabIndicatorDuration;
-                        indicator.StartAnimation("Size", pillSizeAnimation);
-                        pillGeometry.StartAnimation("Size", pillSizeAnimation);
-                    }
-                    else
-                    {
-                        indicator.Offset = new Vector3(targetPillX, targetPillY, 0);
-                        indicator.Size = new Vector2(targetPillWidth, targetPillHeight);
-                        pillGeometry.Size = new Vector2(targetPillWidth, targetPillHeight);
-                    }
+                        Compositor compositor = indicator.Compositor;
+                        CompositionEasingFunction easing = compositor.CreateCubicBezierEasingFunction(
+                            TabMotionConfiguration.DecelerateControlPoint1,
+                            TabMotionConfiguration.DecelerateControlPoint2);
 
-                    // 2. Animate Background Capsule if present
-                    if (bgCapsule != null)
-                    {
-                        ElementCompositionPreview.SetIsTranslationEnabled(bgCapsule, true);
-                        bgCapsule.Opacity = 1.0;
-                        Visual capsuleVisual = ElementCompositionPreview.GetElementVisual(bgCapsule);
+                        // 1. Animate Accent Pill Position & Width (only if enabled via flag)
+                        if (isIndicatorVisible)
+                        {
+                            Vector3KeyFrameAnimation pillOffsetAnimation = compositor.CreateVector3KeyFrameAnimation();
+                            pillOffsetAnimation.InsertKeyFrame(1.0f, new Vector3(targetPillX, targetPillY, 0), easing);
+                            pillOffsetAnimation.Duration = TabMotionConfiguration.TabIndicatorDuration;
+                            indicator.StartAnimation("Offset", pillOffsetAnimation);
 
-                        Vector3KeyFrameAnimation bgTranslationAnimation = compositor.CreateVector3KeyFrameAnimation();
-                        bgTranslationAnimation.InsertKeyFrame(1.0f, new Vector3(targetBgX, targetBgY, 0), easing);
-                        bgTranslationAnimation.Duration = TabMotionConfiguration.TabIndicatorDuration;
-                        capsuleVisual.StartAnimation("Translation", bgTranslationAnimation);
+                            Vector2KeyFrameAnimation pillSizeAnimation = compositor.CreateVector2KeyFrameAnimation();
+                            pillSizeAnimation.InsertKeyFrame(1.0f, new Vector2(targetPillWidth, targetPillHeight), easing);
+                            pillSizeAnimation.Duration = TabMotionConfiguration.TabIndicatorDuration;
+                            indicator.StartAnimation("Size", pillSizeAnimation);
+                            pillGeometry.StartAnimation("Size", pillSizeAnimation);
+                        }
+                        else
+                        {
+                            indicator.Offset = new Vector3(targetPillX, targetPillY, 0);
+                            indicator.Size = new Vector2(targetPillWidth, targetPillHeight);
+                            pillGeometry.Size = new Vector2(targetPillWidth, targetPillHeight);
+                        }
 
-                        bgCapsule.Width = targetBgWidth;
-                        bgCapsule.Height = targetBgHeight;
+                        // 2. Animate Background Capsule if present
+                        if (bgCapsule != null)
+                        {
+                            ElementCompositionPreview.SetIsTranslationEnabled(bgCapsule, true);
+                            bgCapsule.Opacity = 1.0;
+                            Visual capsuleVisual = ElementCompositionPreview.GetElementVisual(bgCapsule);
+
+                            Vector3KeyFrameAnimation bgTranslationAnimation = capsuleVisual.Compositor.CreateVector3KeyFrameAnimation();
+                            CompositionEasingFunction capsuleEasing = capsuleVisual.Compositor.CreateCubicBezierEasingFunction(
+                                TabMotionConfiguration.DecelerateControlPoint1,
+                                TabMotionConfiguration.DecelerateControlPoint2);
+                            bgTranslationAnimation.InsertKeyFrame(1.0f, new Vector3(targetBgX, targetBgY, 0), capsuleEasing);
+                            bgTranslationAnimation.Duration = TabMotionConfiguration.TabIndicatorDuration;
+                            capsuleVisual.StartAnimation("Translation", bgTranslationAnimation);
+
+                            bgCapsule.Width = targetBgWidth;
+                            bgCapsule.Height = targetBgHeight;
+                        }
                     }
                 }
                 else
                 {
+                    tabView.SetValue(LastTargetPositionProperty, new Point(targetBgX, targetBgY));
+                    tabView.SetValue(LastTargetWidthProperty, (double)targetBgWidth);
+
                     indicator.Offset = new Vector3(targetPillX, targetPillY, 0);
                     indicator.Size = new Vector2(targetPillWidth, targetPillHeight);
                     pillGeometry.Size = new Vector2(targetPillWidth, targetPillHeight);

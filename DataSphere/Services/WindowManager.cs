@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using Windows.Foundation;
+using Microsoft.UI.Xaml;
+using DataSphere.Controls;
 using DataSphere.Models;
 using DataSphere.Services.Contracts;
 
@@ -152,6 +154,9 @@ namespace DataSphere.Services
                 throw new ArgumentNullException(nameof(tab));
             }
 
+            // Ensure the tab's visual content is safely detached from any donor window's visual tree
+            CachedContentControl.DisconnectFromParent(tab.Content as UIElement);
+
             // Create a new window instance via DI or type activation
             var shellWindowType = Type.GetType("DataSphere.Views.Windows.ShellWindow, DataSphere");
             Window? newWindow = null;
@@ -253,6 +258,8 @@ namespace DataSphere.Services
             {
                 ExecuteOnUi(donorWindow, () =>
                 {
+                    CachedContentControl.DisconnectFromParent(tab.Content as UIElement);
+
                     if (Equals(donorWindow.ViewModel.SelectedTab, tab))
                     {
                         int currentIndex = donorWindow.ViewModel.Tabs.IndexOf(tab);
@@ -271,6 +278,7 @@ namespace DataSphere.Services
             }
             else
             {
+                CachedContentControl.DisconnectFromParent(tab.Content as UIElement);
                 sourceSession.Tabs.Remove(tab);
             }
 

@@ -18,7 +18,8 @@
 
         <!-- Inner Tab Workspace with unified background matching tab surface -->
         <Grid Grid.Row="1"
-              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+              Background="Transparent"
+              RowSpacing="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -30,68 +31,73 @@
                     IsHitTestVisible="False">
                 <Border x:Name="InnerTabCapsule"
                         CornerRadius="6"
-                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1"
                         Opacity="0"
                         IsHitTestVisible="False" />
             </Canvas>
 
-            <TabView Grid.Row="0"
-                     x:Name="InnerTabView"
-                     Background="Transparent"
-                     BorderThickness="0"
-                     TabItemsSource="{x:Bind ViewModel.InnerTabs, Mode=OneWay}"
-                     SelectedItem="{x:Bind ViewModel.SelectedInnerTab, Mode=TwoWay}"
-                     controls:SlidingTabIndicatorBehavior.IsEnabled="True"
-                     controls:SlidingTabIndicatorBehavior.BackgroundCapsule="{x:Bind InnerTabCapsule}"
-                     TabWidthMode="Compact"
-                     SelectionChanged="InnerTabView_SelectionChanged"
-                     TabCloseRequested="InnerTabView_TabCloseRequested"
-                     IsAddTabButtonVisible="False"
-                     CanReorderTabs="True"
-                     CanDragTabs="False"
-                     HorizontalAlignment="Stretch">
+            <Border Grid.Row="0"
+                    CornerRadius="6"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <TabView x:Name="InnerTabView"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         TabItemsSource="{x:Bind ViewModel.InnerTabs, Mode=OneWay}"
+                         SelectedItem="{x:Bind ViewModel.SelectedInnerTab, Mode=TwoWay}"
+                         controls:SlidingTabIndicatorBehavior.IsEnabled="True"
+                         controls:SlidingTabIndicatorBehavior.BackgroundCapsule="{x:Bind InnerTabCapsule}"
+                         TabWidthMode="Compact"
+                         SelectionChanged="InnerTabView_SelectionChanged"
+                         TabCloseRequested="InnerTabView_TabCloseRequested"
+                         IsAddTabButtonVisible="False"
+                         CanReorderTabs="True"
+                         CanDragTabs="False"
+                         HorizontalAlignment="Stretch">
 
-                <!-- Anchored Connection Tab in TabStripHeader -->
-                <TabView.TabStripHeader>
-                    <StackPanel Orientation="Horizontal"
-                                 VerticalAlignment="Top"
-                                 Margin="3,3,-6,3">
-                        <TabViewItem x:Name="ConnectionTabItem"
-                                     Style="{StaticResource PillTabViewItemStyle}"
-                                     Header="{x:Bind ViewModel.ConnectionTab.Header, Mode=OneWay}"
-                                     IsClosable="{x:Bind ViewModel.ConnectionTab.IsClosable, Mode=OneWay}"
-                                     IsSelected="{x:Bind ViewModel.IsConnectionSelected, Mode=TwoWay}"
-                                     Tapped="OnConnectionTabTapped">
-                            <TabViewItem.IconSource>
-                                <FontIconSource Glyph="{x:Bind ViewModel.ConnectionTab.IconGlyph, Mode=OneWay}" />
-                            </TabViewItem.IconSource>
-                        </TabViewItem>
-                    </StackPanel>
-                </TabView.TabStripHeader>
+                    <!-- Anchored Connection Tab in TabStripHeader -->
+                    <TabView.TabStripHeader>
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Top"
+                                    Background="Transparent"
+                                    Tapped="OnConnectionTabTapped"
+                                    Margin="3,3,-7,3">
+                            <TabViewItem x:Name="ConnectionTabItem"
+                                         Style="{StaticResource PillTabViewItemStyle}"
+                                         Header="{x:Bind ViewModel.ConnectionTab.Header, Mode=OneWay}"
+                                         IsClosable="{x:Bind ViewModel.ConnectionTab.IsClosable, Mode=OneWay}"
+                                         IsSelected="{x:Bind ViewModel.IsConnectionSelected, Mode=TwoWay}"
+                                         Tapped="OnConnectionTabTapped">
+                                <TabViewItem.IconSource>
+                                    <FontIconSource Glyph="{x:Bind ViewModel.ConnectionTab.IconGlyph, Mode=OneWay}" />
+                                </TabViewItem.IconSource>
+                            </TabViewItem>
+                        </StackPanel>
+                    </TabView.TabStripHeader>
 
-                <!-- Dynamic Workspace Tabs Template -->
-                <TabView.TabItemTemplate>
-                    <DataTemplate x:DataType="models:InnerTabItemModel">
-                        <TabViewItem Style="{StaticResource PillTabViewItemStyle}"
-                                     Header="{x:Bind Header, Mode=OneWay}"
-                                     IsClosable="{x:Bind IsClosable, Mode=OneWay}">
-                            <TabViewItem.IconSource>
-                                <FontIconSource Glyph="{x:Bind IconGlyph, Mode=OneWay}" />
-                            </TabViewItem.IconSource>
-                        </TabViewItem>
-                    </DataTemplate>
-                </TabView.TabItemTemplate>
-            </TabView>
+                    <!-- Dynamic Workspace Tabs Template -->
+                    <TabView.TabItemTemplate>
+                        <DataTemplate x:DataType="models:InnerTabItemModel">
+                            <TabViewItem Style="{StaticResource PillTabViewItemStyle}"
+                                         Header="{x:Bind Header, Mode=OneWay}"
+                                         IsClosable="{x:Bind IsClosable, Mode=OneWay}">
+                                <TabViewItem.IconSource>
+                                    <FontIconSource Glyph="{x:Bind IconGlyph, Mode=OneWay}" />
+                                </TabViewItem.IconSource>
+                            </TabViewItem>
+                        </DataTemplate>
+                    </TabView.TabItemTemplate>
+                </TabView>
+            </Border>
 
             <!-- Active Tab Content Area (Unified Viewport) -->
             <controls:CachedContentControl Grid.Row="1"
-                            Background="Transparent"
-                            SelectedIndex="{x:Bind ViewModel.EffectiveTabIndex, Mode=OneWay}"
-                            Content="{x:Bind ViewModel.ActiveInnerContent, Mode=OneWay}"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch" />
+                                           Background="Transparent"
+                                           SelectedIndex="{x:Bind ViewModel.EffectiveTabIndex, Mode=OneWay}"
+                                           Content="{x:Bind ViewModel.ActiveInnerContent, Mode=OneWay}"
+                                           HorizontalAlignment="Stretch"
+                                           VerticalAlignment="Stretch" />
         </Grid>
     </Grid>
 </Page>

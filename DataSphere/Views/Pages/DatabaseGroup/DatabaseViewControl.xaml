@@ -9,122 +9,131 @@
     xmlns:vm="using:DataSphere.ViewModels.Pages.DatabaseGroup"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280" MinWidth="200" MaxWidth="500" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" MinWidth="300" />
-        </Grid.ColumnDefinitions>
+    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="6">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280"
+                                  MinWidth="200"
+                                  MaxWidth="500" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*"
+                                  MinWidth="300" />
+            </Grid.ColumnDefinitions>
 
-        <!-- Left Column: Schema Object Explorer -->
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+            <!-- Left Column: Schema Object Explorer -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-            <!-- Explorer Command Bar -->
-            <Border
-                Grid.Row="0"
-                Padding="12,8"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="0,0,0,1">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                <!-- Explorer Command Bar -->
+                <Border Grid.Row="0"
+                        Padding="12,8"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="0,0,0,1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                        <Button Command="{x:Bind ViewModel.NewDatabaseCommand}">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE710;" FontSize="12" />
-                                <TextBlock Text="{Binding [dbinf_database_title], Source={StaticResource Localization}, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
-                            </StackPanel>
-                        </Button>
-                        <Button Command="{x:Bind ViewModel.RefreshDatabasesCommand}">
-                            <FontIcon Glyph="&#xE72C;" FontSize="12" />
-                        </Button>
-                    </StackPanel>
-
-                    <ProgressRing
-                        Grid.Column="1"
-                        Width="16" Height="16"
-                        IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
-                        Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
-                </Grid>
-            </Border>
-
-            <!-- Explorer TreeView -->
-            <TreeView
-                Grid.Row="1"
-                x:Name="SchemaTree"
-                SelectionMode="Single"
-                Expanding="SchemaTree_Expanding"
-                ItemInvoked="SchemaTree_ItemInvoked"
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                ScrollViewer.VerticalScrollMode="Enabled"
-                ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                ScrollViewer.HorizontalScrollMode="Enabled"
-                Padding="4">
-                <TreeView.ItemTemplate>
-                    <DataTemplate x:DataType="TreeViewNode">
-                        <StackPanel
-                            Orientation="Horizontal"
-                            Spacing="8"
-                            Padding="2,4"
-                            ContextRequested="TreeNode_ContextRequested"
-                            DoubleTapped="TreeNode_DoubleTapped">
-                            <Grid Width="16" Height="16">
-                                <FontIcon
-                                    Glyph="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IconGlyph, Mode=OneWay}"
-                                    FontSize="14"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Visibility="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IsLoading, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                                <ProgressRing
-                                    Width="14" Height="14"
-                                    IsActive="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IsLoading, Mode=OneWay}"
-                                    Visibility="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center" />
-                            </Grid>
-                            <TextBlock Text="{x:Bind ((dbmodels:DatabaseTreeNode)Content).Title, Mode=OneWay}" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    Spacing="6"
+                                    VerticalAlignment="Center">
+                            <Button Command="{x:Bind ViewModel.NewDatabaseCommand}">
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="6">
+                                    <FontIcon Glyph="&#xE710;"
+                                              FontSize="11" />
+                                    <TextBlock Text="{Binding [dbinf_database_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                               Style="{StaticResource CaptionTextBlockStyle}" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.RefreshDatabasesCommand}">
+                                <FontIcon Glyph="&#xE72C;"
+                                          FontSize="12" />
+                            </Button>
                         </StackPanel>
-                    </DataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
+
+                        <ProgressRing Grid.Column="1"
+                                      Width="16"
+                                      Height="16"
+                                      IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                    </Grid>
+                </Border>
+
+                <!-- Explorer TreeView -->
+                <TreeView Grid.Row="1"
+                          x:Name="SchemaTree"
+                          SelectionMode="Single"
+                          Expanding="SchemaTree_Expanding"
+                          ItemInvoked="SchemaTree_ItemInvoked"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ScrollViewer.VerticalScrollMode="Enabled"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollMode="Enabled"
+                          Padding="4">
+                    <TreeView.ItemTemplate>
+                        <DataTemplate x:DataType="TreeViewNode">
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="8"
+                                        Padding="2,4"
+                                        ContextRequested="TreeNode_ContextRequested"
+                                        DoubleTapped="TreeNode_DoubleTapped">
+                                <Grid Width="16"
+                                      Height="16">
+                                    <FontIcon Glyph="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IconGlyph, Mode=OneWay}"
+                                              FontSize="14"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Visibility="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IsLoading, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                    <ProgressRing Width="14"
+                                                  Height="14"
+                                                  IsActive="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IsLoading, Mode=OneWay}"
+                                                  Visibility="{x:Bind ((dbmodels:DatabaseTreeNode)Content).IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                                </Grid>
+                                <TextBlock Text="{x:Bind ((dbmodels:DatabaseTreeNode)Content).Title, Mode=OneWay}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Grid>
+
+            <!-- Column Separator -->
+            <Border Grid.Column="1"
+                    Width="2"
+                    Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                    HorizontalAlignment="Center" />
+
+            <!-- Right Column: Detail / Tabular Viewport Content -->
+            <Grid Grid.Column="2">
+                <ContentControl x:Name="RightPanelHost"
+                                Content="{x:Bind ViewModel.RightPanelContent, Mode=OneWay}"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch" />
+
+                <!-- Empty Selection Placeholder -->
+                <StackPanel Visibility="{x:Bind ViewModel.RightPanelContent, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"
+                            IsHitTestVisible="False"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Spacing="12">
+                    <FontIcon Glyph="&#xF0E2;"
+                              FontSize="40"
+                              Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                              HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding [page_db_select_table_hint], Source={StaticResource Localization}, Mode=OneWay}"
+                               Style="{StaticResource BodyTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextAlignment="Center" />
+                </StackPanel>
+            </Grid>
         </Grid>
-
-        <!-- Column Separator -->
-        <Border
-            Grid.Column="1"
-            Width="2"
-            Background="{ThemeResource CardStrokeColorDefaultBrush}"
-            HorizontalAlignment="Center" />
-
-        <!-- Right Column: Detail / Tabular Viewport Content -->
-        <Grid Grid.Column="2">
-            <ContentControl
-                x:Name="RightPanelHost"
-                Content="{x:Bind ViewModel.RightPanelContent, Mode=OneWay}"
-                HorizontalContentAlignment="Stretch"
-                VerticalContentAlignment="Stretch" />
-
-            <!-- Empty Selection Placeholder -->
-            <StackPanel
-                Visibility="{x:Bind ViewModel.RightPanelContent, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"
-                IsHitTestVisible="False"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Spacing="12">
-                <FontIcon Glyph="&#xF0E2;" FontSize="40" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
-                <TextBlock
-                    Text="{Binding [page_db_select_table_hint], Source={StaticResource Localization}, Mode=OneWay}"
-                    Style="{StaticResource BodyTextBlockStyle}"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    TextAlignment="Center" />
-            </StackPanel>
-        </Grid>
-    </Grid>
+    </Border>
 </UserControl>

@@ -12,7 +12,7 @@
                   HorizontalScrollBarVisibility="Disabled"
                   MaxWidth="900"
                   Background="Transparent">
-        <StackPanel Spacing="14"
+        <StackPanel Spacing="8"
                     Padding="24,24,24,32"
                     HorizontalAlignment="Stretch"
                     Background="Transparent">
@@ -183,6 +183,7 @@
                     <ToggleSwitch Grid.Column="2"
                                   HorizontalAlignment="Right"
                                   VerticalAlignment="Center"
+                                  MinWidth="0"
                                   IsOn="{x:Bind ViewModel.EnableTabMemorySaver, Mode=TwoWay}" />
                 </Grid>
             </Border>

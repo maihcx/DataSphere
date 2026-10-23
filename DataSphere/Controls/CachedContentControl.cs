@@ -4,6 +4,7 @@ using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Media;
 
 namespace DataSphere.Controls
 {
@@ -108,6 +109,106 @@ namespace DataSphere.Controls
         }
 
         /// <summary>
+        /// Disconnects the specified visual element from any existing parent container (such as a donor window's viewport
+        /// during a tab tear-off or cross-window transfer) to ensure it can be safely attached to a new container.
+        /// </summary>
+        /// <param name="element">The visual element to disconnect.</param>
+        public static void DisconnectFromParent(UIElement? element)
+        {
+            if (element == null)
+            {
+                return;
+            }
+
+            try
+            {
+                DependencyObject? visualParent = VisualTreeHelper.GetParent(element);
+                if (visualParent != null)
+                {
+                    if (visualParent is Panel parentPanel)
+                    {
+                        parentPanel.Children.Remove(element);
+                    }
+                    else if (visualParent is ContentControl parentCc)
+                    {
+                        parentCc.Content = null;
+                    }
+                    else if (visualParent is Border parentBorder)
+                    {
+                        parentBorder.Child = null;
+                    }
+                }
+
+                if (element is FrameworkElement fe && fe.Parent != null)
+                {
+                    if (fe.Parent is Panel logicalPanel)
+                    {
+                        logicalPanel.Children.Remove(element);
+                    }
+                    else if (fe.Parent is ContentControl logicalCc)
+                    {
+                        logicalCc.Content = null;
+                    }
+                    else if (fe.Parent is Border logicalBorder)
+                    {
+                        logicalBorder.Child = null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CachedContentControl] Warning: Failed to disconnect element from existing parent: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Ensures that the specified element is not attached to another parent container before adding it to this container.
+        /// </summary>
+        /// <param name="element">The visual element to check and disconnect if needed.</param>
+        private void EnsureDisconnectedFromOtherParent(UIElement element)
+        {
+            try
+            {
+                DependencyObject? visualParent = VisualTreeHelper.GetParent(element);
+                if (visualParent != null && !ReferenceEquals(visualParent, this))
+                {
+                    if (visualParent is Panel parentPanel)
+                    {
+                        parentPanel.Children.Remove(element);
+                    }
+                    else if (visualParent is ContentControl parentCc)
+                    {
+                        parentCc.Content = null;
+                    }
+                    else if (visualParent is Border parentBorder)
+                    {
+                        parentBorder.Child = null;
+                    }
+                }
+
+                if (element is FrameworkElement fe && fe.Parent != null && !ReferenceEquals(fe.Parent, this))
+                {
+                    if (fe.Parent is Panel logicalPanel)
+                    {
+                        logicalPanel.Children.Remove(element);
+                    }
+                    else if (fe.Parent is ContentControl logicalCc)
+                    {
+                        logicalCc.Content = null;
+                    }
+                    else if (fe.Parent is Border logicalBorder)
+                    {
+                        logicalBorder.Child = null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CachedContentControl] Warning: Failed to disconnect element from other parent: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Activates the visual element corresponding to the active content while collapsing all other cached views.
         /// Dispatches a smooth, direction-aware horizontal WinUI 3 Compositor entrance transition on the newly active element.
         /// </summary>
@@ -116,9 +217,18 @@ namespace DataSphere.Controls
         {
             if (newContent is UIElement element)
             {
+                EnsureDisconnectedFromOtherParent(element);
+
                 if (!Children.Contains(element))
                 {
-                    Children.Add(element);
+                    try
+                    {
+                        Children.Add(element);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[CachedContentControl] Error: Failed to add element to Children: {ex.Message}");
+                    }
                 }
 
                 foreach (UIElement child in Children)

@@ -59,13 +59,13 @@
             <TabView.TabStripHeader>
                 <StackPanel Orientation="Horizontal"
                             VerticalAlignment="Top"
-                            Margin="0,3,-6,3"
+                            Margin="0,3,-7,3"
                             AllowDrop="True"
                             DragOver="OnTabAreaDragOver"
                             Drop="OnTabAreaDrop">
                     <Grid x:Name="CustomDragRegionLeft"
                           Background="Transparent"
-                          Width="4"
+                          Width="3"
                           Height="34" />
                     <TabViewItem x:Name="HomeTabItem"
                                  Style="{StaticResource PillTabViewItemStyle}"

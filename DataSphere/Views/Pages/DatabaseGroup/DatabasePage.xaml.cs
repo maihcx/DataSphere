@@ -1,3 +1,5 @@
+using System;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using DataSphere.Models;
@@ -30,9 +32,43 @@ namespace DataSphere.Views.Pages.DatabaseGroup
             {
                 if (e.PropertyName == nameof(DatabaseViewModel.IsConnectionSelected) && ViewModel.IsConnectionSelected)
                 {
+                    ConnectionTabItem.IsSelected = true;
                     InnerTabView.SelectedItem = null;
+                    Controls.SlidingTabIndicatorBehavior.UpdatePosition(InnerTabView, animate: true);
                 }
             };
+
+            // Register pointer and tapped handlers with handledEventsToo=true to ensure clicks are never swallowed
+            ConnectionTabItem.AddHandler(UIElement.TappedEvent, new TappedEventHandler(OnConnectionTabTapped), true);
+            ConnectionTabItem.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler(OnConnectionTabPointerPressed), true);
+            ConnectionTabItem.AddHandler(UIElement.PointerReleasedEvent, new PointerEventHandler(OnConnectionTabPointerReleased), true);
+            ConnectionTabItem.RegisterPropertyChangedCallback(TabViewItem.IsSelectedProperty, (s, dp) =>
+            {
+                if (ConnectionTabItem.IsSelected && InnerTabView.SelectedItem != null)
+                {
+                    ActivateConnectionTab();
+                }
+            });
+        }
+
+        /// <summary>
+        /// Handles pointer released events on the anchored Connection TabViewItem to guarantee selection activation.
+        /// </summary>
+        /// <param name="sender">The source of the pointer released event.</param>
+        /// <param name="e">The pointer event arguments.</param>
+        private void OnConnectionTabPointerReleased(object sender, PointerRoutedEventArgs e)
+        {
+            ActivateConnectionTab();
+        }
+
+        /// <summary>
+        /// Handles pointer pressed events on the anchored Connection TabViewItem to guarantee selection activation.
+        /// </summary>
+        /// <param name="sender">The source of the pointer pressed event.</param>
+        /// <param name="e">The pointer event arguments.</param>
+        private void OnConnectionTabPointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            ActivateConnectionTab();
         }
 
         /// <summary>
@@ -42,8 +78,18 @@ namespace DataSphere.Views.Pages.DatabaseGroup
         /// <param name="e">The event data.</param>
         private void OnConnectionTabTapped(object sender, TappedRoutedEventArgs e)
         {
+            ActivateConnectionTab();
+        }
+
+        /// <summary>
+        /// Activates the anchored Connection tab, deselects dynamic tabs, and requests indicator position recalculation.
+        /// </summary>
+        private void ActivateConnectionTab()
+        {
+            ConnectionTabItem.IsSelected = true;
             ViewModel.SelectConnectionCommand.Execute(null);
             InnerTabView.SelectedItem = null;
+            Controls.SlidingTabIndicatorBehavior.UpdatePosition(InnerTabView, animate: true);
         }
 
         /// <summary>

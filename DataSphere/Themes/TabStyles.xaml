@@ -42,7 +42,7 @@
     <!-- Pill Geometry Overrides -->
     <CornerRadius x:Key="TabViewItemCornerRadius">8</CornerRadius>
     <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
-    <x:Double x:Key="TabViewItemHeaderMinHeight">34</x:Double>
+    <x:Double x:Key="TabViewItemHeaderMinHeight">36</x:Double>
 
     <!-- Pill-Shaped TabViewItem Style -->
     <Style x:Key="PillTabViewItemStyle"
@@ -189,7 +189,7 @@
                                 BorderThickness="1"
                                 CornerRadius="6"
                                 Padding="10,4,10,4"
-                                MinHeight="34"
+                                MinHeight="36"
                                 VerticalAlignment="Center">
                             <Grid VerticalAlignment="Center">
                                 <Grid.ColumnDefinitions>

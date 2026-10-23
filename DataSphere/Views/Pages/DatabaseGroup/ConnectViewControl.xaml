@@ -9,181 +9,177 @@
     xmlns:vm="using:DataSphere.ViewModels.Pages.DatabaseGroup"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            CornerRadius="6">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <!-- Command Toolbar -->
-        <Border
-            Grid.Row="0"
-            Padding="16,12"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <Button
-                    Command="{x:Bind ViewModel.NewConnectionCommand}"
-                    Style="{StaticResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE774;" FontSize="16" />
-                        <TextBlock Text="{Binding [btn_new_connection], Source={StaticResource Localization}, Mode=OneWay}" />
-                    </StackPanel>
-                </Button>
-
-                <Button Command="{x:Bind ViewModel.AddFolderCommand}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE838;" FontSize="16" />
-                        <TextBlock Text="{Binding [ctx_folder_title], Source={StaticResource Localization}, Mode=OneWay}" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-        </Border>
-
-        <!-- Content Area: Connections Tree or Empty State -->
-        <Grid Grid.Row="1" Margin="16">
-            <!-- Empty State View -->
-            <Border
-                Visibility="{x:Bind ViewModel.IsEmptyView, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="32"
-                MaxWidth="480">
-                <StackPanel Spacing="16" HorizontalAlignment="Center">
-                    <FontIcon
-                        Glyph="&#xE774;"
-                        FontSize="48"
-                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                        HorizontalAlignment="Center" />
-
-                    <TextBlock
-                        Text="{Binding [page_db_conn_list_title], Source={StaticResource Localization}, Mode=OneWay}"
-                        Style="{StaticResource SubtitleTextBlockStyle}"
-                        TextAlignment="Center" />
-
-                    <TextBlock
-                        Text="{Binding [page_db_conn_list_desc], Source={StaticResource Localization}, Mode=OneWay}"
-                        Style="{StaticResource BodyTextBlockStyle}"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        TextAlignment="Center"
-                        TextWrapping="Wrap" />
-
-                    <Button
-                        Command="{x:Bind ViewModel.NewConnectionCommand}"
-                        Style="{StaticResource AccentButtonStyle}"
-                        HorizontalAlignment="Center"
-                        Margin="0,8,0,0">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE710;" FontSize="14" />
+            <!-- Command Toolbar -->
+            <Border Grid.Row="0"
+                    Padding="5"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="0,0,0,1">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="4">
+                    <Button Command="{x:Bind ViewModel.NewConnectionCommand}"
+                            Style="{StaticResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="8">
+                            <FontIcon Glyph="&#xE774;"
+                                      FontSize="16" />
                             <TextBlock Text="{Binding [btn_new_connection], Source={StaticResource Localization}, Mode=OneWay}" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{x:Bind ViewModel.AddFolderCommand}">
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="8">
+                            <FontIcon Glyph="&#xE838;"
+                                      FontSize="16" />
+                            <TextBlock Text="{Binding [ctx_folder_title], Source={StaticResource Localization}, Mode=OneWay}" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
             </Border>
 
-            <!-- Connections TreeView -->
-            <TreeView
-                x:Name="ConnectionsTree"
-                Visibility="{x:Bind ViewModel.IsNotEmptyView, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
-                ItemsSource="{x:Bind ViewModel.ConnectItems, Mode=OneWay}"
-                KeyDown="ConnectionsTree_KeyDown"
-                SelectionMode="Single"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch">
-                <TreeView.ItemTemplate>
-                    <DataTemplate x:DataType="models:ConnectionModel">
-                        <TreeViewItem
-                            ItemsSource="{x:Bind Children, Mode=OneWay}"
-                            DoubleTapped="TreeViewItem_DoubleTapped">
-                            <TreeViewItem.ContextFlyout>
-                                <MenuFlyout>
-                                    <!-- Connection Actions -->
-                                    <MenuFlyoutItem
-                                        Text="{Binding [ctx_opencnn_title], Source={StaticResource Localization}, Mode=OneWay}"
-                                        Command="{x:Bind OpenCommand, Mode=OneWay}"
-                                        Visibility="{x:Bind IsConnection, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE774;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
+            <!-- Content Area: Connections Tree or Empty State -->
+            <Grid Grid.Row="1"
+                  Margin="6">
+                <!-- Empty State View -->
+                <Border Visibility="{x:Bind ViewModel.IsEmptyView, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="32"
+                        MaxWidth="480">
+                    <StackPanel Spacing="16"
+                                HorizontalAlignment="Center">
+                        <FontIcon Glyph="&#xE774;"
+                                  FontSize="48"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                  HorizontalAlignment="Center" />
 
-                                    <MenuFlyoutItem
-                                        Text="{Binding [ctx_edit_title], Source={StaticResource Localization}, Mode=OneWay}"
-                                        Command="{x:Bind EditCommand, Mode=OneWay}"
-                                        Visibility="{x:Bind IsConnection, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE70F;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
+                        <TextBlock Text="{Binding [page_db_conn_list_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                   Style="{StaticResource SubtitleTextBlockStyle}"
+                                   TextAlignment="Center" />
 
-                                    <!-- Folder Actions -->
-                                    <MenuFlyoutItem
-                                        Text="{Binding [ctx_mysql_title], Source={StaticResource Localization}, Mode=OneWay}"
-                                        Command="{x:Bind AddConnectionCommand, Mode=OneWay}"
-                                        Visibility="{x:Bind IsFolder, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE774;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
+                        <TextBlock Text="{Binding [page_db_conn_list_desc], Source={StaticResource Localization}, Mode=OneWay}"
+                                   Style="{StaticResource BodyTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap" />
 
-                                    <MenuFlyoutSeparator />
+                        <Button Command="{x:Bind ViewModel.NewConnectionCommand}"
+                                Style="{StaticResource AccentButtonStyle}"
+                                HorizontalAlignment="Center"
+                                Margin="0,8,0,0">
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="8">
+                                <FontIcon Glyph="&#xE710;"
+                                          FontSize="14" />
+                                <TextBlock Text="{Binding [btn_new_connection], Source={StaticResource Localization}, Mode=OneWay}" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
 
-                                    <!-- Common Actions -->
-                                    <MenuFlyoutItem
-                                        Text="{Binding [ctx_rename_title], Source={StaticResource Localization}, Mode=OneWay}"
-                                        Command="{x:Bind RenameCommand, Mode=OneWay}">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE8AC;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
+                <!-- Connections TreeView -->
+                <TreeView x:Name="ConnectionsTree"
+                          Visibility="{x:Bind ViewModel.IsNotEmptyView, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                          ItemsSource="{x:Bind ViewModel.ConnectItems, Mode=OneWay}"
+                          KeyDown="ConnectionsTree_KeyDown"
+                          SelectionMode="Single"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch">
+                    <TreeView.ItemTemplate>
+                        <DataTemplate x:DataType="models:ConnectionModel">
+                            <TreeViewItem ItemsSource="{x:Bind Children, Mode=OneWay}"
+                                          DoubleTapped="TreeViewItem_DoubleTapped">
+                                <TreeViewItem.ContextFlyout>
+                                    <MenuFlyout>
+                                        <!-- Connection Actions -->
+                                        <MenuFlyoutItem Text="{Binding [ctx_opencnn_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                                        Command="{x:Bind OpenCommand, Mode=OneWay}"
+                                                        Visibility="{x:Bind IsConnection, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE774;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
 
-                                    <MenuFlyoutItem
-                                        Text="{Binding [ctx_delete_title], Source={StaticResource Localization}, Mode=OneWay}"
-                                        Command="{x:Bind DeleteCommand, Mode=OneWay}">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE74D;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-                                </MenuFlyout>
-                            </TreeViewItem.ContextFlyout>
-                            <Grid ColumnSpacing="8" Padding="4,2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                                        <MenuFlyoutItem Text="{Binding [ctx_edit_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                                        Command="{x:Bind EditCommand, Mode=OneWay}"
+                                                        Visibility="{x:Bind IsConnection, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE70F;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
 
-                                <FontIcon
-                                    Grid.Column="0"
-                                    Glyph="{x:Bind IconGlyph, Mode=OneWay}"
-                                    FontSize="16"
-                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                    VerticalAlignment="Center" />
+                                        <!-- Folder Actions -->
+                                        <MenuFlyoutItem Text="{Binding [ctx_mysql_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                                        Command="{x:Bind AddConnectionCommand, Mode=OneWay}"
+                                                        Visibility="{x:Bind IsFolder, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE774;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
 
-                                <!-- Display Text -->
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Text="{x:Bind Name, Mode=OneWay}"
-                                    Visibility="{x:Bind IsEditing, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                    VerticalAlignment="Center" />
+                                        <MenuFlyoutSeparator />
 
-                                <!-- Inline Editing Text -->
-                                <TextBox
-                                    Grid.Column="1"
-                                    Text="{x:Bind Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    Visibility="{x:Bind IsEditing, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                    KeyDown="RenameTextBox_KeyDown"
-                                    LostFocus="RenameTextBox_LostFocus"
-                                    MinWidth="120"
-                                    VerticalAlignment="Center" />
-                            </Grid>
-                        </TreeViewItem>
-                    </DataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
+                                        <!-- Common Actions -->
+                                        <MenuFlyoutItem Text="{Binding [ctx_rename_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                                        Command="{x:Bind RenameCommand, Mode=OneWay}">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE8AC;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+
+                                        <MenuFlyoutItem Text="{Binding [ctx_delete_title], Source={StaticResource Localization}, Mode=OneWay}"
+                                                        Command="{x:Bind DeleteCommand, Mode=OneWay}">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE74D;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                    </MenuFlyout>
+                                </TreeViewItem.ContextFlyout>
+                                <Grid ColumnSpacing="8"
+                                      Padding="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <FontIcon Grid.Column="0"
+                                              Glyph="{x:Bind IconGlyph, Mode=OneWay}"
+                                              FontSize="16"
+                                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                              VerticalAlignment="Center" />
+
+                                    <!-- Display Text -->
+                                    <TextBlock Grid.Column="1"
+                                               Text="{x:Bind Name, Mode=OneWay}"
+                                               Visibility="{x:Bind IsEditing, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                               VerticalAlignment="Center" />
+
+                                    <!-- Inline Editing Text -->
+                                    <TextBox Grid.Column="1"
+                                             Text="{x:Bind Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Visibility="{x:Bind IsEditing, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                             KeyDown="RenameTextBox_KeyDown"
+                                             LostFocus="RenameTextBox_LostFocus"
+                                             MinWidth="120"
+                                             VerticalAlignment="Center" />
+                                </Grid>
+                            </TreeViewItem>
+                        </DataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Grid>
         </Grid>
-    </Grid>
+    </Border>
 </UserControl>

@@ -1,4 +1,4 @@
-using Windows.ApplicationModel.DataTransfer;
+﻿using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using System.Runtime.InteropServices;
 using Microsoft.UI;
@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using WinUIEx;
+using DataSphere.Controls;
 using DataSphere.Models;
 using DataSphere.Services.Contracts;
 using DataSphere.Utils;
@@ -102,6 +103,7 @@ namespace DataSphere.Views.Windows
                     if (ViewModel.IsHomeSelected)
                     {
                         ShellTabView.SelectedItem = null;
+                        SlidingTabIndicatorBehavior.UpdatePosition(ShellTabView, animate: true);
                     }
                 }
             };
@@ -162,6 +164,7 @@ namespace DataSphere.Views.Windows
         {
             ViewModel.SelectHomeCommand.Execute(null);
             ShellTabView.SelectedItem = null;
+            SlidingTabIndicatorBehavior.UpdatePosition(ShellTabView, animate: true);
         }
 
         /// <summary>
@@ -239,6 +242,9 @@ namespace DataSphere.Views.Windows
         {
             if (args.Item is TabItemModel tabModel && tabModel.IsClosable)
             {
+                // Explicitly disconnect the tab's visual content from the donor window's CachedContentControl
+                CachedContentControl.DisconnectFromParent(tabModel.Content as UIElement);
+
                 // Switch active selection if the torn-off tab is currently selected
                 if (Equals(ViewModel.SelectedTab, tabModel))
                 {
