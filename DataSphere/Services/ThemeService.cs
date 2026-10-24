@@ -215,7 +215,7 @@ namespace DataSphere.Services
             {
                 var elementTheme = GetElementTheme(_currentTheme);
 
-                if (win.Content is FrameworkElement fe)
+                if (win.Content is FrameworkElement fe && fe.RequestedTheme != elementTheme)
                 {
                     fe.RequestedTheme = elementTheme;
                 }
